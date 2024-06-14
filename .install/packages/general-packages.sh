@@ -1,6 +1,7 @@
 packagesPacman=(
     "pacman-contrib"
     "vim"
+    "stow"
     "bluez"
     "bluez-utils"
     "neovim"

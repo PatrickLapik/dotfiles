@@ -33,7 +33,7 @@
     },
     {
         "key": "waybar_chatgpt",
-        "value": false
+        "value": true
     },
     {
         "key": "waybar_systray",
@@ -45,7 +45,7 @@
     },
     {
         "key": "waybar_window",
-        "value": false
+        "value": true
     },
     {
         "key": "hypridle_hyprlock_timeout",

@@ -4,7 +4,7 @@ source .install/includes/library.sh
 clear
 
 # Set installation mode
-mode="live"
+mode="dev"
 if [ ! -z $1 ]; then
     mode="dev"
     echo "IMPORTANT: DEV MODE ACTIVATED. "
