@@ -13,3 +13,4 @@ map("i", "<C-k>", "<Up>", {})
 map("i", "<C-z>", "<c-o>u", {})
 vim.g.mapleader = " "
 
+
