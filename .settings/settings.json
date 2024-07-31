@@ -53,7 +53,7 @@
     },
     {
         "key": "hypridle_dpms_timeout",
-        "value": 660
+        "value": 0
     },
     {
         "key": "hypridle_suspend_timeout",

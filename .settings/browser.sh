@@ -1,1 +1,1 @@
-com.brave.Browser
+firefox

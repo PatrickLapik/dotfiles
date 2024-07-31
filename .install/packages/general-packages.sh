@@ -3,6 +3,7 @@ packagesPacman=(
     "vim"
     "stow"
     "bluez"
+    "keepassxc"
     "bluez-utils"
     "neovim"
     "wget"
