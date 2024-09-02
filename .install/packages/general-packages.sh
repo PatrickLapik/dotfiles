@@ -1,5 +1,7 @@
 packagesPacman=(
     "pacman-contrib"
+    "zoxide"
+    "zsh"
     "vim"
     "stow"
     "bluez"
@@ -12,7 +14,6 @@ packagesPacman=(
     "dunst" 
     "starship"
     "mpv" 
-    "thunar"
     "nautilus" 
     "mousepad"
     "noto-fonts" 
@@ -44,7 +45,6 @@ packagesPacman=(
     "networkmanager"
     "network-manager-applet"
     "xarchiver"
-    "thunar-archive-plugin"
     "zip"
     "fuse2"
     "gtk4"
@@ -57,6 +57,7 @@ packagesPacman=(
     "rofi-wayland"
     "fastfetch"
     "blueman"
+    "firefox"
 );
 
 packagesYay=(

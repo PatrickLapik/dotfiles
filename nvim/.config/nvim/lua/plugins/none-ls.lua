@@ -7,6 +7,7 @@ return {
 				null_ls.builtins.formatting.stylua,
 				null_ls.builtins.formatting.erb_lint,
 				null_ls.builtins.formatting.prettier,
+        null_ls.builtins.formatting.ast_grep,
 			},
 		})
 		vim.keymap.set("n", "<leader>fd", vim.lsp.buf.format, {})
