@@ -4,7 +4,7 @@
 BASE_DIR=~/.config
 
 # Define the subdirectories to be created
-SUBDIRS=("hypr" "dunst" "eww" "fastfetch" "alacritty" "rofi" "wal" "waybar")
+SUBDIRS=("wlogout" "hypr" "dunst" "eww" "fastfetch" "alacritty" "rofi" "wal" "waybar")
 
 echo -e "${GREEN}"
 figlet "Symlinks"
