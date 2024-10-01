@@ -42,7 +42,7 @@ stow -t "$BASE_DIR" starship
 
 sudo stow -d "./sddm" -t "/usr/share/sddm/themes" themes
 
-sudo ln -s ./sddm/default.conf /etc/sddm.conf.d
+sudo ln -s ~/dotfiles/sddm/default.conf /etc/sddm.conf.d
 
 stow nvim
 
