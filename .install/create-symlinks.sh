@@ -40,7 +40,8 @@ done
 # Manual commands
 stow -t "$BASE_DIR" starship
 
-sudo stow -d "./sddm" -t "/usr/share/sddm/themes" themes
+# Copy themes to sddm themes folder because it doesn't work any other way rn
+sudo cp -r ~/dotfiles/sddm/themes/ /usr/share/sddm/themes
 
 sudo ln -s ~/dotfiles/sddm/default.conf /etc/sddm.conf.d
 
