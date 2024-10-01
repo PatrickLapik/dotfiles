@@ -34,13 +34,13 @@ return {
       lspconfig.tailwindcss.setup({
         capabilities = capabilities,
       })
-      lspconfig.ast_grep.setup({
-        capabilities = capabilities,
-      })
       lspconfig.intelephense.setup({
         capabilities = capabilities,
       })
       lspconfig.clangd.setup({
+        capabilities = capabilities
+      })
+      lspconfig.volar.setup({
         capabilities = capabilities
       })
 
