@@ -13,11 +13,11 @@
     },
     {
         "key": "waybar_workspaces",
-        "value": 5
+        "value": 4
     },
     {
         "key": "rofi_bordersize",
-        "value": 3
+        "value": 0
     },
     {
         "key": "waybar_toggle",
