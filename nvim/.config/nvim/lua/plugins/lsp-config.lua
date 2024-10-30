@@ -49,6 +49,12 @@ return {
       lspconfig.dockerls.setup({
         capabilities = capabilities
       })
+      lspconfig.stimulus_ls.setup({
+        capabilities = capabilities
+      })
+      lspconfig.gdscript.setup({
+        capabilities = capabilities
+      })
 
       vim.keymap.set("n", "K", vim.lsp.buf.hover, {})
       vim.keymap.set("n", "<leader>gd", vim.lsp.buf.definition, {})
