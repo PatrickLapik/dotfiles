@@ -14,6 +14,13 @@ alias cd="z"
 eval "$(zoxide init zsh)"
 eval "$(starship init zsh)"
 
+# History
+HISTFILE=~/.cache/zsh/.zsh_history
+HISTSIZE=1000
+SAVEHIST=1000
+
+setopt SHARE_HISTORY
+
 
 # Android environment variables
 export ANDROID_HOME=$HOME/android-sdk

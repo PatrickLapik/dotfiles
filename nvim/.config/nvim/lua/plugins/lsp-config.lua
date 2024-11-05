@@ -43,6 +43,9 @@ return {
       lspconfig.volar.setup({
         capabilities = capabilities
       })
+      -- lspconfig.vuels.setup({
+      --     capabilities = capabilities
+      -- })
       lspconfig.docker_compose_language_service.setup({
         capabilities = capabilities
       })
