@@ -7,4 +7,8 @@ else
     _installPackagesPacman "${packagesPacman[@]}";
     _installPackagesYay "${packagesYay[@]}";
 fi
+
+if gum confirm "Do you want to install Atuin?"; then
+    curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh | sh
+fi
 echo
