@@ -45,7 +45,7 @@
     },
     {
         "key": "waybar_window",
-        "value": true
+        "value": false
     },
     {
         "key": "hypridle_hyprlock_timeout",

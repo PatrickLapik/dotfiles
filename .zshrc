@@ -38,6 +38,9 @@ export ANDROID_HOME=$HOME/android-sdk
 export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
 export PATH=$ANDROID_HOME/platform-tools:$PATH
 
+# Env
+export PAGER=more
+
 # Completion styling
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
@@ -46,7 +49,6 @@ zstyle ':fzf-tab:complete:cd:*' fzf-preview 'ls --color $realpath'
 zstyle ':fzf-tab:complete:__zoxide_z:*' fzf-preview 'ls --color $realpath'
 
 
-eval "$(atuin init zsh)"
 eval "$(zoxide init zsh)"
 eval "$(starship init zsh)"
 eval "$(fzf --zsh)"
