@@ -56,3 +56,4 @@ eval "$(fzf --zsh)"
 alias cd="z"
 alias c="clear"
 alias ls="ls --color"
+alias cts="~/dotfiles/scripts/create-tmux-session.sh" # Create tmux session command
