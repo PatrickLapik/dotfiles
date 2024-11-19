@@ -6,6 +6,8 @@
 # |_|   \___/ \_/\_/ \___|_|   
 #                              
 
+containers=$(docker ps -q)
+
 if [[ "$1" == "exit" ]]; then
     echo ":: Exit"
     sleep 0.5
@@ -32,6 +34,10 @@ fi
 
 if [[ "$1" == "suspend" ]]; then
     echo ":: Suspend"
+    if [ ! -z $containers ]; then
+      docker kill $containers;
+    fi
+    kill $(pgrep docker)
     sleep 0.5
     systemctl suspend    
 fi
