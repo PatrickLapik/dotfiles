@@ -57,5 +57,6 @@ alias cd="z"
 alias c="clear"
 alias ls="ls --color"
 alias cts="~/dotfiles/scripts/create-tmux-session.sh" # Create tmux session command
+alias sail='sh $([ -f sail ] && echo sail || echo vendor/bin/sail)'
 
 stty -ixon
