@@ -23,6 +23,8 @@ packagesPacman=(
     "ttf-firacode-nerd" 
     "figlet" 
     "vlc" 
+    "docker"
+    "docker-compose"
     "eza" 
     "python-pip" 
     "python-psutil" 

@@ -62,6 +62,8 @@
       ],
       "right": [
         "volume",
+        "bluetooth",
+        "battery",
         "network",
         "clock",
         "notifications"

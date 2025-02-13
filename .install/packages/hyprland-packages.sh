@@ -16,4 +16,7 @@ packagesYay=(
     "nwg-look"
     "eww"
     "hyprshade"
+    "ags-hyprpanel-git"
+    "swww"
+    "matugen-bin"
 );
