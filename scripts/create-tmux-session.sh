@@ -21,6 +21,28 @@ case "$SESSION_NAME" in
         tmux new-window -t "$SESSION_NAME:3" -n "btop"
         tmux send-keys -t "$SESSION_NAME:3" "btop" C-m 
     ;;
+    "zuzu")
+        echo "Creating zuzu session"
+        tmux new-session -d -s "$SESSION_NAME" -n "nvim"
+        tmux send-keys -t "$SESSION_NAME:1" "cd adon && clear" C-m 
+        tmux new-window -t "$SESSION_NAME:2" -n "docker"
+        tmux split-window -h -t "$SESSION_NAME:2"  
+        tmux send-keys -t "$SESSION_NAME:2.1" "cd adon && clear" C-m 
+        tmux send-keys -t "$SESSION_NAME:2.2" "cd adon && clear" C-m 
+        tmux new-window -t "$SESSION_NAME:3" -n "btop"
+        tmux send-keys -t "$SESSION_NAME:3" "btop" C-m 
+    ;;
+    "phoenix")
+        echo "Creating PhoenixWheels session"
+        tmux new-session -d -s "$SESSION_NAME" -n "nvim"
+        tmux send-keys -t "$SESSION_NAME:1" "cd phoenixwheels && clear" C-m 
+        tmux new-window -t "$SESSION_NAME:2" -n "docker"
+        tmux split-window -h -t "$SESSION_NAME:2"  
+        tmux send-keys -t "$SESSION_NAME:2.1" "cd phoenixwheels && clear" C-m 
+        tmux send-keys -t "$SESSION_NAME:2.2" "cd phoenixwheels && clear" C-m 
+        tmux new-window -t "$SESSION_NAME:3" -n "btop"
+        tmux send-keys -t "$SESSION_NAME:3" "btop" C-m 
+    ;;
     "default")
         echo "Creating default session"
         tmux new-session -d -s "$SESSION_NAME" -n "nvim"
@@ -28,6 +50,6 @@ case "$SESSION_NAME" in
     ;;
 esac
 
-tmux attach-session -t "$SESSION_NAME"
-
 tmux select-window -t "$SESSION_NAME:1"
+
+tmux attach-session -t "$SESSION_NAME"

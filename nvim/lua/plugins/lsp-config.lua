@@ -52,9 +52,9 @@ return {
       lspconfig.dockerls.setup({
         capabilities = capabilities
       })
-      lspconfig.stimulus_ls.setup({
-        capabilities = capabilities
-      })
+      -- lspconfig.stimulus_ls.setup({
+      --   capabilities = capabilities
+      -- })
       lspconfig.gdscript.setup({
         capabilities = capabilities
       })

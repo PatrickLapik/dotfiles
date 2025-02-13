@@ -1,0 +1,103 @@
+{
+  "bar.customModules.updates.pollingInterval": 1440000,
+  "menus.transition": "crossfade",
+  "scalingPriority": "gdk",
+  "theme.bar.menus.monochrome": false,
+  "wallpaper.pywal": true,
+  "theme.bar.menus.opacity": 100,
+  "wallpaper.enable": true,
+  "theme.font.weight": 400,
+  "theme.font.size": "1.2rem",
+  "theme.bar.scaling": 90,
+  "menus.clock.weather.unit": "metric",
+  "menus.clock.weather.location": "Tallinn",
+  "menus.clock.weather.key": "3dea472e9d5f431c859221147251202",
+  "wallpaper.image": "/home/patrick/dotfiles/wallpapers/dark-green-leaves.jpg",
+  "theme.osd.orientation": "horizontal",
+  "theme.osd.location": "bottom",
+  "theme.osd.margins": "5px 5px 5px 5px",
+  "theme.osd.muted_zero": true,
+  "theme.matugen": true,
+  "theme.matugen_settings.mode": "dark",
+  "theme.matugen_settings.scheme_type": "fruit-salad",
+  "theme.bar.transparent": false,
+  "theme.bar.opacity": 40,
+  "theme.bar.location": "top",
+  "bar.autoHide": "fullscreen",
+  "theme.bar.buttons.enableBorders": false,
+  "theme.matugen_settings.variation": "standard_1",
+  "menus.power.lowBatteryNotification": true,
+  "menus.clock.time.military": true,
+  "menus.clock.time.hideSeconds": true,
+  "menus.dashboard.shortcuts.enabled": true,
+  "menus.dashboard.directories.enabled": false,
+  "menus.dashboard.controls.enabled": false,
+  "menus.dashboard.powermenu.avatar.image": "/home/patrick/Pictures/iusearchbtw.jpg",
+  "theme.bar.menus.menu.dashboard.profile.size": "8.5em",
+  "theme.bar.menus.menu.dashboard.profile.radius": "4em",
+  "menus.dashboard.powermenu.avatar.name": "patrick",
+  "theme.notification.scaling": 80,
+  "theme.osd.scaling": 80,
+  "theme.bar.menus.menu.dashboard.scaling": 80,
+  "theme.bar.menus.menu.dashboard.confirmation_scaling": 80,
+  "theme.bar.menus.menu.media.scaling": 80,
+  "theme.bar.menus.menu.volume.scaling": 80,
+  "theme.bar.menus.menu.network.scaling": 80,
+  "theme.bar.menus.menu.bluetooth.scaling": 80,
+  "theme.bar.menus.menu.battery.scaling": 80,
+  "theme.bar.menus.menu.clock.scaling": 80,
+  "theme.bar.menus.menu.notifications.scaling": 80,
+  "theme.bar.menus.menu.power.scaling": 80,
+  "theme.bar.menus.popover.scaling": 80,
+  "theme.tooltip.scaling": 80,
+  "bar.layouts": {
+    "0": {
+      "left": [
+        "dashboard",
+        "workspaces",
+        "windowtitle"
+      ],
+      "middle": [
+        "media"
+      ],
+      "right": [
+        "volume",
+        "network",
+        "clock",
+        "notifications"
+      ]
+    },
+    "1": {
+      "left": [
+        "dashboard",
+        "workspaces",
+        "windowtitle"
+      ],
+      "middle": [
+        "media"
+      ],
+      "right": [
+        "volume",
+        "clock",
+        "notifications"
+      ]
+    },
+    "2": {
+      "left": [
+        "dashboard",
+        "workspaces",
+        "windowtitle"
+      ],
+      "middle": [
+        "media"
+      ],
+      "right": [
+        "volume",
+        "clock",
+        "notifications"
+      ]
+    }
+  },
+  "bar.workspaces.show_icons": false,
+  "bar.workspaces.show_numbered": false
+}
