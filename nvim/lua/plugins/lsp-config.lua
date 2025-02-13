@@ -61,6 +61,9 @@ return {
       lspconfig.bashls.setup({
         capabilities = capabilities
       })
+      lspconfig.gopls.setup({
+          capabilities = capabilities
+      })
 
       vim.keymap.set("n", "K", vim.lsp.buf.hover, {})
       vim.keymap.set("n", "<leader>gd", vim.lsp.buf.definition, {})
