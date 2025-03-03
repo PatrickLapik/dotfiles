@@ -48,6 +48,10 @@ case "$SESSION_NAME" in
         tmux new-session -d -s "$SESSION_NAME" -n "nvim"
         tmux new-window -t "$SESSION_NAME:2" -n "zsh"
     ;;
+    *)
+        echo "Creating $SESSION_NAME session"
+        tmux new-session -d -s "$SESSION_NAME" -n "nvim"
+        tmux new-window -t "$SESSION_NAME:2" -n "zsh"
 esac
 
 tmux select-window -t "$SESSION_NAME:1"
