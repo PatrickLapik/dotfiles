@@ -18,7 +18,7 @@ return {
     })
     local config = require("nvim-treesitter.configs")
     config.setup({
-      ensure_installed = { "markdown", "html", "php", "blade", "php_only" },
+      ensure_installed = { "markdown", "html", "php", "blade", "php_only", "go" },
       auto_installed = true,
       highlight = true,
       indent = { enabled = true },
