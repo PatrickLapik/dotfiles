@@ -1,4 +1,4 @@
-vim.lsp.config("*", {
+vim.lsp.config('*', {
     capabilities = {
         textDocument = {
             semanticTokens = {
@@ -8,15 +8,23 @@ vim.lsp.config("*", {
     },
 })
 
-vim.o.completeopt = "menu,noinsert,popup,fuzzy"
+vim.lsp.enable({
+    'luals',
+    'ts-ls',
+    'intelephense',
+    'gopls',
+    'rust-analyzer',
+    'tailwindcss',
+    'volar',
+
+})
+
+vim.diagnostic.config({ virtual_text = true })
+vim.o.completeopt = 'menuone,popup,fuzzy,noselect'
 
 vim.api.nvim_create_autocmd('LspAttach', {
     group = vim.api.nvim_create_augroup('my.lsp', {}),
     callback = function(args)
-        require('completions')(args)
+        require('config.completions')(args)
     end,
-})
-
-vim.lsp.enable({
-    "luals"
 })
