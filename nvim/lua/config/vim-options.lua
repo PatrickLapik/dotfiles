@@ -11,7 +11,6 @@ map("i", "<C-h>", "<Left>", {})
 map("i", "<C-l>", "<Right>", {})
 map("i", "<C-j>", "<Down>", {})
 map("i", "<C-k>", "<Up>", {})
-map("i", "<C-z>", "<c-o>u", {})
 vim.g.mapleader = " "
 
 vim.api.nvim_create_autocmd("FileType", {
