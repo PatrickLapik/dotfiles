@@ -1,5 +1,3 @@
-vim.lsp.enable('luals')
-
 require('config.vim-options')
 require('config.lsp-config')
 require('config.lazy')
