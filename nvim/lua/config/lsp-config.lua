@@ -16,7 +16,11 @@ vim.lsp.enable({
     'rust-analyzer',
     'tailwindcss',
     'volar',
-
+    'html',
+    'dockerls',
+    'docker-compose-language-server',
+    'bashls',
+    'clangd',
 })
 
 vim.diagnostic.config({ virtual_text = true })

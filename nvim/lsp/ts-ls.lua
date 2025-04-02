@@ -1,6 +1,6 @@
 return {
     cmd = { 'typescript-language-server', '--stdio' },
-    filetypes = { 'typescript', 'javascript', 'vue', },
+    filetypes = { 'typescript', 'javascript', 'vue', 'typescriptreact', 'javascriptreact' },
     root_markers = { 'package.json' },
     init_options = {
         plugins = {
