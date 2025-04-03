@@ -12,8 +12,10 @@ map('i', '<C-h>', '<Left>', {})
 map('i', '<C-l>', '<Right>', {})
 map('i', '<C-j>', '<Down>', {})
 map('i', '<C-k>', '<Up>', {})
+
+-- Map <CR> to accept completion when an item is selected
 map('i', '<CR>', function()
-	return vim.fn.pumvisible() == 1 and '<C-y>' or '<CR>'
+	return vim.fn.pumvisible() == 1 and vim.fn.complete_info().selected ~= -1 and '<C-y>' or '<CR>'
 end, { expr = true, noremap = true })
 
 vim.g.mapleader = ' '
