@@ -30,11 +30,7 @@ configuration {
 /* ---- Load font ---- */
 @import "~/dotfiles/.settings/rofi-font.rasi"
 
-/* ---- Load pywal colors (custom wal template) ---- */
-@import "~/.cache/wal/colors-rofi-pywal"
-
-/* ---- Load wallpaper ---- */
-@import "~/.cache/current_wallpaper.rasi"
+@import "~/.config/rofi/colors.rasi"
 
 /* ---- Load border width ---- */
 @import "~/dotfiles/.settings/rofi-border.rasi"
@@ -42,8 +38,8 @@ configuration {
 /* ---- Window ---- */
 window {
     width:                        400px;
-    x-offset:                     -14px;
-    y-offset:                     65px;
+    x-offset:                     -20px;
+    y-offset:                     20px;
     spacing:                      0px;
     padding:                      0px;
     margin:                       0px; 
@@ -51,7 +47,6 @@ window {
     border:                       @border-width;
     border-color:                 #FFFFFF;
     cursor:                       "default";
-    transparency:                 "real";
     location:                     northeast;
     anchor:                       northeast;
     fullscreen:                   false;
@@ -67,16 +62,7 @@ mainbox {
     spacing:                      0px;
     margin:                       0px;
     background-color:             @background;
-    background-image:             @current-image;
     children:                     ["listbox"];
-}
-
-/* ---- Imagebox ---- */
-imagebox {
-    padding:                      18px;
-    background-color:             transparent;
-    orientation:                  vertical;
-    children:                     [ "inputbar", "dummy", "mode-switcher" ];
 }
 
 /* ---- Listbox ---- */
@@ -87,11 +73,6 @@ listbox {
     children:                    [ "inputbar", "message", "listview" ];
 }
 
-/* ---- Dummy ---- */
-dummy {
-    background-color:            transparent;
-}
-
 /* ---- Inputbar ---- */
 inputbar {
     enabled:                      true;
@@ -99,7 +80,7 @@ inputbar {
     spacing:                      10px;
     padding:                      15px;
     border-radius:                0px;
-    border-color:                 @foreground;
+    border-color:                 @outline;
     background-color:             @background;
     children:                     [ "textbox-prompt-colon", "entry" ];
 }
@@ -140,7 +121,7 @@ button {
 }
 
 button selected {
-    background-color:             @color11;
+    background-color:             @tertiary;
     text-color:                   @foreground;
 }
 
@@ -190,7 +171,7 @@ element normal.active {
 }
 
 element selected.normal {
-    background-color:            @color11;
+    background-color:            @tertiary;
     text-color:                  @foreground;
 }
 

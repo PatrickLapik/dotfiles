@@ -31,11 +31,7 @@ configuration {
 /* ---- Load font ---- */
 @import "~/dotfiles/.settings/rofi-font.rasi"
 
-/* ---- Load pywal colors (custom wal template) ---- */
-@import "~/.cache/wal/colors-rofi-pywal"
-
-/* ---- Load wallpaper ---- */
-@import "~/.cache/current_wallpaper.rasi"
+@import "~/.config/rofi/colors.rasi"
 
 /* ---- Load border width ---- */
 @import "~/dotfiles/.settings/rofi-border.rasi"
@@ -68,7 +64,6 @@ mainbox {
     spacing:                      0px;
     margin:                       0px;
     background-color:             @background;
-    background-image:             @current-image;
     children:                     ["imagebox","listbox"];
 }
 
@@ -141,7 +136,7 @@ button {
 }
 
 button selected {
-    background-color:             @color11;
+    background-color:             @tertiary;
     text-color:                   @foreground;
 }
 
@@ -191,7 +186,7 @@ element normal.active {
 }
 
 element selected.normal {
-    background-color:            @color11;
+    background-color:            @tertiary;
     text-color:                  @foreground;
 }
 

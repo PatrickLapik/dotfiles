@@ -6,7 +6,7 @@ CURRENT_DIR="$HOME/dotfiles"
 
 
 # Define the subdirectories to be created
-SUBDIRS=("wlogout" "hypr" "dunst" "eww" "fastfetch" "alacritty" "rofi" "wal" "waybar" "nvim")
+SUBDIRS=("wlogout" "hypr" "dunst" "eww" "fastfetch" "rofi" "wal" "waybar" "nvim" "matugen")
 
 echo -e "${GREEN}"
 figlet "Symlinks"
@@ -90,6 +90,3 @@ if [ ! -e "~/.cache/zsh/.zsh_history" ]; then
             echo ":: Proceeding without creating the cache file"
     esac
 fi
-
-# Install wallpapers
-source wallpaper.sh
