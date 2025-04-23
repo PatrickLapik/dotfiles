@@ -14,3 +14,17 @@ output_path = "~/.config/rofi/colors.rasi"
 [templates.lualine]
 input_path = "./templates/matugen-lualine.lua"
 output_path = "~/.local/share/nvim/lazy/lualine.nvim/lua/lualine/themes/matugen-lualine.lua"
+
+[templates.qtct]
+input_path = "./templates/matugen-qtct.conf"
+output_path = "~/.config/qt6ct/colors/matugen-qtct.conf"
+
+[templates.gtk3]
+input_path = "./templates/matugen-gtk.css"
+output_path = "~/.config/gtk-3.0/colors.css"
+
+[templates.gtk4]
+input_path = "./templates/matugen-gtk.css"
+output_path = "~/.config/gtk-4.0/colors.css"
+
+
