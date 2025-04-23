@@ -10,3 +10,7 @@ output_path = "~/.config/alacritty/alacritty.toml"
 [templates.rofi]
 input_path = "./templates/matugen-rofi.rasi"
 output_path = "~/.config/rofi/colors.rasi"
+
+[templates.lualine]
+input_path = "./templates/matugen-lualine.lua"
+output_path = "~/.local/share/nvim/lazy/lualine.nvim/lua/lualine/themes/matugen-lualine.lua"
