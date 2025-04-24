@@ -11,10 +11,9 @@ packagesPacman=(
     "wget"
     "unzip"
     "alacritty" 
-    "dunst" 
     "starship"
     "mpv" 
-    "nautilus" 
+    "thunar" 
     "mousepad"
     "noto-fonts" 
     "otf-font-awesome" 
@@ -30,7 +29,6 @@ packagesPacman=(
     "python-psutil" 
     "python-rich" 
     "python-click" 
-    "python-pywal"
     "python-gobject"
     "pavucontrol" 
     "tumbler" 
@@ -59,11 +57,11 @@ packagesPacman=(
     "rofi-wayland"
     "fastfetch"
     "blueman"
-    "firefox"
 );
 
 packagesYay=(
     "bibata-cursor-theme" 
     "trizen"
     "pacseek"
+    "hyprpanel-bin"
 );
