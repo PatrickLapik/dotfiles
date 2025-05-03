@@ -27,4 +27,6 @@ output_path = "~/.config/gtk-3.0/colors.css"
 input_path = "./templates/matugen-gtk.css"
 output_path = "~/.config/gtk-4.0/colors.css"
 
-
+[templates.tmux]
+input_path = "./templates/matugen-tmux.conf"
+output_path = "~/.config/tmux/matugen-tmux.conf"
