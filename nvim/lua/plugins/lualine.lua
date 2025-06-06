@@ -3,7 +3,7 @@ return {
   config = function()
     require('lualine').setup({
       options = {
-        theme = 'matugen-lualine'
+        theme = 'gruvbox-material'
       }
     })
   end

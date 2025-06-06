@@ -21,6 +21,7 @@ vim.lsp.enable({
     'docker-compose-language-server',
     'bashls',
     'clangd',
+    'emmet-language-server',
 })
 
 vim.diagnostic.config({ virtual_text = true })

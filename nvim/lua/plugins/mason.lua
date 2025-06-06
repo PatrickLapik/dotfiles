@@ -19,8 +19,9 @@ return {
                     "tailwindcss",
                     "intelephense",
                     "clangd",
-                    "volar",
+                    "vuels",
                     "gopls",
+                    "emmet_language_server"
                 },
             }
         end,
