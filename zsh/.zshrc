@@ -38,6 +38,9 @@ export ANDROID_HOME=$HOME/android-sdk
 export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
 export PATH=$ANDROID_HOME/platform-tools:$PATH
 
+# .NET tools path
+export PATH="$PATH:/home/patrick/.dotnet/tools"
+
 # Do the nvm thingy
 source /usr/share/nvm/init-nvm.sh
 

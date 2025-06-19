@@ -22,6 +22,7 @@ vim.lsp.enable({
     'bashls',
     'clangd',
     'emmet-language-server',
+    'csharp-ls',
 })
 
 vim.diagnostic.config({ virtual_text = true })
