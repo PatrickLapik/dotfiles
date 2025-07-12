@@ -42,6 +42,10 @@ export PATH=$ANDROID_HOME/platform-tools:$PATH
 DOTNET_ROOT=$HOME/.dotnet
 export PATH=$PATH:$DOTNET_ROOT:$DOTNET_ROOT/tools
 
+# Qml import paths
+export QML_IMPORT_PATH=/usr/lib/qt6/qml
+export QML2_IMPORT_PATH=/usr/lib/qt6/qml
+
 # Do the nvm thingy
 source /usr/share/nvm/init-nvm.sh
 

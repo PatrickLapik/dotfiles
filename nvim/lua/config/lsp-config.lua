@@ -23,6 +23,7 @@ vim.lsp.enable({
     'clangd',
     'emmet-language-server',
     'csharp-ls',
+    'qmlls'
 })
 
 vim.diagnostic.config({ virtual_text = true })
