@@ -6,7 +6,7 @@ CURRENT_DIR="$HOME/dotfiles"
 
 
 # Define the subdirectories to be created
-SUBDIRS=("alacritty" "wlogout" "hypr" "dunst" "eww" "fastfetch" "rofi" "wal" "waybar" "nvim" "matugen")
+SUBDIRS=("alacritty" "wlogout" "hypr" "dunst" "eww" "fastfetch" "rofi" "wal" "waybar" "nvim" "matugen" "quickshell")
 
 echo -e "${GREEN}"
 figlet "Symlinks"
