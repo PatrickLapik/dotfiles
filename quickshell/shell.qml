@@ -1,5 +1,8 @@
 import Quickshell
+import "background" as Bg
 
-Scope {
+ShellRoot{
     Bar{}
+    Bg.Bg
+    {}
 }
