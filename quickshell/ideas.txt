@@ -1,0 +1,8 @@
+probably something more simple and minimalistic
+i want a custom app launcher,
+somehow incorporate day nigth cylce into themeing with actual sunset and sunrise times by region,
+like cool animations, on notification popups, 
+potential sound design:
+    like cool sounds on notifications on clicks and such
+    maybe even on changing workspaces like swooshes or smth
+
