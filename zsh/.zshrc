@@ -1,4 +1,4 @@
-# Set the directory we want to store zinit and plugins
+
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 
 # Download Zinit, if it's not there yet
@@ -39,7 +39,8 @@ export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
 export PATH=$ANDROID_HOME/platform-tools:$PATH
 
 # .NET tools path
-export PATH="$PATH:/home/patrick/.dotnet/tools"
+DOTNET_ROOT=$HOME/.dotnet
+export PATH=$PATH:$DOTNET_ROOT:$DOTNET_ROOT/tools
 
 # Do the nvm thingy
 source /usr/share/nvm/init-nvm.sh
