@@ -22,5 +22,5 @@ return {
             validate = true
         }
     },
-    root_markers = { 'tailwind.config.js' },
+    root_markers = { '.git' },
 }

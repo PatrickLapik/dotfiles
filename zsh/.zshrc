@@ -46,6 +46,8 @@ export PATH=$PATH:$DOTNET_ROOT:$DOTNET_ROOT/tools
 export QML_IMPORT_PATH=/usr/lib/qt6/qml
 export QML2_IMPORT_PATH=/usr/lib/qt6/qml
 
+export PATH=/usr/lib/qt6/bin:$PATH
+
 # Do the nvm thingy
 source /usr/share/nvm/init-nvm.sh
 
