@@ -1,8 +1,8 @@
 import Quickshell
-import "background" as Bg
+import qs.modules.background
+import qs.modules.bar
 
 ShellRoot{
+    Background{}
     Bar{}
-    Bg.Bg
-    {}
 }
