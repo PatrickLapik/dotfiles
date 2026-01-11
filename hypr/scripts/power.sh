@@ -14,7 +14,7 @@ fi
 
 if [[ "$1" == "lock" ]]; then
     echo ":: Lock"
-    sleep 0.5
+    sleep 0.8
     hyprlock    
 fi
 
