@@ -1,12 +1,12 @@
-//  __  __           _       _            
-// |  \/  | ___   __| |_   _| | ___  ___  
-// | |\/| |/ _ \ / _` | | | | |/ _ \/ __| 
-// | |  | | (_) | (_| | |_| | |  __/\__ \ 
-// |_|  |_|\___/ \__,_|\__,_|_|\___||___/ 
-//                                        
-//  
-// by Stephan Raabe (2023) 
-// ----------------------------------------------------- 
+//  __  __           _       _
+// |  \/  | ___   __| |_   _| | ___  ___
+// | |\/| |/ _ \ / _` | | | | |/ _ \/ __|
+// | |  | | (_) | (_| | |_| | |  __/\__ \
+// |_|  |_|\___/ \__,_|\__,_|_|\___||___/
+//
+//
+// by Stephan Raabe (2023)
+// -----------------------------------------------------
 //
 {
     // Workspaces
@@ -22,7 +22,7 @@
         },
         "persistent-workspaces": {
              "*": 5
-        }       
+        }
     },
 
     // Taskbar
@@ -59,17 +59,9 @@
     // Cliphist
     "custom/cliphist": {
         "format": "",
-        "on-click": "sleep 0.1 && ~/dotfiles/scripts/cliphist.sh",
-        "on-click-right": "sleep 0.1 && ~/dotfiles/scripts/cliphist.sh d",
-        "on-click-middle": "sleep 0.1 && ~/dotfiles/scripts/cliphist.sh w",
-        "tooltip": false
-    },
-
-    // Hyprshade
-    "custom/hyprshade": {
-        "format": "",
-        "on-click": "sleep 0.1; ~/dotfiles/hypr/scripts/hyprshade.sh",
-        "on-click-right": "sleep 0.1; ~/dotfiles/hypr/scripts/hyprshade.sh rofi",
+        "on-click": "sleep 0.1 && ~/.config/ml4w/scripts/cliphist.sh",
+        "on-click-right": "sleep 0.1 && ~/.config/ml4w/scripts/cliphist.sh d",
+        "on-click-middle": "sleep 0.1 && ~/.config/ml4w/scripts/cliphist.sh w",
         "tooltip": false
     },
 
@@ -80,20 +72,20 @@
         "escape": true,
         "exec-on-event": true,
         "interval": 60,
-        "exec": "~/dotfiles/hypr/scripts/hypridle.sh status",
-        "on-click": "~/dotfiles/hypr/scripts/hypridle.sh toggle",
+        "exec": "~/.config/hypr/scripts/hypridle.sh status",
+        "on-click": "~/.config/hypr/scripts/hypridle.sh toggle",
         "on-click-right": "hyprlock"
     },
 
     // Updates Count
     "custom/updates": {
-        "format": "   {}",
+        "format": " {}",
         "tooltip-format": "{}",
         "escape": true,
-        "return-type": "json",       
-        "exec": "~/dotfiles/scripts/updates.sh",
+        "return-type": "json",
+        "exec": "~/.config/ml4w/scripts/updates.sh",
         "restart-interval": 60,
-        "on-click": "alacritty -e ~/dotfiles/scripts/installupdates.sh",
+        "on-click": "alacritty -e ~/.config/ml4w/scripts/installupdates.sh",
         "tooltip": false
     },
 
@@ -102,55 +94,56 @@
         "format": "THEME STARTER",
         "tooltip": false
     },
-    
+
     // Wallpaper
     "custom/wallpaper": {
         "format": "",
-        "on-click": "~/dotfiles/hypr/scripts/wallpaper.sh select",
-        "on-click-right": "~/dotfiles/hypr/scripts/wallpaper-effects.sh",
+        "on-click": "waypaper",
+        "on-click-right": "~/.config/hypr/scripts/wallpaper-effects.sh",
         "tooltip": false
     },
 
     // Waybar Themes
     "custom/waybarthemes": {
         "format": "",
-        "on-click": "~/dotfiles/waybar/themeswitcher.sh",
+        "on-click": "~/.config/waybar/themeswitcher.sh",
         "tooltip": false
     },
-    
+
     // Settings
     "custom/settings": {
         "format": "",
-        "on-click": "~/dotfiles/apps/ML4W_Dotfiles_Settings-x86_64.AppImage",
+        "on-click": "flatpak run com.ml4w.settings",
         "tooltip": false
     },
 
     // Keybindings
     "custom/keybindings": {
         "format": "",
-        "on-click": "~/dotfiles/hypr/scripts/keybindings.sh",
+        "on-click": "~/.config/hypr/scripts/keybindings.sh",
         "tooltip": false
     },
 
     // Filemanager Launcher
     "custom/filemanager": {
         "format": "",
-        "on-click": "thunar",
+        "on-click": "nautilus",
         "tooltip": false
     },
 
     // Browser Launcher
     "custom/browser": {
         "format": "",
-        "on-click": "~/dotfiles/.settings/browser.sh",
+        "on-click": "~/.config/ml4w/settings/browser.sh",
         "tooltip": false
-    },    
+    },
 
     // ML4W Welcome App
     "custom/ml4w-welcome": {
-        "on-click": "~/dotfiles/apps/ML4W_Welcome-x86_64.AppImage",
+        "on-click": "flatpak run com.ml4w.sidebar",
+        "on-click-right": "flatpak run com.ml4w.welcome",
         "format": " ",
-        "tooltip": false
+        "tooltip-format": "Open Sidebar"
     },
 
     // ChatGPT Launcher
@@ -164,10 +157,10 @@
     "custom/appmenu": {
         "format": "Apps",
         "on-click": "rofi -show drun -replace",
-        "on-click-right": "~/dotfiles/hypr/scripts/keybindings.sh",
+        "on-click-right": "~/.config/hypr/scripts/keybindings.sh",
         "tooltip": false
     },
-    
+
     // Power Menu
     "custom/exit": {
         "format": "",
@@ -194,9 +187,9 @@
 
     // Clock
     "clock": {
-        // "timezone": "America/New_York",
-        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
-        "format-alt": "{:%Y-%m-%d}"
+        "format": "{:%H:%M %a}",
+        "on-click": "flatpak run com.ml4w.calendar",
+        "tooltip": false
     },
 
     // System
@@ -223,7 +216,7 @@
         "format": "D {percentage_used}% ",
         "path": "/",
         "on-click": "alacritty -e htop"
-    }, 
+    },
 
     "hyprland/language": {
         "format": "/ K {short}"
@@ -236,7 +229,7 @@
             "transition-duration": 300,
             "children-class": "not-memory",
             "transition-left-to-right": false
-        },        
+        },
         "modules": [
             "custom/system",
             "disk",
@@ -245,7 +238,7 @@
             "hyprland/language"
         ]
     },
-    
+
     // Group Settings
     "group/settings": {
         "orientation": "inherit",
@@ -253,7 +246,7 @@
             "transition-duration": 300,
             "children-class": "not-memory",
             "transition-left-to-right": false
-        },        
+        },
         "modules": [
             "custom/settings",
             "custom/waybarthemes",
@@ -291,10 +284,10 @@
             "warning": 30,
             "critical": 15
         },
-        "format": "{icon}   {capacity}%",
-        "format-charging": "  {capacity}%",
-        "format-plugged": "  {capacity}%",
-        "format-alt": "{icon}  {time}",
+        "format": "{icon} {capacity}%",
+        "format-charging": " {capacity}%",
+        "format-plugged": " {capacity}%",
+        "format-alt": "{icon} {time}",
         // "format-good": "", // An empty format will hide the module
         // "format-full": "",
         "format-icons": [" ", " ", " ", " ", " "]
@@ -303,10 +296,10 @@
     // Pulseaudio
     "pulseaudio": {
         // "scroll-step": 1, // %, can be a float
-        "format": "{icon}  {volume}%",
-        "format-bluetooth": "{volume}% {icon} {format_source}",
-        "format-bluetooth-muted": " {icon} {format_source}",
-        "format-muted": " {format_source}",
+        "format": "{icon} {volume}%",
+        "format-bluetooth": "{volume}%  {icon} {format_source}",
+        "format-bluetooth-muted": "  {icon} {format_source}",
+        "format-muted": "  {format_source}",
         "format-source": "{volume}% ",
         "format-source-muted": "",
         "format-icons": {
@@ -345,6 +338,6 @@
             "activated": "",
             "deactivated": ""
         },
-        "on-click-right": "hyprlock"        
+        "on-click-right": "hyprlock"
     }
 }

@@ -3,6 +3,14 @@ command = "swww"
 arguments = ["img", "transition-type", "center"]
 set = true
 
+[templates.waybar]
+input_path = "./templates/colors.css"
+output_path = "~/.config/waybar/colors.css"
+
+[templates.swaync]
+input_path = "./templates/colors.css"
+output_path = "~/.config/swaync/colors.css"
+
 [templates.alacritty]
 input_path = "./templates/matugen-alacritty.toml"
 output_path = "~/.config/alacritty/matugen-alacritty.toml"
