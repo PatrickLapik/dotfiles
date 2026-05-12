@@ -1,4 +1,3 @@
-
 ZINIT_HOME="${XDG_DATA_HOME:-${HOME}/.local/share}/zinit/zinit.git"
 
 # Download Zinit, if it's not there yet
@@ -39,7 +38,7 @@ export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$PATH
 export PATH=$ANDROID_HOME/platform-tools:$PATH
 
 # .NET tools path
-export DOTNET_ROOT=$HOME/.dotnet
+DOTNET_ROOT=$HOME/.dotnet
 export PATH=$PATH:$DOTNET_ROOT:$DOTNET_ROOT/tools
 
 # Qml import paths
@@ -48,8 +47,11 @@ export QML2_IMPORT_PATH=/usr/lib/qt6/qml
 
 export PATH=/usr/lib/qt6/bin:$PATH
 
-# Do the nvm thingy
-source /usr/share/nvm/init-nvm.sh
+export PATH=$HOME/.local/bin:$PATH
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 # Env
 export PAGER=more
@@ -72,4 +74,34 @@ alias ls="ls --color"
 alias cts="~/dotfiles/scripts/create-tmux-session.sh" # Create tmux session command
 alias sail='sh $([ -f sail ] && echo sail || echo vendor/bin/sail)'
 
+# Git aliases
+alias gs="git status"
+
+function gc {
+    git commit -m "$1"
+    gs
+}
+
+# git commit merge
+function gcm {
+    git commit --no-edit
+    gs
+}
+
+function goops {
+    git commit --no-edit --amend 
+    gs
+}
+
+function gco {
+  local branches branch
+  branches=$(git branch --all --sort=-committerdate | grep -v 'HEAD ->') || return
+  branch=$(echo "$branches" | fzf --height 40% --layout=reverse --info=inline -q "$1" --preview 'git log --oneline --graph --date=short --color=always {1}') || return
+  git checkout "$(echo "$branch" | sed "s/.* //" | sed "s#remotes/[^/]*/##")"
+}
+
 stty -ixon
+
+export PATH="/home/patrick/.fzf/bin:$PATH"
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
