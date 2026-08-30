@@ -22,7 +22,8 @@ hl.config({
     },
 })
 
-hl.curve("zap", { type = "spring", mass = 1, stiffness = 1000, dampening = 100 })
+hl.curve("zap", { type = "spring", mass = 1, stiffness = 2000, dampening = 100 })
+hl.curve("calm-zap", { type = "spring", mass = 1, stiffness = 1500, dampening = 100 })
 
 hl.animation({ leaf = "workspaces", enabled = true, speed = 1, spring = "zap" })
-hl.animation({ leaf = "windows", enabled = true, speed = 5, spring = "zap" })
+hl.animation({ leaf = "windows", enabled = true, speed = 1, spring = "calm-zap" })

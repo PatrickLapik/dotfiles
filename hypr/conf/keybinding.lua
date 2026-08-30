@@ -4,7 +4,7 @@ hl.bind("SUPER + E", hl.dsp.exec_cmd('~/dotfiles/.settings/filemanager.sh'))
 
 hl.bind("SUPER + C", hl.dsp.window.close("activewindow"))
 hl.bind("SUPER + D", hl.dsp.exec_cmd("vesktop"))
-hl.bind("SUPER + S", hl.dsp.exec_cmd("hyprshot -m region --freeze"))
+hl.bind("SUPER + SHIFT + S", hl.dsp.exec_cmd("hyprshot -m region --freeze"))
 hl.bind("SUPER + F", hl.dsp.window.fullscreen("activewindow"))
 
 hl.bind("SUPER + T", hl.dsp.window.float('activewindow'))
