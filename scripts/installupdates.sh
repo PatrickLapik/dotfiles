@@ -1,33 +1,13 @@
 #!/bin/bash
-#  ___           _        _ _   _   _           _       _             
-# |_ _|_ __  ___| |_ __ _| | | | | | |_ __   __| | __ _| |_ ___  ___  
-#  | || '_ \/ __| __/ _` | | | | | | | '_ \ / _` |/ _` | __/ _ \/ __| 
-#  | || | | \__ \ || (_| | | | | |_| | |_) | (_| | (_| | ||  __/\__ \ 
-# |___|_| |_|___/\__\__,_|_|_|  \___/| .__/ \__,_|\__,_|\__\___||___/ 
-#                                    |_|                              
-# by Stephan Raabe (2024) 
-# ----------------------------------------------------- 
-# Required: yay trizen timeshift btrfs-grub
-# ----------------------------------------------------- 
 
-sleep 1
+[ -f ~/matugen-gum-colors.sh ] && source ~/matugen-gum-colors.sh
+
 clear
-figlet "Updates"
-echo
-_isInstalledYay() {
-    package="$1";
-    check="$(yay -Qs --color always "${package}" | grep "local" | grep "${package} ")";
-    if [ -n "${check}" ] ; then
-        echo 0; #'0' means 'true' in Bash
-        return; #true
-    fi;
-    echo 1; #'1' means 'false' in Bash
-    return; #false
-}
 
-# ------------------------------------------------------
-# Confirm Start
-# ------------------------------------------------------
+printf "\e[38;2;%d;%d;%dm" 0x${GUM_PRIMARY_COLOR:1:2} 0x${GUM_PRIMARY_COLOR:3:2} 0x${GUM_PRIMARY_COLOR:5:2}
+figlet "Updates"
+printf "\e[0m"
+echo
 
 if gum confirm "DO YOU WANT TO START THE UPDATE NOW?" ;then
     echo 
@@ -40,25 +20,32 @@ else
     exit;
 fi
 
-if [[ $(_isInstalledYay "timeshift") == "0" ]] ;then
-    if gum confirm "DO YOU WANT TO CREATE A SNAPSHOT?" ;then
-        echo
-        c=$(gum input --placeholder "Enter a comment for the snapshot...")
-        sudo timeshift --create --comments "$c"
-        sudo timeshift --list
-        sudo grub-mkconfig -o /boot/grub/grub.cfg
-        echo ":: DONE. Snapshot $c created!"
-        echo
-    elif [ $? -eq 130 ]; then
-        echo ":: Snapshot canceled."
-        exit 130
-    else
-        echo ":: Snapshot canceled."
-    fi
-    echo
+PACMAN="Update Pacman"
+AUR="Update AUR"
+ALL="Update ALL"
+
+CHOICE=$(gum choose --limit=1 --header="Which system updates should be made?: " "$PACMAN" "$AUR" "$ALL")
+
+if [ -z "$CHOICE" ]; then
+    echo ":: Update canceled."
+    exit 130
 fi
 
-yay
+case "$CHOICE" in
+    "$PACMAN")
+        sudo pacman -Syu
+    ;;
+    "$AUR")
+        yay --aur
+    ;;
+    "$ALL")
+        yay
+    ;;
+    *)
+        echo ":: Not applying any updates."
+    ;;
+esac
+
 
 notify-send "Update complete"
 echo 

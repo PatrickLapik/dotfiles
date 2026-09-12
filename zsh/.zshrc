@@ -105,3 +105,5 @@ stty -ixon
 export PATH="/home/patrick/.fzf/bin:$PATH"
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+[ -f ~/matugen-gum-colors.sh ] && source ~/matugen-gum-colors.sh

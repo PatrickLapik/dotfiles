@@ -1,5 +1,5 @@
 [config.wallpaper]
-command = "swww"
+command = "awww"
 arguments = ["img", "transition-type", "center"]
 set = true
 
@@ -42,3 +42,7 @@ output_path = "~/.config/gtk-4.0/colors.css"
 [templates.tmux]
 input_path = "./templates/matugen-tmux.conf"
 output_path = "~/.config/tmux/matugen-tmux.conf"
+
+[templates.gum]
+input_path = "./templates/matugen-gum-colors.sh"
+output_path = "~/matugen-gum-colors.sh"
