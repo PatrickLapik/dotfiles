@@ -8,6 +8,10 @@ require("conf.environment")
 
 require("conf.autostart")
 
+require('conf.windowrule')
+
+require('conf.cursors')
+
 hl.monitor({
     output = "DP-2",
     mode = "2560x1440@144",

@@ -28,21 +28,9 @@ hl.bind("SUPER + SHIFT + up", hl.dsp.window.resize({ x = 0, y = -100, relative =
 hl.bind("SUPER + G", hl.dsp.group.toggle())
 
 -- Actions
-hl.bind("SUPER + SHIFT + A", hl.dsp.exec_cmd("~/dotfiles/hypr/scripts/toggle-animations.sh"))
-hl.bind("SUPER + PRINT", hl.dsp.exec_cmd("~/dotfiles/hypr/scripts/screenshot.sh"))
 hl.bind("SUPER + Q", hl.dsp.exec_cmd("~/dotfiles/scripts/wlogout.sh"))
-hl.bind("SUPER + SHIFT + W", hl.dsp.exec_cmd("~/dotfiles/hypr/scripts/wallpaper.sh"))
-hl.bind("SUPER + CTRL + W", hl.dsp.exec_cmd("~/dotfiles/hypr/scripts/wallpaper.sh select"))
 hl.bind("SUPER + CTRL + RETURN", hl.dsp.exec_cmd("rofi -show drun -replace -i"))
-hl.bind("SUPER + CTRL + H", hl.dsp.exec_cmd("~/dotfiles/hypr/scripts/keybindings.sh"))
-hl.bind("SUPER + SHIFT + B", hl.dsp.exec_cmd("~/dotfiles/waybar/launch.sh"))
-hl.bind("SUPER + CTRL + B", hl.dsp.exec_cmd("~/dotfiles/waybar/toggle.sh"))
-hl.bind("SUPER + SHIFT + R", hl.dsp.exec_cmd("~/dotfiles/hypr/scripts/loadconfig.sh"))
 hl.bind("SUPER + V", hl.dsp.exec_cmd("~/dotfiles/scripts/cliphist.sh"))
-hl.bind("SUPER + CTRL + T", hl.dsp.exec_cmd("~/dotfiles/waybar/themeswitcher.sh"))
-hl.bind("SUPER + CTRL + S", hl.dsp.exec_cmd("~/dotfiles/apps/ML4W_Dotfiles_Settings-x86_64.AppImage"))
-hl.bind("SUPER + SHIFT + P", hl.dsp.exec_cmd("~/dotfiles/hypr/scripts/hyprshade.sh"))
-hl.bind("SUPER + ALT + G", hl.dsp.exec_cmd("~/dotfiles/hypr/scripts/gamemode.sh"))
 
 -- Workspaces
 for i = 1, 10 do
@@ -75,5 +63,3 @@ hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"))
 hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"))
 hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("pactl set-source-mute @DEFAULT_SOURCE@ toggle"))
 hl.bind("XF86Calculator", hl.dsp.exec_cmd("qalculate-gtk"))
-hl.bind("XF86Tools",
-    hl.dsp.exec_cmd("alacritty --class dotfiles-floating -e ~/dotfiles/apps/ML4W_Dotfiles_Settings-x86_64.AppImage"))

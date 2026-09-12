@@ -9,13 +9,13 @@
 if [[ "$1" == "exit" ]]; then
     echo ":: Exit"
     sleep 0.5
-    hyprctl dispatch exit
+    hyprctl dispatch "hl.dsp.exit()"
 fi
 
 if [[ "$1" == "lock" ]]; then
     echo ":: Lock"
     sleep 0.8
-    hyprlock    
+    hyprlock
 fi
 
 if [[ "$1" == "reboot" ]]; then
