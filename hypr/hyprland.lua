@@ -17,12 +17,22 @@ hl.monitor({
     mode = "2560x1440@144",
 })
 
+hl.monitor({
+    output = "",
+    scale = 1
+})
+
 hl.config({
     general = {
         gaps_in = 5,
         gaps_out = 10,
         border_size = 0,
         layout = "dwindle",
+    },
+    input = {
+        touchpad = {
+            natural_scroll = true
+        }
     },
 })
 
