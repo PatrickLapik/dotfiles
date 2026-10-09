@@ -46,3 +46,7 @@ output_path = "~/.config/tmux/matugen-tmux.conf"
 [templates.gum]
 input_path = "./templates/matugen-gum-colors.sh"
 output_path = "~/matugen-gum-colors.sh"
+
+[templates.quickshell]
+input_path = "./templates/matugen-quickshell.json"
+output_path = "~/.config/quickshell/colors.json"

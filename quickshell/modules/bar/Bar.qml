@@ -5,6 +5,7 @@ import Quickshell.Wayland
 
 import qs.components.containers
 import qs.config
+import qs.services
 
 Scope {
     Variants {
@@ -21,18 +22,21 @@ Scope {
             }
 
             implicitHeight: Sizing.barHeight
+            color: Colors.withAlpha(Colors.panel, Theme.panelOpacity)
 
             WlrLayershell.layer: WlrLayer.Top
             WlrLayershell.exclusiveZone: implicitHeight
 
             RowLayout {
                 anchors.fill: parent
+                anchors.leftMargin: Spacing.panelPadding
+                anchors.rightMargin: Spacing.panelPadding
                 spacing: Spacing.xl 
 
                 LeftBar{}
                 // Temp spacer
-                Rectangle {
-                    implicitWidth: 200
+                Item {
+                    Layout.fillWidth: true
                 }
                 RightBar{}
             }
