@@ -1,22 +1,63 @@
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
+import qs.components
 import qs.services
 import qs.config
-import qs.modules.wallpapers
 
 RowLayout {
+    id: root
+    WidgetAnchor { name: "notifications"; target: root.parent }
     Layout.fillWidth: false
     Layout.alignment: Qt.AlignRight
-    implicitHeight: parent.height
-    
-    spacing: Spacing.md
+    spacing: Spacing.sm
 
-    WallpaperPicker {}
+    StatusItem {
+        id: bell
+        statusIcon: Notifications.dnd ? "bell-off" : "bell"
+        label: Notifications.count > 0 ? String(Notifications.count) : ""
+        tooltip: "Notifications · " + Notifications.count + (Notifications.dnd ? " · Do not disturb" : "")
+        interactive: true
+        tint: Notifications.dnd ? Colors.textMuted : Colors.text
+        onClicked: Widgets.toggle("notifications", bell.QsWindow.window.screen.name)
+    }
 
-    Text {
-        color: Colors.text
-        font.family: Theme.fontFamily
-        font.pixelSize: Theme.fontSize
-        text: Time.time
+    StatusItem {
+        statusIcon: Network.icon
+        tooltip: Network.details
+        tint: Network.connected ? Colors.text : Colors.textMuted
+    }
+    StatusItem {
+        id: microphone
+        WidgetAnchor { name: "microphone"; target: microphone }
+        statusIcon: Audio.inputMuted ? "microphone-muted" : "microphone"
+        label: Audio.inputAvailable ? Audio.inputPercent + "%" : "—"
+        tooltip: Audio.inputDescription + (Audio.inputMuted ? " · Muted" : "") + "\nClick for input controls · Middle-click to mute · Scroll to adjust"
+        interactive: Audio.inputAvailable
+        middleClickEnabled: true
+        tint: Audio.inputMuted || !Audio.inputAvailable ? Colors.textMuted : Colors.text
+        onClicked: Widgets.toggle("microphone", microphone.QsWindow.window.screen.name)
+        onMiddleClicked: Audio.toggleInputMute()
+        onScrolled: direction => Audio.adjustInput(direction)
+    }
+    StatusItem {
+        id: volumeButton
+        middleClickEnabled: true
+        onMiddleClicked: Audio.toggleMute()
+        WidgetAnchor { name: "volume"; target: volumeButton }
+        statusIcon: !Audio.available || Audio.muted ? "muted" : Audio.percent < 50 ? "volume-low" : "volume"
+        label: Audio.available ? Audio.percent + "%" : "—"
+        tooltip: Audio.description + (Audio.muted ? " · Muted" : "") + "\nClick for volume controls · Middle-click to mute · Scroll to adjust"
+        interactive: Audio.available
+        tint: Audio.muted ? Colors.textMuted : Colors.text
+        onClicked: Widgets.toggle("volume", volumeButton.QsWindow.window.screen.name)
+        onScrolled: direction => Audio.adjust(direction)
+    }
+    StatusItem {
+        visible: Environment.showBattery
+        statusIcon: Environment.charging ? "charging" : "battery"
+        label: Environment.batteryPercent + "%"
+        tooltip: Environment.charging ? "Charging" : Environment.onBattery ? "On battery" : "Plugged in"
+        tint: Environment.onBattery && Environment.batteryPercent <= 20 ? Colors.error : Colors.text
     }
 }

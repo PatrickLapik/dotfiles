@@ -16,6 +16,9 @@ Loader {
             aboveWindows: false
             focusable: false
 
+            // Fill the screen behind panels, including their reserved space.
+            exclusionMode: ExclusionMode.Ignore
+
             WlrLayershell.layer: WlrLayer.Background
 
             anchors {

@@ -1,7 +1,12 @@
 import QtQuick.Layouts
+import Quickshell
+import qs.components
+import qs.services
+import qs.config
 
 RowLayout {
-    Layout.fillWidth: true
+    Layout.fillWidth: false
     Layout.alignment: Qt.AlignLeft
-    implicitHeight: parent.height
+    spacing: Spacing.sm
+    PlayingMedia {}
 }

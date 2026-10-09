@@ -1,6 +1,7 @@
-"""Discover wallpapers and generate the shell palette without wallpaper daemons."""
+"""Discover wallpapers and regenerate application themes without wallpaper daemons."""
 import json
 import os
+import re
 from pathlib import Path
 import subprocess
 import sys
@@ -34,10 +35,18 @@ def apply(filename):
         raise ValueError('Choose an image from the wallpapers directory.')
     output = CONFIG / 'quickshell/colors.json'
     output.parent.mkdir(parents=True, exist_ok=True)
-    # Generate only this shell's palette; Quickshell itself renders the background.
+    # Keep every configured template and hook, but let Quickshell render the wallpaper.
+    matugen_directory = ROOT / 'matugen'
+    config_text = (matugen_directory / 'config.toml').read_text()
+    def disable_wallpaper(match):
+        section = match.group(0)
+        return re.sub(r'(?m)^set\s*=.*$', 'set = false', section)
+    config_text = re.sub(r'(?ms)^\[config\.wallpaper\]\n.*?(?=^\[|\Z)', disable_wallpaper, config_text)
     with tempfile.TemporaryDirectory(prefix='quickshell-palette-') as tmp:
         config = Path(tmp) / 'config.toml'
-        config.write_text('[config]\n[templates.quickshell]\ninput_path = ' + json.dumps(str(ROOT / 'matugen/templates/matugen-quickshell.json')) + '\noutput_path = ' + json.dumps(str(output)) + '\n')
+        # Existing input paths are relative to the Matugen configuration directory.
+        (Path(tmp) / 'templates').symlink_to(matugen_directory / 'templates', target_is_directory=True)
+        config.write_text(config_text)
         result = subprocess.run(['matugen', '-c', str(config), '-m', 'dark', '--source-color-index', '0', 'image', str(path)], capture_output=True, text=True, timeout=120)
         if result.returncode:
             raise RuntimeError(result.stderr.strip() or result.stdout.strip() or 'Matugen failed.')

@@ -28,9 +28,9 @@ hl.bind("SUPER + SHIFT + up", hl.dsp.window.resize({ x = 0, y = -100, relative =
 hl.bind("SUPER + G", hl.dsp.group.toggle())
 
 -- Actions
-hl.bind("SUPER + Q", hl.dsp.exec_cmd("~/dotfiles/scripts/wlogout.sh"))
-hl.bind("SUPER + CTRL + RETURN", hl.dsp.exec_cmd("rofi -show drun -replace -i"))
-hl.bind("SUPER + V", hl.dsp.exec_cmd("~/dotfiles/scripts/cliphist.sh"))
+hl.bind("SUPER + Q", hl.dsp.exec_cmd("~/dotfiles/scripts/widget.sh power toggle"))
+hl.bind("SUPER + CTRL + RETURN", hl.dsp.exec_cmd("~/dotfiles/scripts/widget.sh launcher open"))
+hl.bind("SUPER + V", hl.dsp.exec_cmd("~/dotfiles/scripts/widget.sh clipboard"))
 
 -- Workspaces
 for i = 1, 10 do
