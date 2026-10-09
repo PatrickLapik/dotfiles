@@ -79,6 +79,8 @@ Scope {
                 background: StyledContainer {
                     radius: Theme.radiusSmall
                     color: Colors.surfaceContainerHigh
+                    border.width: search.activeFocus ? Theme.borderWidth : Theme.borderNone
+                    border.color: Colors.primary
                 }
                 Keys.priority: Keys.BeforeItem
                 Keys.onPressed: event => {
@@ -112,13 +114,27 @@ Scope {
                         anchors.fill: parent
                         anchors.margins: Spacing.sm
                         spacing: Spacing.md
-                        Image {
+                        Item {
+                            id: applicationIcon
                             Layout.preferredWidth: Sizing.launcherIconSize
                             Layout.preferredHeight: Sizing.launcherIconSize
-                            source: Quickshell.iconPath(row.modelData.icon || "application-x-executable", "application-x-executable")
-                            sourceSize.width: Sizing.launcherIconSize
-                            sourceSize.height: Sizing.launcherIconSize
-                            fillMode: Image.PreserveAspectFit
+                            readonly property string themeIcon: row.modelData.icon && Quickshell.hasThemeIcon(row.modelData.icon)
+                                ? row.modelData.icon : ""
+                            Image {
+                                id: appIcon
+                                anchors.fill: parent
+                                source: applicationIcon.themeIcon ? Quickshell.iconPath(applicationIcon.themeIcon) : ""
+                                sourceSize.width: Sizing.launcherIconSize
+                                sourceSize.height: Sizing.launcherIconSize
+                                fillMode: Image.PreserveAspectFit
+                                visible: status === Image.Ready
+                            }
+                            ShellIcon {
+                                anchors.fill: parent
+                                visible: appIcon.status !== Image.Ready
+                                kind: "application"
+                                tint: row.ListView.isCurrentItem ? Colors.onPrimaryContainer : Colors.textMuted
+                            }
                         }
                         ColumnLayout {
                             Layout.fillWidth: true
@@ -135,7 +151,7 @@ Scope {
                                 Layout.fillWidth: true
                                 visible: text !== ""
                                 text: row.modelData.genericName || row.modelData.comment || ""
-                                color: row.ListView.isCurrentItem ? Colors.onPrimaryContainer : Colors.textMuted
+                                color: Colors.textMuted
                                 font.weight: Theme.fontWeight; font.family: Theme.fontFamily
                                 font.pixelSize: Theme.fontSizeSmall
                                 elide: Text.ElideRight
@@ -158,12 +174,6 @@ Scope {
                     font.weight: Theme.fontWeight; font.family: Theme.fontFamily
                     font.pixelSize: Theme.fontSize
                 }
-            }
-            Text {
-                text: "↑ ↓ / Tab  Select     Enter  Launch     Esc  Close"
-                color: Colors.textMuted
-                font.weight: Theme.fontWeight; font.family: Theme.fontFamily
-                font.pixelSize: Theme.fontSizeSmall
             }
         }
     }

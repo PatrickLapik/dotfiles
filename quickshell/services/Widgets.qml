@@ -4,6 +4,7 @@ import Quickshell
 Singleton {
     property var entries: ({})
     property string activeName: ""
+    property string activeScreenName: ""
     property var anchors: ({})
     function setAnchor(name, screenName, owner, item) {
         const next = Object.assign({}, anchors)
@@ -40,7 +41,9 @@ Singleton {
         if (!entries[name]) return false
         for (const key of Object.keys(entries)) if (key !== name) entries[key].close()
         activeName = name
-        entries[name].open(screenName)
+        const screen = screenFor(screenName)
+        activeScreenName = screen ? screen.name : ""
+        entries[name].open(activeScreenName)
         return true
     }
     function close(name) {
@@ -50,7 +53,13 @@ Singleton {
         return true
     }
     function toggle(name, screenName) {
-        return activeName === name ? close(name) : open(name, screenName)
+        const screen = screenFor(screenName)
+        return activeName === name && activeScreenName === (screen ? screen.name : "")
+            ? close(name) : open(name, screenName)
     }
-    function closed(name) { if (activeName === name) activeName = "" }
+    function closed(name) {
+        if (activeName !== name) return
+        activeName = ""
+        activeScreenName = ""
+    }
 }

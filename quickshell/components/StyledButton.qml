@@ -8,11 +8,12 @@ Button {
     id: root
     property bool middleClickEnabled: false
     property bool scrollActionEnabled: false
+    property bool highlightInteractions: true
     signal middleClicked()
     signal scrolled(int direction)
     hoverEnabled: true
     padding: Spacing.sm
-    font.weight: Theme.fontWeight; font.family: Theme.fontFamily
+    font.weight: Theme.controlFontWeight; font.family: Theme.fontFamily
     font.pixelSize: Theme.fontSize
     font.letterSpacing: Theme.buttonLetterSpacing
     property MouseArea cursorArea: MouseArea {
@@ -29,16 +30,17 @@ Button {
     }
     background: StyledContainer {
         radius: Theme.radiusSmall
-        color: root.down || root.checked ? Colors.primaryContainer
-            : root.hovered ? Colors.surfaceContainerHighest : Colors.surfaceContainerHigh
+        color: root.highlightInteractions && (root.down || root.checked) ? Colors.primaryContainer
+            : root.highlightInteractions && root.hovered ? Colors.surfaceContainerHighest : root.flat ? "transparent" : Colors.surfaceContainerHigh
         border.width: root.visualFocus ? Theme.borderSelectedWidth : Theme.metalStyle ? Theme.borderWidth : Theme.borderNone
-        border.color: root.visualFocus || root.hovered || root.checked ? Colors.primary : Colors.border
+        border.color: root.visualFocus || root.highlightInteractions && (root.hovered || root.checked) ? Colors.primary : Colors.border
     }
     contentItem: Text {
         text: root.text
         textFormat: Text.PlainText
         font: root.font
-        color: root.enabled ? Colors.text : Colors.textMuted
+        color: !root.enabled ? Colors.textMuted
+            : root.highlightInteractions && (root.down || root.checked) ? Colors.onPrimaryContainer : Colors.text
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         elide: Text.ElideRight

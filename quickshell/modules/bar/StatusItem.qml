@@ -13,14 +13,16 @@ StyledButton {
     property color tint: Colors.text
     property bool interactive: false
     enabled: interactive
+    highlightInteractions: false
+    Accessible.name: tooltip.split("\n")[0]
     scrollActionEnabled: interactive
     implicitWidth: content.implicitWidth + Spacing.sm
     implicitHeight: Sizing.widgetHeight
     padding: 0
     background: StyledContainer {
         radius: Theme.radiusSmall
-        color: root.hovered ? Colors.surfaceContainerHighest : "transparent"
-        border.width: root.visualFocus ? Theme.borderSelectedWidth : 0
+        color: "transparent"
+        border.width: root.visualFocus ? Theme.borderSelectedWidth : Theme.borderNone
         border.color: Colors.primary
     }
     contentItem: RowLayout {
@@ -34,6 +36,7 @@ StyledButton {
             color: root.tint
             font.weight: Theme.fontWeight; font.family: Theme.fontFamily
             font.pixelSize: Theme.fontSizeSmall
+            font.features: { "tnum": 1 }
         }
     }
     BarToolTip {

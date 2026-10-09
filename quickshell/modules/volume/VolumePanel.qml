@@ -26,11 +26,22 @@ Scope {
             RowLayout {
                 Layout.fillWidth: true
                 Text { Layout.fillWidth: true; text: "Volume"; color: Colors.text; font.weight: Theme.headingFontWeight; font.family: Theme.headingFontFamily; font.pixelSize: Theme.fontSize }
-                Text { text: Audio.available ? Audio.percent + "%" : "—"; color: Colors.primary; font.weight: Theme.fontWeight; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSize }
-                StyledButton { text: Audio.muted ? "Unmute" : "Mute"; checked: Audio.muted; enabled: Audio.available; onClicked: Audio.toggleMute() }
-                StyledButton { text: "×"; Accessible.name: "Close volume controls"; onClicked: popup.close() }
+                Text { text: Audio.available ? Audio.percent + "%" : "—"; color: Colors.textMuted; font.weight: Theme.fontWeight; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSize; font.features: { "tnum": 1 } }
+                StyledIconButton { iconName: Audio.muted ? "muted" : "volume"; Accessible.name: Audio.muted ? "Unmute output" : "Mute output"; checked: Audio.muted; enabled: Audio.available && !Audio.outputBusy; onClicked: Audio.toggleMute() }
             }
-            Text { text: "Output device"; color: Colors.textMuted; font.weight: Theme.fontWeight; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall }
+            RowLayout {
+                Layout.fillWidth: true
+                Text { Layout.fillWidth: true; text: "Output device"; color: Colors.textMuted; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall }
+                StyledButton {
+                    Layout.preferredWidth: Sizing.audioDefaultButtonWidth
+                    text: Audio.outputBusy ? "Applying…" : Audio.outputIsDefault ? "Default" : "Set as default"
+                    enabled: Audio.available && !Audio.outputBusy && !Audio.outputIsDefault
+                    flat: true
+                    padding: Spacing.xs
+                    font.pixelSize: Theme.fontSizeSmall
+                    onClicked: Audio.setOutputDefault()
+                }
+            }
             StyledDropdown {
                 id: outputs
                 Layout.fillWidth: true
@@ -38,17 +49,28 @@ Scope {
                 textRole: "label"
                 currentIndex: Audio.outputIndex
                 displayText: count ? currentText : "No audio output available"
-                enabled: count > 0
+                enabled: count > 0 && !Audio.outputBusy
                 Accessible.name: "Audio output device"
                 onActivated: index => Audio.selectOutput(index)
             }
             StyledSlider {
                 Layout.fillWidth: true
                 from: 0; to: 100
-                enabled: Audio.available
+                enabled: Audio.available && !Audio.outputBusy
                 value: Audio.percent
                 Accessible.name: "Output volume"
                 onMoved: Audio.setPercent(value)
+            }
+            Text {
+                Layout.fillWidth: true
+                visible: Audio.outputError !== ""
+                text: Audio.outputError
+                color: Colors.error
+                wrapMode: Text.Wrap
+                maximumLineCount: 2
+                elide: Text.ElideRight
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSizeSmall
             }
             Item { Layout.fillHeight: true }
         }

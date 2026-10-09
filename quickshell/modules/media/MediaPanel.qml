@@ -19,12 +19,12 @@ Scope {
         popupWidth: Sizing.mediaPanelWidth
         popupHeight: Sizing.mediaPanelHeight
         onDismissed: Widgets.closed("media")
-        radius: Theme.radiusSmall
-        backgroundContent: Image {
+        backgroundContent: RoundedImage {
             anchors.fill: parent
             source: Media.artUrl
-            fillMode: Image.PreserveAspectCrop
-            asynchronous: true
+            sourceSize.width: Sizing.mediaPanelWidth * 2
+            sourceSize.height: Sizing.mediaPanelHeight * 2
+            radius: Theme.radius
             opacity: Theme.mediaArtworkOpacity
             visible: status === Image.Ready
         }
@@ -37,10 +37,9 @@ Scope {
             spacing: Spacing.sm
             RowLayout {
                 Layout.fillWidth: true
-                Text { Layout.fillWidth: true; text: "Now playing"; color: Colors.text; font.weight: Theme.headingFontWeight; font.family: Theme.headingFontFamily; font.pixelSize: Theme.fontSizeLarge; font.letterSpacing: Theme.headingLetterSpacing }
-                StyledButton { text: "×"; Accessible.name: "Close playback controls"; onClicked: popup.close() }
+                Text { Layout.fillWidth: true; text: "Now playing"; color: Colors.text; font.weight: Theme.headingFontWeight; font.family: Theme.headingFontFamily; font.pixelSize: Theme.fontSizeSmall; font.letterSpacing: Theme.headingLetterSpacing }
             }
-            ScrollingText { Layout.fillWidth: true; text: Media.title; color: Colors.text; font.weight: Theme.emphasisFontWeight; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSize;  }
+            ScrollingText { Layout.fillWidth: true; text: Media.title; color: Colors.text; font.weight: Theme.emphasisFontWeight; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeLarge;  }
             ScrollingText { Layout.fillWidth: true; text: Media.artist || (Media.available ? Media.player.identity : "No player available"); color: Colors.textMuted; font.weight: Theme.fontWeight; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall }
             StyledSlider {
                 id: seek
@@ -53,16 +52,16 @@ Scope {
             }
             RowLayout {
                 Layout.fillWidth: true
-                Text { text: Media.formatTime(seek.value); color: Colors.textMuted; font.weight: Theme.fontWeight; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall }
+                Text { text: Media.formatTime(seek.value); color: Colors.textMuted; font.weight: Theme.fontWeight; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall; font.features: { "tnum": 1 } }
                 Item { Layout.fillWidth: true }
-                Text { text: Media.length > 0 ? Media.formatTime(Media.length) : "—"; color: Colors.textMuted; font.weight: Theme.fontWeight; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall }
+                Text { text: Media.length > 0 ? Media.formatTime(Media.length) : "—"; color: Colors.textMuted; font.weight: Theme.fontWeight; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall; font.features: { "tnum": 1 } }
             }
             RowLayout {
                 Layout.alignment: Qt.AlignHCenter
                 spacing: Spacing.md
-                StyledButton { text: "⏮"; Accessible.name: "Previous track"; enabled: Media.available && Media.player.canGoPrevious; onClicked: Media.previous() }
-                StyledButton { text: Media.playing ? "⏸" : "▶"; Accessible.name: Media.playing ? "Pause" : "Play"; enabled: Media.available && Media.player.canTogglePlaying; onClicked: Media.toggle() }
-                StyledButton { text: "⏭"; Accessible.name: "Next track"; enabled: Media.available && Media.player.canGoNext; onClicked: Media.next() }
+                StyledIconButton { iconName: "previous"; Accessible.name: "Previous track"; enabled: Media.available && Media.player.canGoPrevious; onClicked: Media.previous() }
+                StyledIconButton { iconName: Media.playing ? "pause" : "play"; flat: false; padding: Spacing.sm; Accessible.name: Media.playing ? "Pause" : "Play"; enabled: Media.available && Media.player.canTogglePlaying; onClicked: Media.toggle() }
+                StyledIconButton { iconName: "next"; Accessible.name: "Next track"; enabled: Media.available && Media.player.canGoNext; onClicked: Media.next() }
             }
         }
     }

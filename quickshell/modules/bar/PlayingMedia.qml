@@ -39,21 +39,23 @@ RowLayout {
     }
     Repeater {
         model: ["previous", "toggle", "next"]
-        delegate: StyledButton {
+        delegate: StyledIconButton {
             id: control
             required property string modelData
             readonly property bool usable: Media.available && (modelData === "previous" ? Media.player.canGoPrevious : modelData === "next" ? Media.player.canGoNext : Media.player.canTogglePlaying)
             visible: Media.available
             enabled: usable
+            highlightInteractions: false
             implicitWidth: Sizing.widgetHeight
             implicitHeight: Sizing.widgetHeight
             padding: Spacing.xs
-            text: modelData === "previous" ? "⏮" : modelData === "next" ? "⏭" : Media.playing ? "⏸" : "▶"
+            iconName: modelData === "toggle" ? (Media.playing ? "pause" : "play") : modelData
             Accessible.name: modelData === "previous" ? "Previous track" : modelData === "next" ? "Next track" : Media.playing ? "Pause" : "Play"
             background: StyledContainer {
                 radius: Theme.radiusSmall
-                border.width: Theme.borderNone
-                color: control.hovered && control.usable ? Colors.surfaceContainerHighest : "transparent"
+                border.width: control.visualFocus ? Theme.borderSelectedWidth : Theme.borderNone
+                border.color: Colors.primary
+                color: "transparent"
             }
             onClicked: {
                 if (modelData === "previous") Media.previous()

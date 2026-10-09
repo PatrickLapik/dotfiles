@@ -10,17 +10,16 @@ import qs.services
 Scope {
     id: root
     readonly property var actions: [
-        { label: "lock", text: "Lock", action: "lock", shortcut: "L", key: Qt.Key_L },
-        { label: "logout", text: "Log Out", action: "exit", shortcut: "E", key: Qt.Key_E },
-        { label: "suspend", text: "Suspend", action: "suspend", shortcut: "U", key: Qt.Key_U },
-        { label: "reboot", text: "Restart", action: "reboot", shortcut: "R", key: Qt.Key_R },
-        { label: "shutdown", text: "Power Off", action: "shutdown", shortcut: "S", key: Qt.Key_S }
+        { icon: "lock", text: "Lock", action: "lock", shortcut: "L", key: Qt.Key_L },
+        { icon: "logout", text: "Log out", action: "exit", shortcut: "E", key: Qt.Key_E },
+        { icon: "suspend", text: "Suspend", action: "suspend", shortcut: "U", key: Qt.Key_U },
+        { icon: "restart", text: "Restart", action: "reboot", shortcut: "R", key: Qt.Key_R },
+        { icon: "power", text: "Power off", action: "shutdown", shortcut: "S", key: Qt.Key_S }
     ]
     function execute(index: int) {
         const action = actions[index]
         if (!action) return
         popup.close()
-        // Use the same action helper as the existing wlogout configuration.
         const script = Quickshell.shellPath("../hypr/scripts/power.sh")
         Quickshell.execDetached(["bash", script, action.action])
     }
@@ -32,76 +31,74 @@ Scope {
     CenteredPopup {
         id: popup
         popupWidth: Sizing.powerMenuWidth
-        popupHeight: Sizing.powerMenuHeight
+        popupHeight: screen && Math.min(popupWidth, screen.width - Spacing.xl * 2) < Sizing.powerMenuCompactBreakpoint
+            ? Sizing.powerMenuCompactHeight : Sizing.powerMenuHeight
         keepBarVisible: false
         onOpened: Qt.callLater(() => content.forceActiveFocus())
         onDismissed: Widgets.closed("power")
         ColumnLayout {
             id: content
             anchors.fill: parent
-            spacing: Spacing.lg
+            spacing: Spacing.md
             focus: true
             Keys.onPressed: event => {
                 if (event.modifiers & (Qt.ControlModifier | Qt.AltModifier | Qt.MetaModifier)) return
                 const index = root.actions.findIndex(action => action.key === event.key)
                 if (index >= 0 && !event.isAutoRepeat) { root.execute(index); event.accepted = true }
             }
-            Text { text: "Session"; color: Colors.text; Layout.maximumHeight: Theme.headingLineHeight; font.weight: Theme.headingFontWeight; font.family: Theme.headingFontFamily; font.letterSpacing: Theme.headingLetterSpacing; font.pixelSize: Theme.fontSizeLarge }
-            RowLayout {
+            Text {
+                text: "Session"
+                color: Colors.text
+                font.family: Theme.headingFontFamily
+                font.weight: Theme.headingFontWeight
+                font.pixelSize: Theme.fontSizeLarge
+            }
+            GridLayout {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                spacing: Spacing.md
+                columns: popup.surface.width < Sizing.powerMenuCompactBreakpoint ? Sizing.powerMenuCompactColumns : root.actions.length
+                rowSpacing: Spacing.sm
+                columnSpacing: Spacing.sm
                 Repeater {
                     model: root.actions
-                    delegate: StyledContainer {
+                    delegate: StyledButton {
                         id: card
                         required property var modelData
                         required property int index
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        radius: Theme.radiusLarge
-                        color: mouse.containsMouse || activeFocus ? Colors.primaryContainer : Colors.withAlpha(Colors.primary, Theme.powerCardOpacity)
-                        border.color: Colors.primary
-                        activeFocusOnTab: true
-                        Keys.onReturnPressed: root.execute(index)
-                        Keys.onEnterPressed: root.execute(index)
-                        Keys.onSpacePressed: root.execute(index)
-                        ColumnLayout {
-                            anchors.centerIn: parent
-                            spacing: Spacing.md
-                            Image {
+                        Layout.preferredWidth: 0
+                        Layout.minimumWidth: 0
+                        Accessible.name: modelData.text
+                        onClicked: root.execute(index)
+                        contentItem: ColumnLayout {
+                            spacing: Spacing.sm
+                            Item { Layout.fillHeight: true }
+                            ShellIcon {
                                 Layout.alignment: Qt.AlignHCenter
                                 Layout.preferredWidth: Sizing.powerIconSize
                                 Layout.preferredHeight: Sizing.powerIconSize
-                                source: "file://" + Quickshell.shellPath("../wlogout/icons/" + card.modelData.label + ".png")
-                                fillMode: Image.PreserveAspectFit
+                                kind: card.modelData.icon
+                                tint: card.down ? Colors.onPrimaryContainer : Colors.text
                             }
                             Text {
                                 Layout.alignment: Qt.AlignHCenter
                                 text: card.modelData.text
-                                color: Colors.text
-                                font.weight: Theme.fontWeight; font.family: Theme.fontFamily
-                                font.pixelSize: Theme.fontSize
+                                color: card.down ? Colors.onPrimaryContainer : Colors.text
+                                font: card.font
                             }
                             Text {
                                 Layout.alignment: Qt.AlignHCenter
                                 text: card.modelData.shortcut
                                 color: Colors.textMuted
-                                font.weight: Theme.fontWeight; font.family: Theme.fontFamily
+                                font.family: Theme.fontFamily
                                 font.pixelSize: Theme.fontSizeSmall
                             }
-                        }
-                        MouseArea {
-                            id: mouse
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: root.execute(card.index)
+                            Item { Layout.fillHeight: true }
                         }
                     }
                 }
             }
-            Text { text: "L  Lock     E  Log Out     U  Suspend     R  Restart     S  Power Off     Esc  Close"; color: Colors.textMuted; font.weight: Theme.fontWeight; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall }
         }
     }
 }

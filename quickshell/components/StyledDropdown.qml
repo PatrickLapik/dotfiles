@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
 import Quickshell
 import Quickshell as QS
 import Quickshell.Wayland
@@ -40,6 +41,7 @@ Item {
         text: root.displayText
         Accessible.name: root.Accessible.name || root.displayText
         font: root.font
+        highlightInteractions: false
         leftPadding: Spacing.sm
         rightPadding: Spacing.sm * 2 + Sizing.dropdownIndicatorSize
         onClicked: { if (root.popup.visible) root.popup.close(); else root.popup.open() }
@@ -53,19 +55,17 @@ Item {
             elide: Text.ElideRight
             verticalAlignment: Text.AlignVCenter
         }
-        Text {
+        ShellIcon {
             x: parent.width - width - Spacing.sm
             y: (parent.height - height) / 2
             width: Sizing.dropdownIndicatorSize
-            text: root.popup.visible ? "▴" : "▾"
-            color: Colors.textMuted
-            font: root.font
-            horizontalAlignment: Text.AlignHCenter
+            height: Sizing.dropdownIndicatorSize
+            kind: root.popup.visible ? "chevron-up" : "chevron-down"
+            tint: Colors.textMuted
         }
     }
     function choose(index: int) {
         if (index < 0 || index >= count) return
-        currentIndex = index
         activated(index)
         popup.close()
         trigger.forceActiveFocus()
@@ -107,8 +107,11 @@ Item {
             y: menu.origin.y
             width: root.width
             height: menu.menuHeight
-            color: Colors.surfaceContainer
+            color: Colors.panel
             radius: Theme.radiusSmall
+            highlightOpacity: 0
+            border.width: Theme.borderWidth
+            border.color: Colors.border
             opacity: menu.progress
             enabled: root.popup.visible
             focus: true
@@ -127,7 +130,7 @@ Item {
                 anchors.margins: Spacing.xs
                 clip: true
                 model: root.model
-                ScrollBar.vertical: ScrollBar {}
+                ScrollBar.vertical: StyledScrollBar {}
                 delegate: StyledButton {
                     id: option
                     required property var modelData
@@ -135,13 +138,40 @@ Item {
                     width: choices.width
                     height: Sizing.dropdownRowHeight
                     text: root.textRole ? String(modelData[root.textRole] || "") : String(modelData)
+                    highlightInteractions: false
+                    padding: Spacing.sm
+                    topPadding: Spacing.xs
+                    bottomPadding: Spacing.xs
                     onClicked: root.choose(index)
                     onHoveredChanged: { if (hovered) choices.currentIndex = index }
                     background: StyledContainer {
-                        radius: Theme.radiusSmall
-                        color: choices.currentIndex === option.index ? Colors.primaryContainer : Colors.surfaceContainerHigh
+                        radius: Theme.radiusNone
+                        highlightOpacity: 0
+                        color: choices.currentIndex === option.index ? Colors.surfaceContainerHigh : "transparent"
+                        border.width: option.visualFocus ? Theme.borderSelectedWidth : Theme.borderNone
+                        border.color: Colors.primary
                     }
-                    contentItem: Text { text: option.text; textFormat: Text.PlainText; font: root.font; color: Colors.text; elide: Text.ElideRight; verticalAlignment: Text.AlignVCenter }
+                    contentItem: RowLayout {
+                        spacing: Spacing.sm
+                        Text {
+                            Layout.fillWidth: true
+                            text: option.text
+                            textFormat: Text.PlainText
+                            font: root.font
+                            color: Colors.text
+                            wrapMode: Text.Wrap
+                            maximumLineCount: 2
+                            elide: Text.ElideRight
+                            verticalAlignment: Text.AlignVCenter
+                        }
+                        ShellIcon {
+                            kind: "check"
+                            tint: Colors.textMuted
+                            opacity: root.currentIndex === option.index ? 1 : 0
+                            Layout.preferredWidth: Sizing.dropdownIndicatorSize
+                            Layout.preferredHeight: Sizing.dropdownIndicatorSize
+                        }
+                    }
                 }
             }
         }

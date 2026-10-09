@@ -23,7 +23,6 @@ Scope {
         topMargin: ScreenLayout.barPopupTop
         rightMargin: Spacing.barRightMargin
         padding: Spacing.sm
-        keepBarVisible: false
         property bool confirmClear: false
         readonly property var results: Clipboard.entries.filter(entry => search.text.trim().toLocaleLowerCase().split(/\s+/).every(word => entry.preview.toLocaleLowerCase().includes(word)))
         onResultsChanged: list.currentIndex = results.length ? Math.max(0, Math.min(list.currentIndex, results.length - 1)) : -1
@@ -68,20 +67,6 @@ Scope {
                     color: Colors.textMuted
                     font.family: Theme.fontFamily
                     font.pixelSize: Theme.fontSizeSmall
-                }
-                StyledButton {
-                    id: closeButton
-                    text: "×"
-                    implicitWidth: Sizing.widgetHeight
-                    implicitHeight: Sizing.widgetHeight
-                    Accessible.name: "Close clipboard history"
-                    onClicked: popup.close()
-                    background: StyledContainer {
-                        color: closeButton.hovered ? Colors.surfaceContainerHighest : "transparent"
-                        border.width: closeButton.visualFocus ? Theme.borderWidth : Theme.borderNone
-                        border.color: Colors.primary
-                        radius: Theme.radiusSmall
-                    }
                 }
             }
             TextField {
@@ -221,9 +206,10 @@ Scope {
                                 }
                             }
                         }
-                        StyledButton {
+                        StyledIconButton {
                             id: removeButton
-                            text: "×"
+                            iconName: "trash"
+                            tint: hovered ? Colors.onErrorContainer : Colors.textMuted
                             Layout.preferredWidth: Sizing.widgetHeight
                             Layout.preferredHeight: Sizing.widgetHeight
                             enabled: !Clipboard.busy
@@ -235,13 +221,6 @@ Scope {
                                 radius: Theme.radiusSmall
                                 border.width: removeButton.visualFocus ? Theme.borderWidth : Theme.borderNone
                                 border.color: Colors.primary
-                            }
-                            contentItem: Text {
-                                text: removeButton.text
-                                color: removeButton.hovered ? Colors.onErrorContainer : Colors.textMuted
-                                font: removeButton.font
-                                horizontalAlignment: Text.AlignHCenter
-                                verticalAlignment: Text.AlignVCenter
                             }
                         }
                     }

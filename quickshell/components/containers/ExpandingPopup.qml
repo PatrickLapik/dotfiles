@@ -24,7 +24,8 @@ PanelWindow {
     exclusionMode: ExclusionMode.Ignore
     WlrLayershell.layer: WlrLayer.Overlay
     // Bar dropdowns must never capture pointer input outside their mask.
-    WlrLayershell.keyboardFocus: expanded ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: !expanded ? WlrKeyboardFocus.None
+        : barInputHole.pointerInside ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.Exclusive
     function open() {
         panel.expandFrom(Widgets.anchorFor(anchorName, screen.name))
         Qt.callLater(() => panel.forceActiveFocus())
@@ -35,7 +36,7 @@ PanelWindow {
         width: root.expanded ? root.width : 0
         height: root.expanded ? root.height : 0
         Region { x: panel.x; y: panel.y; width: panel.width; height: panel.height }
-        BarInputHole { screen: root.screen; width: root.width }
+        BarInputHole { id: barInputHole; screen: root.screen; width: root.width }
     }
     property Item overlay: Item {
         parent: root.contentItem

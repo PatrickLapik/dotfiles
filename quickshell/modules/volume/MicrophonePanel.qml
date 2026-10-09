@@ -26,11 +26,22 @@ Scope {
             RowLayout {
                 Layout.fillWidth: true
                 Text { Layout.fillWidth: true; text: "Microphone"; color: Colors.text; font.weight: Theme.headingFontWeight; font.family: Theme.headingFontFamily; font.pixelSize: Theme.fontSize }
-                Text { text: Audio.inputAvailable ? Audio.inputPercent + "%" : "—"; color: Colors.primary; font.weight: Theme.fontWeight; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSize }
-                StyledButton { text: Audio.inputMuted ? "Unmute" : "Mute"; checked: Audio.inputMuted; enabled: Audio.inputAvailable; onClicked: Audio.toggleInputMute() }
-                StyledButton { text: "×"; Accessible.name: "Close microphone controls"; onClicked: popup.close() }
+                Text { text: Audio.inputAvailable ? Audio.inputPercent + "%" : "—"; color: Colors.textMuted; font.weight: Theme.fontWeight; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSize; font.features: { "tnum": 1 } }
+                StyledIconButton { iconName: Audio.inputMuted ? "microphone-muted" : "microphone"; Accessible.name: Audio.inputMuted ? "Unmute microphone" : "Mute microphone"; checked: Audio.inputMuted; enabled: Audio.inputAvailable && !Audio.inputBusy; onClicked: Audio.toggleInputMute() }
             }
-            Text { text: "Input device"; color: Colors.textMuted; font.weight: Theme.fontWeight; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall }
+            RowLayout {
+                Layout.fillWidth: true
+                Text { Layout.fillWidth: true; text: "Input device"; color: Colors.textMuted; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall }
+                StyledButton {
+                    Layout.preferredWidth: Sizing.audioDefaultButtonWidth
+                    text: Audio.inputBusy ? "Applying…" : Audio.inputIsDefault ? "Default" : "Set as default"
+                    enabled: Audio.inputAvailable && !Audio.inputBusy && !Audio.inputIsDefault
+                    flat: true
+                    padding: Spacing.xs
+                    font.pixelSize: Theme.fontSizeSmall
+                    onClicked: Audio.setInputDefault()
+                }
+            }
             StyledDropdown {
                 id: inputs
                 Layout.fillWidth: true
@@ -38,17 +49,28 @@ Scope {
                 textRole: "label"
                 currentIndex: Audio.inputIndex
                 displayText: count ? currentText : "No microphone available"
-                enabled: count > 0
+                enabled: count > 0 && !Audio.inputBusy
                 Accessible.name: "Microphone input device"
                 onActivated: index => Audio.selectInput(index)
             }
             StyledSlider {
                 Layout.fillWidth: true
                 from: 0; to: 100
-                enabled: Audio.inputAvailable
+                enabled: Audio.inputAvailable && !Audio.inputBusy
                 value: Audio.inputPercent
                 Accessible.name: "Microphone input level"
                 onMoved: Audio.setInputPercent(value)
+            }
+            Text {
+                Layout.fillWidth: true
+                visible: Audio.inputError !== ""
+                text: Audio.inputError
+                color: Colors.error
+                wrapMode: Text.Wrap
+                maximumLineCount: 2
+                elide: Text.ElideRight
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSizeSmall
             }
             Item { Layout.fillHeight: true }
         }

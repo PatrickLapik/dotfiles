@@ -56,7 +56,7 @@ PopupWindow {
         const point = target.mapToItem(window.contentItem, 0, 0)
         const centeredX = point.x + (target.width - implicitWidth) / 2
         const x = Math.max(0, Math.min(centeredX, Math.max(0, window.width - implicitWidth)))
-        // The window includes hidden menu space; anchor to the visible bar instead.
+        // Follow the visible bar edge, including during reveal.
         const y = Math.max(point.y + target.height, ScreenLayout.barBottom) + Spacing.sm
         anchor.rect = Qt.rect(Math.round(x), Math.ceil(y), 1, 1)
     }

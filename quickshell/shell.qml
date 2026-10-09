@@ -3,6 +3,7 @@ import qs.modules.clipboard
 import qs.modules.background
 import qs.modules.launcher
 import qs.modules.bar
+import qs.modules.wallpapers
 import qs.modules.volume
 import qs.modules.media
 import qs.modules.power
@@ -12,6 +13,8 @@ import qs.components
 ShellRoot{
     Background{}
     Bar{}
+    ClockMenu{}
+    WallpaperPicker{}
     WidgetHost{}
     ClipboardViewer{}
     AppLauncher{}

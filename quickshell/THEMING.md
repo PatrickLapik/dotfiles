@@ -1,16 +1,26 @@
 # Theming
 
-The default style is weathered iron: near-black blue-grey surfaces, bone-silver
-accents, etched grain, thin borders, and tight corners inspired by the
-Death Above Life wallpaper. Set `Theme.metalStyle` to `false` to restore the
-live Matugen palette and softer surfaces. Matugen continues to update other
-applications while metal styling is active.
+The default style uses the live Matugen palette, rounded surfaces, subtle
+highlights, and Adwaita Sans. Body text is regular, controls are medium, and
+headings are semibold. Bar labels use 14 px, body text 15 px, and headings 20 px.
+Typography and corner tokens live in `Theme.qml`.
 
-`StyledContainer` shares a cached SVG grain tile across surfaces; transparent
-controls remain clear. Adjust `Theme.surfaceTextureOpacity` for the amount of
-wear. Body text uses Fira Sans; headings use the installed 28 Days Later face
-(with system fallback if unavailable). Typography and corner tokens live in
-`Theme.qml`; the cold metal color roles live in `Colors.qml`.
+Set `Theme.metalStyle` to `true` for the optional cold iron palette, tighter
+corners, thin borders, and grain inspired by the Death Above Life wallpaper.
+Both styles use the same typography. `StyledContainer` shares a cached SVG grain
+tile across metal surfaces; `Theme.surfaceTextureOpacity` controls its strength.
+Matugen continues to update other applications while metal styling is active.
+
+Use `StyledButton` for text actions and `StyledIconButton` for icon actions.
+The latter uses `ShellIcon`, the common drawn icon system for status, playback,
+calendar navigation, and session controls. Set `flat: true` for quiet actions;
+checked controls and keyboard focus retain their shared indication. `RoundedImage`
+provides consistent rounded previews and artwork.
+
+Topbar controls set `highlightInteractions: false` and use stable backgrounds;
+hovering, pressing, or opening a widget does not tint them. Keyboard focus still
+has an outline. Selection dropdowns use plain rows, a neutral navigation state,
+and a checkmark for the applied selection. Long option names wrap to two lines.
 
 Matugen renders `matugen/templates/matugen-quickshell.json` to
 `~/.config/quickshell/colors.json`. `services/Colors.qml` watches this file and
@@ -67,9 +77,11 @@ and [Matugen templates](https://github.com/InioX/matugen/wiki/Configuration).
 
 ## Wallpaper picker
 
-Click **Wallpapers** in the right side of the bar to browse thumbnails from
-`dotfiles/wallpapers`, including subdirectories. Search filters filenames, and
-Refresh picks up newly added images. Supported formats: JPG, JPEG, PNG, WebP, BMP.
+Click **Wallpapers** at the bottom of the clock dropdown to browse thumbnails from
+`dotfiles/wallpapers`, including subdirectories. Search filters filenames.
+The refresh icon picks up newly added images. Supported formats: JPG, JPEG, PNG,
+WebP, BMP. The current wallpaper has a selected background and checkmark. The
+picker is registered as `wallpapers` and also opens with `scripts/widget.sh wallpapers`.
 
 Selecting an image regenerates all configured Matugen application themes in dark mode, changes the
 background on all monitors, and saves the selection to
@@ -98,8 +110,8 @@ launcher clears the search, matching the previous Rofi shortcut behavior.
 
 The launcher uses `CenteredPopup` and `StyledContainer` with shared theme tokens.
 `Sizing.launcherWidth`, `launcherHeight`, `launcherRowHeight`, and
-`launcherIconSize` control its dimensions. `scripts/app-launcher.sh` calls the
-`launcher.open` IPC method; Hyprland starts this Quickshell configuration on login.
+`launcherIconSize` control its dimensions. `scripts/app-launcher.sh` forwards to
+the shared `widgets` IPC endpoint; Hyprland starts this Quickshell configuration on login.
 App discovery uses Quickshell DesktopEntries, and `gtk-launch` launches the
 desktop entry, including applications that request a terminal.
 
@@ -116,9 +128,10 @@ players. With no player, it shows "No media playing" and hides controls.
 Unsupported player actions are disabled. Long track labels are truncated;
 hover to read the full label.
 
-The right side shows the wallpaper picker, network adapter icon, output volume,
-optional laptop battery, and clock. Hover for connection details or the full
-date. Click volume to toggle mute; scroll to adjust it in 5% steps, up to 100%.
+The right side shows notifications, network state, microphone level, output
+volume, and an optional laptop battery. The clock sits in the center. Hover for
+connection and device details. Click an audio control to open its dropdown;
+middle-click toggles mute and scrolling adjusts the level in 5% steps, up to 100%.
 Network state comes from NetworkManager, audio from PipeWire, and battery state
 from UPower. Missing services show disconnected/unavailable states.
 
@@ -198,33 +211,36 @@ popup top, and animated notification offset; use it for new top-aligned widgets.
 `Spacing.barMargin` keeps the horizontal inset.
 `Spacing.barSectionGap` controls the minimum gap around the clock.
 
-## Clock expansion
+## Clock dropdown
 
-Click the center clock to expand its container into a two-section menu. The left
-section holds the calendar and selected-date agenda, with an outline for today
-and a filled selected date. The right Appearance section opens the wallpaper
-selector and holds brightness controls when available. Opening the selector
-collapses the clock menu. The clock grows while the panel widens and its content
-slides and fades into view. Click
-the time again or press Escape to collapse it. Month arrows and Today navigate
-the calendar; selecting a day updates the agenda placeholder. Settings and
-events are placeholders for future integrations.
+Click the center clock to open a compact dropdown underneath it. The time and
+full date lead into a calendar, with month arrows, Today, and keyboard-accessible
+day buttons. The selected day has an accent fill; today uses accent text. The
+footer opens the wallpaper picker and displays brightness when available.
+There are no agenda or settings placeholders.
+
+The clock button stays at its normal size, so the left and right bar sections
+keep their layout throughout opening and closing. The `clock` widget uses a
+per-monitor anchor and the shared registry. Opening another widget closes it;
+clicking the clock again, pressing Escape, or clicking outside also dismisses it.
+It can be opened with `scripts/widget.sh clock`.
 
 Brightness appears only when `brightnessctl` reports a backlight device; its
 slider changes that device and refreshes the reported level. Desktop monitors
 without a backlight device do not show this control. `Sizing.clockMenuWidth`,
-`clockMenuHeight`, `calendarHeight`, and `Theme.clockExpandedFontSize` control
-the expansion; animations use `config/Animations.qml` presets.
+`clockMenuHeight`, `clockMenuCompactHeight`, `calendarHeight`, and
+`Theme.clockExpandedFontSize` control its layout. The compact height is used
+without brightness controls; animations use `config/Animations.qml` presets.
 
 ## Interaction animations
 
 `config/Animations.qml` controls snappy interaction transitions: bar reveals use
 `revealDuration` (160 ms), menu expansion uses `expandDuration` (180 ms), and
 collapse uses `collapseDuration` (130 ms), each with its own easing. Set `enabled`
-to false for instant transitions. The clock keeps a fixed window and calendar
-layout, scales fixed-size clock text, and fades/slides cached content while the
-surface reveals it. Its input mask follows the visible panel so hidden areas
-remain click-through.
+to false for instant transitions. Dropdowns keep fixed windows and content
+layouts, fading/sliding cached content while their surfaces expand. Their input
+masks release full-screen dismissal input as soon as closing starts; the bar
+remains clickable throughout transitions.
 
 Shared centered dialogs use expand/collapse presets and animate their surface
 with a vertical translation and opacity inside a fixed window. Tooltips use
@@ -283,7 +299,7 @@ registration so toggling reflects Escape/click-outside closures too.
 
 Click the playing track in the bar to open the `media` dropdown. It uses faded
 track artwork behind the title, artist, seek timeline, previous/play-pause/next
-controls, and output volume. Unsupported player actions and seeking are disabled.
+controls. Unsupported player actions and seeking are disabled.
 The volume panel and media panel share `components/StyledSlider.qml`.
 `Sizing.mediaPanelWidth/mediaPanelHeight` and `Theme.mediaArtworkOpacity` control
 its layout and background. It also opens with `scripts/widget.sh media`.
@@ -343,9 +359,22 @@ is controlled by `Sizing.clipboardWidth`, `clipboardHeight`, and
 
 The compact volume panel includes a `StyledDropdown` for hardware/virtual
 PipeWire output sinks (excluding application streams), followed by the volume
-slider. Selecting an output sets PipeWire's preferred default audio sink; the
-bar, volume level, and mute control follow the active default. Device hotplug
-updates the choices. `Sizing.volumePanelWidth/Height` controls the panel; shared
+slider. The bar, volume level, and mute control follow the selected device. Selecting an
+input or output moves current application streams to that device, including
+applications pinned to another target. The selection is confirmed against the
+audio graph before the UI updates; failures appear in the panel. Internal
+Bluetooth/filter streams are excluded.
+
+**Set as default** saves the selected input or output as WirePlumber's preferred
+default for future applications and subsequent sessions. **Default** indicates
+the selected device already has that preference. Selecting a device alone does
+not replace the saved system default. The selected device falls back to the
+system default if it disconnects. Device hotplug updates the choices.
+
+Switching requires Python 3, `pw-dump`, `pw-metadata`, and `wpctl`. The first two
+PipeWire tools apply and verify routing; `wpctl` persists the default preference.
+`Sizing.volumePanelWidth/Height` controls the panel; shared
 `dropdownHeight`, `dropdownRowHeight`, and `dropdownMaxHeight` control selectors.
 Use `StyledDropdown` with a string list, or an object list and `textRole`; handle
-`activated(index)` to apply a selection.
+`activated(index)` to apply a selection. Its `currentIndex` stays bound to the
+owning service, including asynchronous updates or failed changes.

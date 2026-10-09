@@ -38,10 +38,10 @@ Scope {
 
             // Reserve a fixed drawing surface; the input mask still follows visible sections.
             // Resizing a Wayland surface every animation frame causes configure stalls.
-            implicitHeight: Sizing.clockMenuHeight + Spacing.barTopMargin
+            implicitHeight: Sizing.barHeight + Spacing.barTopMargin
 
             WlrLayershell.layer: WlrLayer.Top
-            WlrLayershell.keyboardFocus: centerSection.expanded ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+            WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
             exclusionMode: ExclusionMode.Ignore
 
             // Only the screen-edge strip receives input while hidden.
@@ -116,10 +116,24 @@ Scope {
                         width: Math.max(0, parent.width - Spacing.panelPadding * 2)
                     }
                 }
-                ClockMenu {
+                StyledButton {
                     id: centerSection
                     anchors.horizontalCenter: parent.horizontalCenter
-                    screen: barWindow.screen
+                    height: Sizing.barHeight
+                    implicitWidth: Math.max(Sizing.clockButtonMinWidth, implicitContentWidth + Spacing.panelPadding * 2)
+                    text: Time.time
+                    font.pixelSize: Theme.fontSizeSmall
+                    font.features: { "tnum": 1 }
+                    highlightInteractions: false
+                    Accessible.name: "Open calendar"
+                    WidgetAnchor { name: "clock"; target: centerSection }
+                    BarToolTip { target: centerSection; hovered: centerSection.hovered; text: Time.date }
+                    background: StyledContainer {
+                        color: Colors.withAlpha(Colors.panel, Theme.panelOpacity)
+                        border.width: centerSection.visualFocus ? Theme.borderSelectedWidth : Theme.borderNone
+                        border.color: Colors.primary
+                    }
+                    onClicked: Widgets.toggle("clock", barWindow.screen.name)
                 }
                 StyledContainer {
                     id: rightSection

@@ -17,7 +17,6 @@ Scope {
     ExpandingPopup {
         id: popup
         anchorName: "notifications"
-        expansionMode: "below"
         popupWidth: Sizing.notificationCenterWidth
         popupHeight: Sizing.notificationCenterHeight
         onExpandedChanged: Notifications.centerOpen = expanded
@@ -27,55 +26,62 @@ Scope {
             spacing: Spacing.md
             RowLayout {
                 Layout.fillWidth: true
-                Text { Layout.fillWidth: true; text: "Notifications · " + Notifications.count; color: Colors.text; Layout.maximumHeight: Theme.headingLineHeight; font.weight: Theme.headingFontWeight; font.family: Theme.headingFontFamily; font.letterSpacing: Theme.headingLetterSpacing; font.pixelSize: Theme.fontSizeLarge }
-                StyledButton {
-                    padding: Spacing.sm
-                    id: closeButton
-                    text: "×"
-                    Accessible.name: "Close notifications"
-                    onClicked: popup.close()
-                    background: StyledContainer { radius: Theme.radiusSmall; color: closeButton.hovered ? Colors.surfaceContainerHighest : "transparent" }
-                    contentItem: Text { text: closeButton.text; color: Colors.text; font.weight: Theme.fontWeight; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeLarge }
+                spacing: Spacing.sm
+                Text {
+                    Layout.fillWidth: true
+                    text: "Notifications"
+                    color: Colors.text
+                    font.family: Theme.headingFontFamily
+                    font.weight: Theme.headingFontWeight
+                    font.pixelSize: Theme.fontSizeLarge
                 }
-            }
-            RowLayout {
-                Layout.fillWidth: true
+                Text {
+                    visible: Notifications.count > 0
+                    text: Notifications.count
+                    color: Colors.textMuted
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSizeSmall
+                    font.features: { "tnum": 1 }
+                }
                 StyledButton {
-                    padding: Spacing.sm
-                    id: dndButton
-                    text: Notifications.dnd ? "Do not disturb: On" : "Do not disturb: Off"
+                    text: "Clear all"
+                    flat: true
+                    enabled: Notifications.count > 0
+                    font.pixelSize: Theme.fontSizeSmall
+                    onClicked: Notifications.clearAll()
+                }
+                StyledIconButton {
+                    iconName: Notifications.dnd ? "bell-off" : "bell"
                     checkable: true
                     checked: Notifications.dnd
+                    Accessible.name: Notifications.dnd ? "Turn off do not disturb" : "Turn on do not disturb"
                     onClicked: Notifications.dnd = !Notifications.dnd
-                    background: StyledContainer { radius: Theme.radiusSmall; color: Notifications.dnd ? Colors.primaryContainer : dndButton.hovered ? Colors.surfaceContainerHighest : Colors.surfaceContainerHigh }
-                    contentItem: Text { text: dndButton.text; color: Colors.text; font.weight: Theme.fontWeight; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSize }
-                }
-                Item { Layout.fillWidth: true }
-                StyledButton {
-                    padding: Spacing.sm
-                    id: clearButton
-                    text: "Clear all"
-                    enabled: Notifications.count > 0
-                    onClicked: Notifications.clearAll()
-                    background: StyledContainer { radius: Theme.radiusSmall; color: clearButton.hovered ? Colors.surfaceContainerHighest : Colors.surfaceContainerHigh }
-                    contentItem: Text { text: clearButton.text; color: clearButton.enabled ? Colors.text : Colors.textMuted; font.weight: Theme.fontWeight; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSize }
                 }
             }
             Item {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                Text {
+                ColumnLayout {
                     anchors.centerIn: parent
                     visible: Notifications.count === 0
-                    text: Notifications.dnd ? "No notifications\nDo not disturb is on" : "No notifications"
-                    horizontalAlignment: Text.AlignHCenter
-                    color: Colors.textMuted
-                    font.weight: Theme.fontWeight; font.family: Theme.fontFamily
-                    font.pixelSize: Theme.fontSize
+                    spacing: Spacing.md
+                    ShellIcon {
+                        Layout.alignment: Qt.AlignHCenter
+                        kind: Notifications.dnd ? "bell-off" : "bell"
+                        Layout.preferredWidth: Sizing.notificationEmptyIconSize
+                        Layout.preferredHeight: Sizing.notificationEmptyIconSize
+                        tint: Colors.textMuted
+                    }
+                    Text {
+                        text: Notifications.dnd ? "Do not disturb is on" : "You're all caught up"
+                        color: Colors.textMuted
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontSize
+                    }
                 }
                 ListView {
-                    boundsBehavior: Flickable.StopAtBounds
                     id: list
+                    boundsBehavior: Flickable.StopAtBounds
                     anchors.fill: parent
                     clip: true
                     spacing: Spacing.sm
@@ -83,7 +89,7 @@ Scope {
                     ScrollBar.vertical: StyledScrollBar {}
                     delegate: NotificationCard {
                         required property var modelData
-                        width: list.width
+                        width: list.width - Sizing.scrollBarWidth - Spacing.xs
                         notification: modelData
                         onClicked: forceActiveFocus()
                     }

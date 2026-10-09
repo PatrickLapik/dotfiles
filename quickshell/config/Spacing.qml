@@ -18,6 +18,6 @@ Singleton {
     readonly property int barPopupGap: sm
     readonly property int notificationTopMargin: screenTopMargin
     readonly property int notificationBarGap: barPopupGap
-    readonly property int panelPadding: md
+    readonly property int panelPadding: lg
     readonly property int widgetSpacing: sm
 }

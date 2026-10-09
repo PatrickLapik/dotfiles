@@ -28,7 +28,7 @@ StyledContainer {
     signal clicked()
     implicitHeight: content.implicitHeight + Spacing.sm * 2
     color: Colors.surfaceContainerHigh
-    border.width: Theme.borderWidth
+    border.width: details && details.urgency === 2 ? Theme.borderWidth : Theme.borderNone
     border.color: details && details.urgency === 2 ? Colors.error : Colors.border
     activeFocusOnTab: true
     Keys.onReturnPressed: clicked()
@@ -92,22 +92,21 @@ StyledContainer {
                         text: modelData.text || "Open"
                         onClicked: modelData.invoke()
                         background: StyledContainer { radius: Theme.radiusSmall; color: actionButton.hovered ? Colors.primaryContainer : Colors.surfaceContainerHighest }
-                        contentItem: Text { text: actionButton.text; textFormat: Text.PlainText; color: Colors.text; font.weight: Theme.fontWeight; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall }
+                        contentItem: Text { text: actionButton.text; textFormat: Text.PlainText; color: actionButton.hovered ? Colors.onPrimaryContainer : Colors.text; font.weight: Theme.controlFontWeight; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall }
                     }
                 }
             }
         }
-        StyledButton {
+        StyledIconButton {
             id: dismiss
             Layout.alignment: Qt.AlignTop
             implicitWidth: Sizing.widgetHeight
             implicitHeight: Sizing.widgetHeight
             padding: Spacing.xs
-            text: "×"
+            iconName: "close"
+            tint: Colors.textMuted
             Accessible.name: "Dismiss notification"
             onClicked: root.details && Notifications.dismiss(root.details.id)
-            background: StyledContainer { radius: Theme.radiusSmall; color: dismiss.hovered ? Colors.surfaceContainerHighest : "transparent" }
-            contentItem: Text { text: dismiss.text; color: Colors.textMuted; font.weight: Theme.fontWeight; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSize; horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter }
         }
     }
 }

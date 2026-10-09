@@ -4,7 +4,7 @@ import Quickshell
 Singleton {
     readonly property int tooltipMaxWidth: 520
     readonly property int mediaPanelWidth: 400
-    readonly property int mediaPanelHeight: 320
+    readonly property int mediaPanelHeight: 260
     readonly property int scrollBarWidth: 6
     readonly property int scrollBarThumbWidth: 2
     readonly property int clipboardTypeHeight: 24
@@ -15,49 +15,52 @@ Singleton {
     readonly property int surfaceTextureSize: 256
     readonly property int dropdownMinWidth: 160
     readonly property int dropdownHeight: 36
-    readonly property int dropdownRowHeight: 36
+    readonly property int dropdownRowHeight: 44
     readonly property int dropdownMaxHeight: 220
     readonly property int dropdownIndicatorSize: 16
-    readonly property int volumePanelWidth: 400
-    readonly property int volumePanelHeight: 300
-    readonly property int volumeHandleSize: 22
-    readonly property int notificationCenterWidth: 620
-    readonly property int notificationCenterHeight: 700
+    readonly property int volumePanelWidth: 360
+    readonly property int volumePanelHeight: 240
+    readonly property int audioDefaultButtonWidth: 112
+    readonly property int volumeHandleSize: 18
+    readonly property int notificationCenterWidth: 440
+    readonly property int notificationCenterHeight: 560
     readonly property int notificationToastWidth: 420
     readonly property int notificationIconSize: 36
     readonly property int notificationCompactIconSize: 28
+    readonly property int notificationEmptyIconSize: 32
     readonly property int notificationMaxToasts: 3
     readonly property int notificationHistoryLimit: 100
     readonly property int barSlantWidth: 20
-    readonly property int barIconSize: 22
-    readonly property int barHeight: 54
-    readonly property int clockMenuWidth: 840
-    readonly property int clockMenuHeight: 660
-    readonly property int clockCalendarWidth: 440
-    readonly property int clockActionsWidth: 310
-    readonly property int clockActionHeight: 56
-    readonly property int calendarHeight: 270
-    readonly property int clockPlaceholderHeight: 88
-    readonly property int brightnessHandleSize: 22
+    readonly property int barIconSize: 20
+    readonly property int barHeight: 46
+    readonly property int clockMenuWidth: 460
+    readonly property int clockMenuHeight: 550
+    readonly property int clockMenuCompactHeight: 490
+    readonly property int calendarHeight: 240
+    readonly property int calendarDaySize: 32
+    readonly property int calendarWeekdayHeight: 20
+    readonly property int clockButtonMinWidth: 90
     readonly property int barRevealHeight: 2
     readonly property int mediaTextMaxWidth: 280
     readonly property int widgetHeight: 34
-    readonly property int wallpaperButtonWidth: 124
-    readonly property int launcherWidth: 720
-    readonly property int launcherHeight: 620
-    readonly property int launcherRowHeight: 76
-    readonly property int launcherIconSize: 40
-    readonly property int powerMenuWidth: 1040
-    readonly property int powerMenuHeight: 340
-    readonly property int powerIconSize: 54
+    readonly property int launcherWidth: 640
+    readonly property int launcherHeight: 560
+    readonly property int launcherRowHeight: 64
+    readonly property int launcherIconSize: 32
+    readonly property int powerMenuWidth: 760
+    readonly property int powerMenuHeight: 240
+    readonly property int powerMenuCompactHeight: 360
+    readonly property int powerMenuCompactBreakpoint: 600
+    readonly property int powerMenuCompactColumns: 3
+    readonly property int powerIconSize: 32
     readonly property int popupWidth: 640
     readonly property int popupHeight: 540
     readonly property int wallpaperColumns: 3
-    readonly property int wallpaperPickerWidth: 1040
-    readonly property int wallpaperPickerHeight: 780
-    readonly property int wallpaperMinCellWidth: 260
-    readonly property int wallpaperCellHeight: 236
-    readonly property int wallpaperPreviewHeight: 168
+    readonly property int wallpaperPickerWidth: 960
+    readonly property int wallpaperPickerHeight: 660
+    readonly property int wallpaperMinCellWidth: 220
+    readonly property int wallpaperCellHeight: 206
+    readonly property int wallpaperPreviewHeight: 148
     readonly property int wallpaperThumbnailWidth: 640
     readonly property int wallpaperThumbnailHeight: 360
 }
