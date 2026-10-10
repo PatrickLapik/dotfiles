@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Services.Pipewire
 import qs.components
 import qs.components.containers
 import qs.config
@@ -20,15 +21,14 @@ Scope {
         popupWidth: Sizing.volumePanelWidth
         popupHeight: Sizing.volumePanelHeight
         onDismissed: { inputs.popup.close(); Widgets.closed("microphone") }
+        PwNodePeakMonitor {
+            id: inputMonitor
+            node: Audio.source
+            enabled: popup.expanded && Audio.inputAvailable && !Audio.inputMuted
+        }
         ColumnLayout {
             anchors.fill: parent
             spacing: Spacing.sm
-            RowLayout {
-                Layout.fillWidth: true
-                Text { Layout.fillWidth: true; text: "Microphone"; color: Colors.text; font.weight: Theme.headingFontWeight; font.family: Theme.headingFontFamily; font.pixelSize: Theme.fontSize }
-                Text { text: Audio.inputAvailable ? Audio.inputPercent + "%" : "—"; color: Colors.textMuted; font.weight: Theme.fontWeight; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSize; font.features: { "tnum": 1 } }
-                StyledIconButton { iconName: Audio.inputMuted ? "microphone-muted" : "microphone"; Accessible.name: Audio.inputMuted ? "Unmute microphone" : "Mute microphone"; checked: Audio.inputMuted; enabled: Audio.inputAvailable && !Audio.inputBusy; onClicked: Audio.toggleInputMute() }
-            }
             RowLayout {
                 Layout.fillWidth: true
                 Text { Layout.fillWidth: true; text: "Input device"; color: Colors.textMuted; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall }
@@ -61,6 +61,35 @@ Scope {
                 Accessible.name: "Microphone input level"
                 onMoved: Audio.setInputPercent(value)
             }
+            StyledContainer {
+                id: inputMeter
+                Layout.fillWidth: true
+                implicitHeight: Sizing.audioInputMeterHeight
+                radius: Theme.radiusSmall
+                color: Colors.surfaceContainerHighest
+                border.width: Theme.borderNone
+                highlightOpacity: 0
+                readonly property real level: inputMonitor.enabled
+                    ? Math.sqrt(Math.max(0, Math.min(1, inputMonitor.peak))) : 0
+                Accessible.role: Accessible.ProgressBar
+                Accessible.name: "Microphone activity"
+                Accessible.description: Audio.inputMuted ? "Microphone muted" : "Live microphone input level"
+                Rectangle {
+                    anchors.fill: parent
+                    radius: parent.radius
+                    color: Colors.primary
+                    transform: Scale {
+                        origin.x: 0
+                        xScale: inputMeter.level
+                        Behavior on xScale {
+                            NumberAnimation {
+                                duration: Animations.enabled ? Animations.feedbackDuration : 0
+                                easing.type: Animations.feedbackEasing
+                            }
+                        }
+                    }
+                }
+            }
             Text {
                 Layout.fillWidth: true
                 visible: Audio.inputError !== ""
@@ -72,7 +101,6 @@ Scope {
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSizeSmall
             }
-            Item { Layout.fillHeight: true }
         }
     }
 }

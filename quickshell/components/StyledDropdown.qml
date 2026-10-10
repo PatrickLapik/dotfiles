@@ -23,7 +23,8 @@ Item {
     property string displayText: currentText
     property font font: Qt.font({ family: Theme.fontFamily, pixelSize: Theme.fontSizeSmall, weight: Theme.fontWeight })
     signal activated(int index)
-    implicitWidth: Sizing.dropdownMinWidth
+    FontMetrics { id: displayFont; font: root.font }
+    implicitWidth: Math.max(Sizing.dropdownMinWidth, displayFont.advanceWidth(displayText) + Spacing.sm * 3 + Sizing.dropdownIndicatorSize)
     implicitHeight: Sizing.dropdownHeight
     component DropdownState: QtObject {
         property bool visible: false
@@ -35,6 +36,11 @@ Item {
         function close() { visible = false }
     }
     property DropdownState popup: DropdownState {}
+    PopupFootprint {
+        screen: menu.screen
+        active: menu.visible
+        bounds: Qt.rect(menu.origin.x, menu.origin.y, root.width, menu.menuHeight)
+    }
     StyledButton {
         id: trigger
         anchors.fill: parent

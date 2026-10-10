@@ -20,6 +20,10 @@ Scope {
         const action = actions[index]
         if (!action) return
         popup.close()
+        if (action.action === "lock") {
+            Widgets.open("lock", popup.screen ? popup.screen.name : "")
+            return
+        }
         const script = Quickshell.shellPath("../hypr/scripts/power.sh")
         Quickshell.execDetached(["bash", script, action.action])
     }
@@ -30,6 +34,7 @@ Scope {
     }
     CenteredPopup {
         id: popup
+        popupName: "power"
         popupWidth: Sizing.powerMenuWidth
         popupHeight: screen && Math.min(popupWidth, screen.width - Spacing.xl * 2) < Sizing.powerMenuCompactBreakpoint
             ? Sizing.powerMenuCompactHeight : Sizing.powerMenuHeight
@@ -56,7 +61,10 @@ Scope {
             GridLayout {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                columns: popup.surface.width < Sizing.powerMenuCompactBreakpoint ? Sizing.powerMenuCompactColumns : root.actions.length
+                uniformCellWidths: true
+                uniformCellHeights: true
+                columns: Math.min(popup.popupMaxWidth, popup.screen ? popup.screen.width - Spacing.xl * 2 : popup.popupMaxWidth)
+                    < Sizing.powerMenuCompactBreakpoint ? Sizing.powerMenuCompactColumns : root.actions.length
                 rowSpacing: Spacing.sm
                 columnSpacing: Spacing.sm
                 Repeater {
@@ -67,7 +75,7 @@ Scope {
                         required property int index
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        Layout.preferredWidth: 0
+                        Layout.preferredWidth: implicitWidth
                         Layout.minimumWidth: 0
                         Accessible.name: modelData.text
                         onClicked: root.execute(index)

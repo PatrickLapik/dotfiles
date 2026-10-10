@@ -14,16 +14,19 @@ Scope {
         StyledWindow {
             id: barWindow
             required property ShellScreen modelData
-            property bool revealed: false
+            property bool revealed: !ShellConfig.barAutoHide
+            readonly property bool autoHide: ShellConfig.barAutoHide
             readonly property bool visibilityLocked: BarVisibility.isLocked(screen)
             readonly property bool pointerAtEdge: PointerPosition.nearTop(screen, Sizing.barRevealHeight)
             readonly property bool pointerInBar: PointerPosition.nearTop(screen, ScreenLayout.barBottom)
             onPointerAtEdgeChanged: updateVisibility()
             onPointerInBarChanged: updateVisibility()
             onVisibilityLockedChanged: updateVisibility()
+            onAutoHideChanged: updateVisibility()
+            Component.onCompleted: updateVisibility()
 
             function updateVisibility() {
-                if (pointerAtEdge || (revealed && pointerInBar) || visibilityLocked) {
+                if (!autoHide || pointerAtEdge || (revealed && pointerInBar) || visibilityLocked) {
                     hideDelay.stop()
                     revealed = true
                 } else if (revealed && !hideDelay.running) hideDelay.start()
@@ -42,7 +45,8 @@ Scope {
 
             WlrLayershell.layer: WlrLayer.Top
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
-            exclusionMode: ExclusionMode.Ignore
+            // Reserve the full bar height (including its top margin) only when pinned.
+            exclusionMode: autoHide ? ExclusionMode.Ignore : ExclusionMode.Auto
 
             // Only the screen-edge strip receives input while hidden.
             mask: Region {
@@ -75,7 +79,7 @@ Scope {
                 id: hideDelay
                 interval: Theme.barHideDelay
                 onTriggered: {
-                    if (!barWindow.pointerInBar && !barWindow.visibilityLocked)
+                    if (barWindow.autoHide && !barWindow.pointerAtEdge && !barWindow.pointerInBar && !barWindow.visibilityLocked)
                         barWindow.revealed = false
                 }
             }

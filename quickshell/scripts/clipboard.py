@@ -3,11 +3,24 @@
 import json
 import subprocess
 import sys
+import tempfile
 
 
 def run(command, data=None):
     return subprocess.run(command, input=data, stdout=subprocess.PIPE,
                           stderr=subprocess.PIPE, check=True).stdout
+
+
+def copy(data):
+    # wl-copy forks a clipboard owner that keeps stderr open. Capturing it in a
+    # pipe waits for that owner to exit instead of reporting a successful copy.
+    with tempfile.TemporaryFile() as errors:
+        result = subprocess.run(['wl-copy'], input=data, stdout=subprocess.DEVNULL,
+                                stderr=errors)
+        if result.returncode:
+            errors.seek(0)
+            raise subprocess.CalledProcessError(result.returncode, result.args,
+                                                stderr=errors.read())
 
 
 def entries():
@@ -27,10 +40,10 @@ def main():
         if not ident.isdigit():
             raise ValueError('Invalid clipboard entry')
         if action == 'copy':
-            data = run(['cliphist', 'decode'], (ident + '\n').encode())
-            run(['wl-copy'], data)
+            data = run(['cliphist', 'decode', ident])
+            copy(data)
             return {'copied': True}
-        run(['cliphist', 'delete'], (ident + '\n').encode())
+        run(['cliphist', 'delete'], ident.encode())
     elif action == 'wipe':
         run(['cliphist', 'wipe'])
     elif action != 'list':

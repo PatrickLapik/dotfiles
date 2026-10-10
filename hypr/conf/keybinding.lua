@@ -28,6 +28,7 @@ hl.bind("SUPER + SHIFT + up", hl.dsp.window.resize({ x = 0, y = -100, relative =
 hl.bind("SUPER + G", hl.dsp.group.toggle())
 
 -- Actions
+hl.bind("SUPER + CTRL + L", hl.dsp.exec_cmd("~/dotfiles/scripts/widget.sh lock open"))
 hl.bind("SUPER + Q", hl.dsp.exec_cmd("~/dotfiles/scripts/widget.sh power toggle"))
 hl.bind("SUPER + CTRL + RETURN", hl.dsp.exec_cmd("~/dotfiles/scripts/widget.sh launcher open"))
 hl.bind("SUPER + V", hl.dsp.exec_cmd("~/dotfiles/scripts/widget.sh clipboard"))

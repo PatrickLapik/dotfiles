@@ -7,25 +7,31 @@ import qs.config
 
 RowLayout {
     id: root
-    WidgetAnchor { name: "notifications"; target: root.parent }
     Layout.fillWidth: false
     Layout.alignment: Qt.AlignRight
     spacing: Spacing.sm
 
     StatusItem {
         id: bell
-        statusIcon: Notifications.dnd ? "bell-off" : "bell"
-        label: Notifications.count > 0 ? String(Notifications.count) : ""
+        WidgetAnchor { name: "notifications"; target: bell }
+        statusIcon: (Notifications.dnd ? "bell-off" : "bell") + (Notifications.count > 0 ? "-dot" : "")
         tooltip: "Notifications · " + Notifications.count + (Notifications.dnd ? " · Do not disturb" : "")
+            + "\nClick for notifications · Middle-click to mute"
         interactive: true
+        middleClickEnabled: true
         tint: Notifications.dnd ? Colors.textMuted : Colors.text
         onClicked: Widgets.toggle("notifications", bell.QsWindow.window.screen.name)
+        onMiddleClicked: Notifications.dnd = !Notifications.dnd
     }
 
     StatusItem {
+        id: networkButton
+        WidgetAnchor { name: "network"; target: networkButton }
         statusIcon: Network.icon
-        tooltip: Network.details
+        tooltip: Network.details + "\nClick for network controls"
+        interactive: true
         tint: Network.connected ? Colors.text : Colors.textMuted
+        onClicked: Widgets.toggle("network", networkButton.QsWindow.window.screen.name)
     }
     StatusItem {
         id: microphone

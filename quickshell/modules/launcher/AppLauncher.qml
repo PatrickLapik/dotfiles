@@ -13,6 +13,8 @@ import "Fuzzy.js" as Fuzzy
 
 Scope {
     id: root
+    FontMetrics { id: appFont; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSize }
+    FontMetrics { id: descriptionFont; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall }
     function show(screenName: string) {
         popup.screen = Widgets.screenFor(screenName)
         if (popup.isOpen) {
@@ -31,6 +33,7 @@ Scope {
     }
     CenteredPopup {
         id: popup
+        popupName: "launcher"
         popupWidth: Sizing.launcherWidth
         popupHeight: Sizing.launcherHeight
         keepBarVisible: false
@@ -97,6 +100,11 @@ Scope {
                 id: list
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                Layout.minimumHeight: 0
+                implicitWidth: count ? Math.max(Sizing.dropdownMinWidth, ...popup.results.map(entry =>
+                    Math.max(appFont.advanceWidth(entry.name), descriptionFont.advanceWidth(entry.genericName || entry.comment || ""))
+                    + Sizing.launcherIconSize + Spacing.sm * 2 + Spacing.md)) : emptyState.implicitWidth
+                implicitHeight: Math.max(1, count) * Sizing.launcherRowHeight + Math.max(0, count - 1) * spacing
                 clip: true
                 spacing: Spacing.xs
                 model: popup.results
@@ -167,6 +175,7 @@ Scope {
                     }
                 }
                 Text {
+                    id: emptyState
                     anchors.centerIn: parent
                     visible: list.count === 0
                     text: "No matching applications"

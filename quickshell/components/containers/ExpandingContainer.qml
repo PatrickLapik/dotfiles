@@ -9,6 +9,7 @@ StyledContainer {
     id: root
     property ShellScreen screen
     property bool expanded: false
+    property bool preparing: false
     property bool dismissOnOutsideClick: true
     property real collapsedWidth: Sizing.widgetHeight
     property real collapsedHeight: Sizing.barHeight
@@ -32,15 +33,17 @@ StyledContainer {
     readonly property real destinationY: belowSource ? startY : Math.max(0,
         Math.min(sourceRect.y, (parent ? parent.height : expandedHeight) - edgeMargin - expandedHeight))
     readonly property bool transitioning: progressAnimation.running
-    readonly property bool showing: expanded || progress > 0
+    readonly property bool showing: preparing || expanded || progress > 0
 
-    x: anchoredExpansion ? sourceRect.x + (destinationX - sourceRect.x) * progress : 0
-    y: anchoredExpansion ? startY + (destinationY - startY) * progress : 0
-    width: (anchoredExpansion ? sourceRect.width : collapsedWidth)
+    x: anchoredExpansion ? belowSource ? destinationX : sourceRect.x + (destinationX - sourceRect.x) * progress : 0
+    y: anchoredExpansion ? belowSource ? destinationY - Spacing.md * (1 - progress)
+        : startY + (destinationY - startY) * progress : 0
+    width: belowSource ? expandedWidth : (anchoredExpansion ? sourceRect.width : collapsedWidth)
         + (expandedWidth - (anchoredExpansion ? sourceRect.width : collapsedWidth)) * progress
-    height: (anchoredExpansion ? startHeight : collapsedHeight)
+    height: belowSource ? expandedHeight : (anchoredExpansion ? startHeight : collapsedHeight)
         + (expandedHeight - (anchoredExpansion ? startHeight : collapsedHeight)) * progress
-    function expandFrom(item: Item) {
+    opacity: preparing ? 0 : belowSource ? progress : 1
+    function captureSource(item: Item) {
         if (item) {
             const window = item.QsWindow.window
             const point = item.mapToItem(window.contentItem, 0, 0)
@@ -49,22 +52,22 @@ StyledContainer {
             sourceItem = item
             anchoredExpansion = true
         }
-        expanded = true
     }
+    function expandFrom(item: Item) { captureSource(item); expanded = true }
     // The expanding surface replaces its source until it has fully collapsed.
     // Bindings restore the source's original values and bindings on completion.
     Binding {
         target: root.sourceItem
         property: "opacity"
         value: 0
-        when: root.showing && !root.belowSource && root.sourceItem !== null
+        when: (root.expanded || root.progress > 0) && !root.belowSource && root.sourceItem !== null
         restoreMode: Binding.RestoreBindingOrValue
     }
     Binding {
         target: root.sourceItem
         property: "enabled"
         value: false
-        when: root.showing && !root.belowSource && root.sourceItem !== null
+        when: (root.expanded || root.progress > 0) && !root.belowSource && root.sourceItem !== null
         restoreMode: Binding.RestoreBindingOrValue
     }
     clip: true

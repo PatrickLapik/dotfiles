@@ -2,12 +2,13 @@ pragma Singleton
 import Quickshell
 
 Singleton {
-    readonly property int scrollBarPadding: 1
-    readonly property int xs: 4
-    readonly property int sm: 10
-    readonly property int md: 14
-    readonly property int lg: 18
-    readonly property int xl: 28
+    readonly property int lockEdgeInset: ShellConfig.scaled(64)
+    readonly property int scrollBarPadding: ShellConfig.scaled(1)
+    readonly property int xs: ShellConfig.scaled(4)
+    readonly property int sm: ShellConfig.scaled(10)
+    readonly property int md: ShellConfig.scaled(14)
+    readonly property int lg: ShellConfig.scaled(18)
+    readonly property int xl: ShellConfig.scaled(28)
 
     readonly property int barSectionGap: xl
     readonly property int barMargin: md

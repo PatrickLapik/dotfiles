@@ -1,5 +1,50 @@
 # Theming
 
+Set `ShellConfig.uiScale` to scale the whole shell: `1.0` preserves the default
+size, `1.1` makes it roughly 10% larger, and `0.9` makes it smaller. Text, icons,
+controls, spacing, borders, corners, and default panel dimensions share this
+scale. This operates in logical pixels, on top of compositor output scaling;
+do not copy a monitor's DPI scale into this setting. Invalid or nonpositive
+scales fall back to `1.0`. Counts, animation timings, and image source resolutions
+are unaffected.
+
+Configure each widget in `Sizing.popupLimits`. Both `width` and `height` accept:
+
+- A number: logical pixels multiplied by `uiScale`.
+- A percentage string: a fraction of available space on the popup's monitor,
+  after the host's margins and, for dropdowns, the space above the popup.
+- `"content"`: fit contents, including padding, within the configured bounds.
+
+`minWidth`, `maxWidth`, `minHeight`, and `maxHeight` accept numbers or percentages.
+Explicit axes with no maximum can use all available space. Minimums default to
+zero. Available space takes priority over all bounds, and a minimum larger than
+its maximum is clamped to that maximum. Percentages are not multiplied by UI scale.
+
+```qml
+launcher: {
+    width: "40%", minWidth: 480, maxWidth: 900,
+    height: "content", maxHeight: "70%"
+},
+volume: {
+    width: 360,
+    height: "content", maxHeight: 160
+}
+```
+
+Launcher, notifications, and wallpapers start with relative widths. Smaller
+panels fit their contents. Lists and grids scroll when they reach their height
+limit. Setting an explicit height such as `"70%"` reserves that space even when
+there are few items.
+
+Omitting an axis retains the legacy content-fitting behavior controlled by
+`ShellConfig.popupHugContents` (or per-widget `hugContents`). Existing panel
+width/height tokens provide fallback maximums for omitted axes. Explicit numeric,
+percentage, and `"content"` rules take priority over this switch. Invalid dimension
+values fall back to the default behavior.
+
+Hosts keep native windows fixed and hold content dimensions steady during entry
+and exit. Sizing is resolved separately for the monitor opening each popup.
+
 The default style uses the live Matugen palette, rounded surfaces, subtle
 highlights, and Adwaita Sans. Body text is regular, controls are medium, and
 headings are semibold. Bar labels use 14 px, body text 15 px, and headings 20 px.
@@ -109,8 +154,8 @@ outside the panel to close. Clicking a result also launches it. Reopening the
 launcher clears the search, matching the previous Rofi shortcut behavior.
 
 The launcher uses `CenteredPopup` and `StyledContainer` with shared theme tokens.
-`Sizing.launcherWidth`, `launcherHeight`, `launcherRowHeight`, and
-`launcherIconSize` control its dimensions. `scripts/app-launcher.sh` forwards to
+`Sizing.popupLimits.launcher` controls the panel dimensions;
+`Sizing.launcherRowHeight` and `launcherIconSize` control the results. `scripts/app-launcher.sh` forwards to
 the shared `widgets` IPC endpoint; Hyprland starts this Quickshell configuration on login.
 App discovery uses Quickshell DesktopEntries, and `gtk-launch` launches the
 desktop entry, including applications that request a terminal.
@@ -227,10 +272,9 @@ It can be opened with `scripts/widget.sh clock`.
 
 Brightness appears only when `brightnessctl` reports a backlight device; its
 slider changes that device and refreshes the reported level. Desktop monitors
-without a backlight device do not show this control. `Sizing.clockMenuWidth`,
-`clockMenuHeight`, `clockMenuCompactHeight`, `calendarHeight`, and
-`Theme.clockExpandedFontSize` control its layout. The compact height is used
-without brightness controls; animations use `config/Animations.qml` presets.
+without a backlight device do not show this control. `Sizing.popupLimits.clock`,
+`Sizing.calendarHeight`, and `Theme.clockExpandedFontSize` control its layout.
+Content fitting shrinks the panel without brightness controls; animations use `config/Animations.qml` presets.
 
 ## Interaction animations
 
@@ -301,7 +345,7 @@ Click the playing track in the bar to open the `media` dropdown. It uses faded
 track artwork behind the title, artist, seek timeline, previous/play-pause/next
 controls. Unsupported player actions and seeking are disabled.
 The volume panel and media panel share `components/StyledSlider.qml`.
-`Sizing.mediaPanelWidth/mediaPanelHeight` and `Theme.mediaArtworkOpacity` control
+`Sizing.popupLimits.media` and `Theme.mediaArtworkOpacity` control
 its layout and background. It also opens with `scripts/widget.sh media`.
 
 ## Notifications
@@ -352,8 +396,8 @@ cliphist preview and copy their original bytes. The old `scripts/cliphist.sh`
 entry point forwards to the viewer rather than starting Rofi.
 
 The widget refreshes while open using `Theme.clipboardPollInterval`; its size
-is controlled by `Sizing.clipboardWidth`, `clipboardHeight`, and
-`clipboardRowHeight`. It requires `cliphist`, `wl-copy`, and Python 3.
+is controlled by `Sizing.popupLimits.clipboard` and
+`Sizing.clipboardRowHeight`. It requires `cliphist`, `wl-copy`, and Python 3.
 
 ## Volume output selection
 
@@ -371,10 +415,47 @@ the selected device already has that preference. Selecting a device alone does
 not replace the saved system default. The selected device falls back to the
 system default if it disconnects. Device hotplug updates the choices.
 
+The microphone panel includes a thin live input meter below its gain slider.
+It follows the selected microphone and samples only while the panel is open
+and the microphone is unmuted. Its fill uses a square-root scale to make quieter
+sounds visible. `Sizing.audioInputMeterHeight` controls its thickness.
+
 Switching requires Python 3, `pw-dump`, `pw-metadata`, and `wpctl`. The first two
 PipeWire tools apply and verify routing; `wpctl` persists the default preference.
-`Sizing.volumePanelWidth/Height` controls the panel; shared
+`Sizing.popupLimits.volume` and `microphone` control their panels; shared
 `dropdownHeight`, `dropdownRowHeight`, and `dropdownMaxHeight` control selectors.
 Use `StyledDropdown` with a string list, or an object list and `textRole`; handle
 `activated(index)` to apply a selection. Its `currentIndex` stays bound to the
 owning service, including asynchronous updates or failed changes.
+
+## Lockscreen
+
+Press **Super + Ctrl + L**, choose **Lock** from the session menu, or run
+`scripts/widget.sh lock open`. Idle locking and locking before sleep use the
+same independent Quickshell locker. Lock requests are idempotent; `close` cannot
+unlock it. Hyprlock remains installed as the startup-failure fallback.
+
+The layout follows the old Hyprlock setup: a blurred screenshot, Chuck Norris
+jokes at the top left, the Arch avatar and password in the center, and a clock
+and date at the bottom right. Colors follow the shared Matugen palette. Each
+monitor gets its own lock surface. Missing screenshots fall back to a solid
+palette background. Jokes refresh every minute with a cached/offline fallback;
+network requests never hold up locking.
+
+Edit `config/LockConfig.qml` for the avatar, blur, dimming, joke refresh interval,
+and PAM service. Lock dimensions and typography live in `Sizing.qml`,
+`Spacing.qml`, and `Theme.qml` and follow `ShellConfig.uiScale`. The default PAM
+service is the existing `/etc/pam.d/hyprlock`; no system PAM files are changed.
+
+`lockscreen.qml` runs separately from the regular shell with config auto-reload
+disabled during the lock. `scripts/lock.py` serializes launches, bounds screenshot
+capture time, stores captures in a private runtime directory, and removes them
+when the locker exits. Only PAM success releases the session lock. Escape clears
+the entry; it does not dismiss the lockscreen. The status-only `sessionLock`
+IPC target exposes no unlock method.
+
+Hypridle uses `inhibit_sleep = 3` so suspend waits for compositor confirmation of
+the lock, rather than merely the launch of the command. See the
+[Quickshell session-lock documentation](https://quickshell.org/docs/v0.2.1/types/Quickshell.Wayland/WlSessionLock/),
+[PAM API](https://quickshell.org/docs/v0.3.0/types/Quickshell.Services.Pam/PamContext/),
+and [Hypridle sleep inhibition](https://wiki.hypr.land/hypr-ecosystem/user/hypridle/).

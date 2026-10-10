@@ -42,11 +42,14 @@ Canvas {
             if (kind === "charging") {
                 c.beginPath(); c.moveTo(11, 6); c.lineTo(7, 10); c.lineTo(11, 10); c.lineTo(8, 14); c.stroke()
             } else c.fillRect(4, 7, 9, 6)
-        } else if (kind === "bell" || kind === "bell-off") {
+        } else if (kind === "bell" || kind === "bell-off" || kind === "bell-dot" || kind === "bell-off-dot") {
             c.beginPath(); c.moveTo(4, 14); c.lineTo(5, 12); c.lineTo(5, 8);
             c.bezierCurveTo(5, 1, 15, 1, 15, 8); c.lineTo(15, 12); c.lineTo(16, 14); c.closePath(); c.stroke()
             c.beginPath(); c.arc(10, 15, 2, 0, Math.PI); c.stroke()
-            if (kind === "bell-off") line(2, 2, 18, 18)
+            if (kind === "bell-off" || kind === "bell-off-dot") line(2, 2, 18, 18)
+            if (kind === "bell-dot" || kind === "bell-off-dot") {
+                c.beginPath(); c.arc(17, 3, 2, 0, Math.PI * 2); c.fill()
+            }
         } else if (kind === "wallpaper") {
             c.strokeRect(2, 3, 16, 14)
             c.beginPath(); c.moveTo(3, 15); c.lineTo(8, 9); c.lineTo(12, 13); c.lineTo(15, 10); c.lineTo(18, 14); c.stroke()
@@ -54,6 +57,11 @@ Canvas {
         } else if (kind === "application") {
             c.strokeRect(2, 3, 16, 14); line(2, 7, 18, 7)
             line(5, 5, 5.5, 5); line(8, 5, 8.5, 5)
+        } else if (kind === "music") {
+            c.beginPath(); c.moveTo(7, 14); c.lineTo(7, 5); c.lineTo(16, 3); c.lineTo(16, 12); c.stroke()
+            line(7, 8, 16, 6)
+            c.beginPath(); c.ellipse(2, 13, 5, 4); c.fill()
+            c.beginPath(); c.ellipse(11, 11, 5, 4); c.fill()
         } else if (kind === "play") {
             c.beginPath(); c.moveTo(6, 3); c.lineTo(16, 10); c.lineTo(6, 17); c.closePath(); c.stroke()
         } else if (kind === "pause") {

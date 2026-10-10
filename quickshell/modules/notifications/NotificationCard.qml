@@ -15,6 +15,12 @@ StyledContainer {
     property var fallbackDetails: ({ id: 0, urgency: 0, actions: [], body: "", summary: "", appName: "", image: "", appIcon: "" })
     readonly property var details: notification || fallbackDetails
     property bool compact: true
+    property bool showTimeout: false
+    property real timeoutProgress: 1
+    property real minimumHeight: Sizing.notificationCardMinHeight
+    property real verticalPadding: Spacing.md
+    readonly property string summaryText: details ? details.summary || details.appName : ""
+    readonly property string bodyText: details ? details.body : ""
     readonly property var visibleActions: details ? details.actions.filter(action =>
         action.identifier !== "default" && !/^(view|open)$/i.test(action.text.trim())) : []
     function iconSource() {
@@ -26,7 +32,8 @@ StyledContainer {
         return icon ? Quickshell.iconPath(icon, true) : ""
     }
     signal clicked()
-    implicitHeight: content.implicitHeight + Spacing.sm * 2
+    implicitHeight: Math.max(minimumHeight, content.implicitHeight + verticalPadding * 2)
+        + (showTimeout ? Spacing.xs + Sizing.notificationProgressHeight : 0)
     color: Colors.surfaceContainerHigh
     border.width: details && details.urgency === 2 ? Theme.borderWidth : Theme.borderNone
     border.color: details && details.urgency === 2 ? Colors.error : Colors.border
@@ -41,7 +48,9 @@ StyledContainer {
     RowLayout {
         id: content
         x: Spacing.sm
-        y: Spacing.sm
+        y: root.verticalPadding + Math.max(0, (root.height - root.verticalPadding * 2
+            - (root.showTimeout ? Spacing.xs + Sizing.notificationProgressHeight : 0)
+            - implicitHeight) / 2)
         width: root.width - Spacing.sm * 2
         spacing: Spacing.sm
         Image {
@@ -55,25 +64,46 @@ StyledContainer {
         ColumnLayout {
             Layout.fillWidth: true
             spacing: Spacing.xs
+            ScrollingText {
+                Layout.fillWidth: true
+                Layout.minimumWidth: 0
+                Layout.preferredWidth: 0
+                visible: root.compact
+                text: root.summaryText.replace(/\s+/g, " ")
+                color: Colors.text
+                font.weight: Theme.emphasisFontWeight; font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize
+            }
             Text {
                 Layout.fillWidth: true
-                text: root.details ? root.details.summary || root.details.appName : ""
+                visible: !root.compact
+                text: root.summaryText
                 textFormat: Text.PlainText
                 wrapMode: Text.Wrap
-                maximumLineCount: root.compact ? 1 : 6
+                maximumLineCount: 6
                 elide: Text.ElideRight
                 color: Colors.text
                 font.weight: Theme.emphasisFontWeight; font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSize
                 
             }
+            ScrollingText {
+                Layout.fillWidth: true
+                Layout.minimumWidth: 0
+                Layout.preferredWidth: 0
+                visible: root.compact && text !== ""
+                text: root.bodyText.replace(/\s+/g, " ")
+                color: Colors.textMuted
+                font.weight: Theme.fontWeight; font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSizeSmall
+            }
             Text {
                 Layout.fillWidth: true
-                visible: text !== ""
-                text: root.details ? root.details.body : ""
+                visible: !root.compact && text !== ""
+                text: root.bodyText
                 textFormat: Text.PlainText
                 wrapMode: Text.Wrap
-                maximumLineCount: root.compact ? 2 : 12
+                maximumLineCount: 12
                 elide: Text.ElideRight
                 color: Colors.textMuted
                 font.weight: Theme.fontWeight; font.family: Theme.fontFamily
@@ -100,13 +130,34 @@ StyledContainer {
         StyledIconButton {
             id: dismiss
             Layout.alignment: Qt.AlignTop
-            implicitWidth: Sizing.widgetHeight
-            implicitHeight: Sizing.widgetHeight
+            implicitWidth: root.compact ? Sizing.notificationDismissSize : Sizing.widgetHeight
+            implicitHeight: root.compact ? Sizing.notificationDismissSize : Sizing.widgetHeight
             padding: Spacing.xs
             iconName: "close"
             tint: Colors.textMuted
             Accessible.name: "Dismiss notification"
             onClicked: root.details && Notifications.dismiss(root.details.id)
+        }
+    }
+    StyledContainer {
+        id: timeoutTrack
+        x: Spacing.sm
+        y: root.height - root.verticalPadding - height
+        width: root.width - Spacing.sm * 2
+        height: Sizing.notificationProgressHeight
+        visible: root.showTimeout
+        radius: Theme.radiusSmall
+        color: Colors.surfaceContainerHighest
+        border.width: Theme.borderNone
+        highlightOpacity: 0
+        Rectangle {
+            anchors.fill: parent
+            radius: parent.radius
+            color: Colors.primary
+            transform: Scale {
+                origin.x: 0
+                xScale: Math.max(0, Math.min(1, root.timeoutProgress))
+            }
         }
     }
 }

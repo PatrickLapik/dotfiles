@@ -8,9 +8,12 @@ import qs.modules.volume
 import qs.modules.media
 import qs.modules.power
 import qs.modules.notifications
+import qs.modules.lock
+import qs.modules.network
 import qs.components
 
 ShellRoot{
+    LockLauncher{}
     Background{}
     Bar{}
     ClockMenu{}
@@ -21,6 +24,7 @@ ShellRoot{
     PowerMenu{}
     VolumePanel { }
     MicrophonePanel {}
+    NetworkPanel {}
     MediaPanel {}
     NotificationCenter{}
     NotificationToasts{}

@@ -9,6 +9,7 @@ import qs.config
 import qs.services
 
 Scope {
+    FontMetrics { id: notificationFont; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall }
     WidgetEndpoint {
         name: "notifications"
         openAction: screenName => { popup.screen = Widgets.screenFor(screenName); popup.open() }
@@ -50,18 +51,20 @@ Scope {
                     font.pixelSize: Theme.fontSizeSmall
                     onClicked: Notifications.clearAll()
                 }
-                StyledIconButton {
-                    iconName: Notifications.dnd ? "bell-off" : "bell"
-                    checkable: true
-                    checked: Notifications.dnd
-                    Accessible.name: Notifications.dnd ? "Turn off do not disturb" : "Turn on do not disturb"
-                    onClicked: Notifications.dnd = !Notifications.dnd
-                }
             }
             Item {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                Layout.minimumHeight: 0
+                implicitWidth: Notifications.count > 0 ? Math.max(Sizing.dropdownMinWidth,
+                    ...Notifications.history.map(notification => Math.max(
+                        notificationFont.advanceWidth(notification.summary || notification.appName),
+                        notificationFont.advanceWidth(notification.body.replace(/\s+/g, " ")))
+                        + Sizing.notificationCompactIconSize + Sizing.notificationDismissSize + Spacing.sm * 4
+                        + Sizing.scrollBarWidth + Spacing.xs)) : emptyState.implicitWidth
+                implicitHeight: Notifications.count > 0 ? list.contentHeight : emptyState.implicitHeight
                 ColumnLayout {
+                    id: emptyState
                     anchors.centerIn: parent
                     visible: Notifications.count === 0
                     spacing: Spacing.md

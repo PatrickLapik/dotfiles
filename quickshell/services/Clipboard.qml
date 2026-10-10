@@ -22,6 +22,9 @@ Singleton {
     function clear() { request("wipe", "") }
     Process {
         id: worker
+        onExited: (code, status) => {
+            if (code !== 0 && root.error === "") root.error = "Clipboard operation failed"
+        }
         stdout: StdioCollector {
             onStreamFinished: {
                 try {

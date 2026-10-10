@@ -64,7 +64,7 @@ Singleton {
                 const screenName = Hyprland.focusedMonitor ? Hyprland.focusedMonitor.name : ""
                 // Keep display data available while a closed notification slides out.
                 const snapshot = { id: n.id, appName: n.appName, appIcon: n.appIcon,
-                    image: n.image, summary: n.summary, body: n.body, urgency: n.urgency,
+                    image: n.image, summary: n.summary, body: n.body, urgency: n.urgency, expireTimeout: n.expireTimeout,
                     actions: n.actions.map(action => ({ text: action.text, identifier: action.identifier })) }
                 const toast = { id: n.id, notification: n, snapshot: snapshot, screenName: screenName, serial: ++root.serial }
                 const next = root.toasts.concat([toast])

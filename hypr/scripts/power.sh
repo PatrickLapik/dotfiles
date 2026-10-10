@@ -14,8 +14,8 @@ fi
 
 if [[ "$1" == "lock" ]]; then
     echo ":: Lock"
-    sleep 0.8
-    hyprlock
+    script_directory=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+    exec python3 "$script_directory/../../quickshell/scripts/lock.py"
 fi
 
 if [[ "$1" == "reboot" ]]; then

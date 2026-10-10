@@ -7,6 +7,37 @@ import qs.config
 import qs.services
 
 Scope {
+    // Keep this inline so hot reload does not depend on discovering a new QML file.
+    component ToastCountdown: QtObject {
+        id: countdownRoot
+        property real duration: Theme.notificationTimeout
+        property bool active: true
+        property bool paused: false
+        property real remaining: duration
+        property real lastTick: 0
+        readonly property real progress: duration > 0 ? Math.max(0, Math.min(1, remaining / duration)) : 0
+        signal expired()
+
+        function reset() {
+            remaining = duration
+            lastTick = Date.now()
+        }
+        function advance(now) {
+            if (!active || paused || duration <= 0 || remaining <= 0) return
+            remaining = Math.max(0, remaining - Math.max(0, now - lastTick))
+            lastTick = now
+            if (remaining === 0) expired()
+        }
+        onDurationChanged: reset()
+        Component.onCompleted: reset()
+        property Timer clock: Timer {
+            interval: Theme.notificationProgressInterval
+            repeat: true
+            running: countdownRoot.active && !countdownRoot.paused && countdownRoot.duration > 0 && countdownRoot.remaining > 0
+            onRunningChanged: countdownRoot.lastTick = Date.now()
+            onTriggered: countdownRoot.advance(Date.now())
+        }
+    }
     Variants {
         model: Quickshell.screens
         delegate: PanelWindow {
@@ -57,9 +88,18 @@ Scope {
             Column {
                 id: stack
                 width: parent.width
-                y: ScreenLayout.topOffset(window.screen, Spacing.notificationTopMargin, Spacing.notificationBarGap)
+                y: PopupLayout.notificationTop(window.screen,
+                    window.screen.width - Spacing.barMargin - width, width,
+                    ScreenLayout.topOffset(window.screen, Spacing.notificationTopMargin, Spacing.notificationBarGap),
+                    Spacing.notificationBarGap)
                 spacing: Spacing.sm
                 clip: true
+                Behavior on y {
+                    NumberAnimation {
+                        duration: Animations.enabled ? Animations.revealDuration : 0
+                        easing.type: Animations.revealEasing
+                    }
+                }
                 move: Transition {
                     NumberAnimation { properties: "y"; duration: Animations.enabled ? Animations.collapseDuration : 0; easing.type: Animations.collapseEasing }
                 }
@@ -69,6 +109,8 @@ Scope {
                         id: toast
                         required property var entry
                         required property bool closing
+                        readonly property int serial: entry.serial
+                        onSerialChanged: Qt.callLater(() => countdown.reset())
                         width: stack.width
                         property real retainedHeight: card.implicitHeight
                         implicitHeight: closing ? retainedHeight : card.implicitHeight
@@ -94,17 +136,21 @@ Scope {
                             fallbackDetails: toast.entry.snapshot
                             enabled: !toast.closing
                             compact: true
+                            showTimeout: countdown.duration > 0
+                            timeoutProgress: countdown.progress
                             transform: Translate { x: (toast.width + Spacing.barMargin) * (1 - toast.reveal) }
                             onClicked: Widgets.open("notifications", window.screen.name)
                         }
                         HoverHandler { id: hover }
                         BarVisibilityLock { screen: window.screen; active: hover.hovered && !toast.closing }
-                        Timer {
-                            readonly property real expiry: toast.entry.notification ? toast.entry.notification.expireTimeout : -1
-                            // The installed Quickshell API exposes the D-Bus timeout in milliseconds.
-                            interval: expiry > 0 ? expiry : Theme.notificationTimeout
-                            running: !toast.closing && expiry !== 0 && !hover.hovered
-                            onTriggered: Notifications.timeout(toast.entry.id)
+                        ToastCountdown {
+                            id: countdown
+                            // Keep the timeout after the native notification closes, like its display data.
+                            readonly property real expiry: toast.entry.snapshot.expireTimeout ?? -1
+                            duration: expiry === 0 ? 0 : expiry > 0 ? expiry : Theme.notificationTimeout
+                            active: !toast.closing
+                            paused: hover.hovered
+                            onExpired: Notifications.timeout(toast.entry.id)
                         }
                     }
                 }

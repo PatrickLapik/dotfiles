@@ -3,6 +3,7 @@ import Quickshell
 import Quickshell.Wayland
 import qs.components
 import qs.config
+import "PopupSizing.js" as PopupSizing
 
 // Fixed fullscreen host; position only the surface and retain shared dismissal/animations.
 PanelWindow {
@@ -10,6 +11,22 @@ PanelWindow {
     default property alias popupContent: body.data
     property int popupWidth: Sizing.popupWidth
     property int popupHeight: Sizing.popupHeight
+    property string popupName: ""
+    readonly property var sizeLimits: Sizing.popupLimits[popupName] || ({})
+    readonly property real availableWidth: Math.max(0, width - edgeMargin * 2)
+    readonly property real availableHeight: Math.max(0, height - (alignment & Qt.AlignTop ? topMargin : edgeMargin) - edgeMargin)
+    property real popupMinWidth: PopupSizing.dimension(sizeLimits.minWidth, availableWidth, ShellConfig.effectiveUiScale, Sizing.popupMinWidth)
+    property real popupMinHeight: PopupSizing.dimension(sizeLimits.minHeight, availableHeight, ShellConfig.effectiveUiScale, Sizing.popupMinHeight)
+    property real popupMaxWidth: PopupSizing.dimension(sizeLimits.maxWidth, availableWidth, ShellConfig.effectiveUiScale, sizeLimits.width !== undefined ? availableWidth : popupWidth)
+    property real popupMaxHeight: PopupSizing.dimension(sizeLimits.maxHeight, availableHeight, ShellConfig.effectiveUiScale, sizeLimits.height !== undefined ? availableHeight : popupHeight)
+    property bool hugContents: sizeLimits.hugContents ?? ShellConfig.popupHugContents
+    readonly property real desiredWidth: PopupSizing.extent(sizeLimits.width, popupMinWidth, popupMaxWidth, availableWidth, body.implicitWidth, padding, ShellConfig.effectiveUiScale, hugContents)
+    readonly property real desiredHeight: PopupSizing.extent(sizeLimits.height, popupMinHeight, popupMaxHeight, availableHeight, body.implicitHeight, padding, ShellConfig.effectiveUiScale, hugContents)
+    property real layoutWidth: desiredWidth
+    property real layoutHeight: desiredHeight
+    onDesiredWidthChanged: if (!motion.running) updateSize()
+    onDesiredHeightChanged: if (!motion.running) updateSize()
+    function updateSize() { layoutWidth = desiredWidth; layoutHeight = desiredHeight }
     property int padding: Spacing.lg
     property int edgeMargin: Spacing.xl
     property int alignment: Qt.AlignCenter
@@ -21,13 +38,16 @@ PanelWindow {
     signal dismissed()
 
     property bool isOpen: false
-    property real progress: isOpen ? 1 : 0
+    property bool preparing: false
+    property bool revealed: false
+    property real progress: revealed ? 1 : 0
     visible: isOpen || progress > 0 || motion.running
     Behavior on progress {
         NumberAnimation {
             id: motion
             duration: !Animations.enabled ? 0 : root.isOpen ? Animations.expandDuration : Animations.collapseDuration
             easing.type: root.isOpen ? Animations.expandEasing : Animations.collapseEasing
+            onRunningChanged: if (!running) root.updateSize()
         }
     }
     color: "transparent"
@@ -50,14 +70,39 @@ PanelWindow {
     function toggle() { isOpen = !isOpen }
     onIsOpenChanged: {
         if (isOpen) {
+            preparing = progress <= 0
+            preparation.frames = 0
+            if (!preparing) revealed = true
+            updateSize()
             overlay.forceActiveFocus()
             opened()
-        } else dismissed()
+        } else {
+            preparing = false
+            revealed = false
+            dismissed()
+        }
+    }
+    FrameAnimation {
+        id: preparation
+        property int frames: 0
+        running: root.preparing
+        onTriggered: {
+            if (root.width <= 0 || root.height <= 0) return
+            root.updateSize()
+            if (++frames < 2) return
+            root.preparing = false
+            root.revealed = true
+        }
     }
 
     property BarVisibilityLock barLock: BarVisibilityLock {
         screen: root.screen
         active: root.visible && root.keepBarVisible
+    }
+    property PopupFootprint footprint: PopupFootprint {
+        screen: root.screen
+        active: root.visible
+        bounds: Qt.rect(popupSurface.x, popupSurface.y, popupSurface.width, popupSurface.height)
     }
 
     // An explicit property keeps internal items out of the public content alias.
@@ -83,12 +128,14 @@ PanelWindow {
             y: root.alignment & Qt.AlignTop
                 ? Math.min(root.topMargin, Math.max(0, parent.height - height - root.edgeMargin))
                 : root.alignment & Qt.AlignBottom ? parent.height - height - root.edgeMargin : (parent.height - height) / 2
-            width: Math.min(root.popupWidth, Math.max(0, parent.width - root.edgeMargin * 2))
-            height: Math.min(root.popupHeight, Math.max(0, parent.height - (root.alignment & Qt.AlignTop ? root.topMargin : root.edgeMargin) - root.edgeMargin))
+            width: Math.min(root.layoutWidth, Math.max(0, parent.width - root.edgeMargin * 2))
+            height: Math.min(root.layoutHeight, Math.max(0, parent.height - (root.alignment & Qt.AlignTop ? root.topMargin : root.edgeMargin) - root.edgeMargin))
             opacity: root.progress
             transform: Translate { y: Spacing.lg * (1 - root.progress) }
             Item {
                 id: body
+                implicitWidth: PopupSizing.implicitExtent(children, "implicitWidth")
+                implicitHeight: PopupSizing.implicitExtent(children, "implicitHeight")
                 anchors.fill: parent
                 anchors.margins: root.padding
             }

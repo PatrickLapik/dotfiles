@@ -25,12 +25,6 @@ Scope {
             spacing: Spacing.sm
             RowLayout {
                 Layout.fillWidth: true
-                Text { Layout.fillWidth: true; text: "Volume"; color: Colors.text; font.weight: Theme.headingFontWeight; font.family: Theme.headingFontFamily; font.pixelSize: Theme.fontSize }
-                Text { text: Audio.available ? Audio.percent + "%" : "—"; color: Colors.textMuted; font.weight: Theme.fontWeight; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSize; font.features: { "tnum": 1 } }
-                StyledIconButton { iconName: Audio.muted ? "muted" : "volume"; Accessible.name: Audio.muted ? "Unmute output" : "Mute output"; checked: Audio.muted; enabled: Audio.available && !Audio.outputBusy; onClicked: Audio.toggleMute() }
-            }
-            RowLayout {
-                Layout.fillWidth: true
                 Text { Layout.fillWidth: true; text: "Output device"; color: Colors.textMuted; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall }
                 StyledButton {
                     Layout.preferredWidth: Sizing.audioDefaultButtonWidth
@@ -72,7 +66,6 @@ Scope {
                 font.family: Theme.fontFamily
                 font.pixelSize: Theme.fontSizeSmall
             }
-            Item { Layout.fillHeight: true }
         }
     }
 }

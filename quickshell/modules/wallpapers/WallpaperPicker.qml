@@ -16,6 +16,7 @@ Scope {
     }
     CenteredPopup {
         id: picker
+        popupName: "wallpapers"
         popupWidth: Sizing.wallpaperPickerWidth
         popupHeight: Sizing.wallpaperPickerHeight
         padding: Spacing.lg
@@ -76,6 +77,10 @@ Scope {
                 boundsBehavior: Flickable.StopAtBounds
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                Layout.minimumHeight: 0
+                implicitWidth: count ? Math.min(count, Sizing.wallpaperColumns) * Sizing.wallpaperMinCellWidth : emptyState.implicitWidth
+                implicitHeight: count ? Math.ceil(count / Math.max(1, Math.round(width / cellWidth))) * cellHeight
+                    : emptyState.implicitHeight + Spacing.sm * 2
                 clip: true
                 cellWidth: width / Math.max(1, Math.min(Sizing.wallpaperColumns,
                     Math.floor(width / Sizing.wallpaperMinCellWidth)))
@@ -130,6 +135,7 @@ Scope {
                     }
                 }
                 Text {
+                    id: emptyState
                     anchors.centerIn: parent
                     visible: grid.count === 0 && !Wallpapers.scanning
                     text: search.text ? "No matching wallpapers" : "No wallpapers found"
