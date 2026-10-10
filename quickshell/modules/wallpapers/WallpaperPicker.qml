@@ -22,7 +22,7 @@ Scope {
         padding: Spacing.lg
         onOpened: {
             Wallpapers.refresh()
-            Qt.callLater(() => search.forceActiveFocus())
+            Qt.callLater(() => toolbar.focusSearch())
         }
         onDismissed: {
             schemeDropdown.popup.close()
@@ -31,15 +31,19 @@ Scope {
         ColumnLayout {
             anchors.fill: parent
             spacing: Spacing.md
-            RowLayout {
+            PopupToolbar {
+                id: toolbar
                 Layout.fillWidth: true
-                Text {
-                    Layout.fillWidth: true
-                    text: "Wallpapers"
-                    color: Colors.text
-                    font.family: Theme.headingFontFamily
-                    font.weight: Theme.headingFontWeight
-                    font.pixelSize: Theme.fontSizeLarge
+                title: "Wallpapers"
+                placeholderText: "Search wallpapers…"
+                countText: searchText ? grid.count + " of " + Wallpapers.items.length
+                    : Wallpapers.items.length + " wallpapers"
+                onSearchTextChanged: grid.positionViewAtBeginning()
+                onSearchKeyPressed: event => {
+                    if (event.key === Qt.Key_Escape) {
+                        picker.close()
+                        event.accepted = true
+                    }
                 }
                 StyledIconButton {
                     iconName: "restart"
@@ -48,9 +52,108 @@ Scope {
                     onClicked: Wallpapers.refresh()
                 }
             }
+            GridView {
+                id: grid
+                boundsBehavior: Flickable.StopAtBounds
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                Layout.minimumHeight: 0
+                // Reserve a scrollbar gutter; each cell has equal side insets.
+                readonly property real galleryWidth: Math.max(0, width - Sizing.scrollBarWidth - Spacing.xs)
+                readonly property int columns: Math.max(1, Math.min(Sizing.wallpaperColumns,
+                    Math.floor(galleryWidth / Sizing.wallpaperMinCellWidth)))
+                readonly property real previewHeight: Math.max(0,
+                    cellWidth - Spacing.md - Spacing.xs * 2) / Sizing.wallpaperPreviewAspectRatio
+                implicitWidth: Sizing.wallpaperColumns * Sizing.wallpaperMinCellWidth
+                clip: true
+                cellWidth: galleryWidth / columns
+                cellHeight: previewHeight + Spacing.sm + Sizing.wallpaperCaptionHeight + Spacing.xs * 2 + Spacing.md
+                model: Wallpapers.items.filter(item => item.name.toLowerCase().includes(toolbar.searchText.toLowerCase()))
+                ScrollBar.vertical: StyledScrollBar {}
+                delegate: Item {
+                    id: cell
+                    required property var modelData
+                    width: grid.cellWidth
+                    height: grid.cellHeight
+                    StyledButton {
+                        id: tile
+                        readonly property var modelData: cell.modelData
+                        readonly property bool current: modelData.path === Wallpapers.current
+                        x: Spacing.md / 2
+                        width: Math.max(0, grid.cellWidth - Spacing.md)
+                        height: grid.cellHeight - Spacing.md
+                        padding: Spacing.xs
+                        highlightInteractions: false
+                        enabled: !Wallpapers.busy && !Wallpapers.scanning
+                        Accessible.name: modelData.name + (current ? ", current wallpaper" : "")
+                        onClicked: Wallpapers.select(modelData.path)
+                        background: StyledContainer {
+                            radius: Theme.radiusSmall
+                            color: tile.hovered ? Colors.surfaceContainerHigh : "transparent"
+                            border.width: tile.current || tile.visualFocus ? Theme.borderSelectedWidth : Theme.borderNone
+                            border.color: Colors.primary
+                        }
+                        contentItem: Item {
+                            RoundedImage {
+                                id: preview
+                                width: parent.width
+                                height: grid.previewHeight
+                                source: tile.modelData.url
+                                sourceSize.width: Sizing.wallpaperThumbnailWidth
+                                sourceSize.height: Sizing.wallpaperThumbnailHeight
+                                StyledContainer {
+                                    anchors.top: parent.top
+                                    anchors.right: parent.right
+                                    anchors.margins: Spacing.sm
+                                    width: Sizing.barIconSize + Spacing.xs * 2
+                                    height: width
+                                    visible: tile.current
+                                    radius: Theme.radiusSmall
+                                    color: Colors.primaryContainer
+                                    ShellIcon {
+                                        anchors.centerIn: parent
+                                        kind: "check"
+                                        tint: Colors.onPrimaryContainer
+                                    }
+                                }
+                            }
+                            Text {
+                                anchors.top: preview.bottom
+                                anchors.topMargin: Spacing.sm
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.leftMargin: Spacing.xs
+                                anchors.rightMargin: Spacing.xs
+                                height: Sizing.wallpaperCaptionHeight
+                                text: tile.modelData.name.replace(/\.[^.]+$/, "")
+                                textFormat: Text.PlainText
+                                elide: Text.ElideRight
+                                verticalAlignment: Text.AlignVCenter
+                                color: tile.current ? Colors.text : Colors.textMuted
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontSizeSmall
+                            }
+                        }
+                    }
+                }
+                Text {
+                    anchors.centerIn: parent
+                    visible: grid.count === 0
+                    text: Wallpapers.scanning ? "Looking for wallpapers…"
+                        : toolbar.searchText ? "No matching wallpapers" : "No wallpapers found"
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSizeSmall
+                    color: Colors.textMuted
+                }
+            }
+            Rectangle {
+                Layout.fillWidth: true
+                height: Theme.borderWidth
+                color: Colors.border
+            }
             RowLayout {
                 Layout.fillWidth: true
-                spacing: Spacing.md
+                spacing: Spacing.sm
                 Text {
                     text: "Color scheme"
                     color: Colors.textMuted
@@ -59,111 +162,25 @@ Scope {
                 }
                 StyledDropdown {
                     id: schemeDropdown
-                    Layout.fillWidth: true
-                    model: Wallpapers.schemeTypes
+                    Layout.preferredWidth: Math.min(Sizing.wallpaperSchemeWidth, picker.surface.width * 0.4)
+                    model: Wallpapers.schemeTypes.map(scheme => ({ label: scheme.replace(/^scheme-/, "")
+                        .split("-").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ") }))
+                    textRole: "label"
                     currentIndex: Wallpapers.schemeIndex
                     enabled: !Wallpapers.busy && !Wallpapers.scanning
-                    Accessible.name: "Matugen color scheme"
+                    Accessible.name: "Wallpaper color scheme"
                     onActivated: index => Wallpapers.setScheme(index)
                 }
-            }
-            TextField {
-                id: search
-                Layout.fillWidth: true
-                placeholderTextColor: Colors.textMuted
-                selectionColor: Colors.primaryContainer
-                selectedTextColor: Colors.onPrimaryContainer
-                placeholderText: "Search wallpapers…"
-                padding: Spacing.sm
-                color: Colors.text
-                font.family: Theme.fontFamily
-                font.pixelSize: Theme.fontSize
-                background: StyledContainer {
-                    color: Colors.surfaceContainerHigh
-                    radius: Theme.radiusSmall
-                    border.width: search.activeFocus ? Theme.borderWidth : Theme.borderNone
-                    border.color: Colors.primary
-                }
-                Keys.onEscapePressed: picker.close()
-            }
-            Text {
-                Layout.fillWidth: true
-                text: Wallpapers.error || (Wallpapers.busy ? "Changing wallpaper…" : Wallpapers.scanning ? "Looking for wallpapers…" : Wallpapers.items.length + " wallpapers")
-                color: Wallpapers.error ? Colors.error : Colors.textMuted
-                wrapMode: Text.Wrap
-                font.family: Theme.fontFamily
-                font.pixelSize: Theme.fontSizeSmall
-            }
-            GridView {
-                id: grid
-                boundsBehavior: Flickable.StopAtBounds
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.minimumHeight: 0
-                implicitWidth: count ? Math.min(count, Sizing.wallpaperColumns) * Sizing.wallpaperMinCellWidth : emptyState.implicitWidth
-                implicitHeight: count ? Math.ceil(count / Math.max(1, Math.round(width / cellWidth))) * cellHeight
-                    : emptyState.implicitHeight + Spacing.sm * 2
-                clip: true
-                cellWidth: width / Math.max(1, Math.min(Sizing.wallpaperColumns,
-                    Math.floor(width / Sizing.wallpaperMinCellWidth)))
-                cellHeight: Sizing.wallpaperCellHeight
-                model: Wallpapers.items.filter(item => item.name.toLowerCase().includes(search.text.toLowerCase()))
-                ScrollBar.vertical: StyledScrollBar {}
-                delegate: StyledButton {
-                    id: tile
-                    required property var modelData
-                    readonly property bool current: modelData.path === Wallpapers.current
-                    width: grid.cellWidth - Spacing.md
-                    height: grid.cellHeight - Spacing.md
-                    padding: Spacing.xs
-                    enabled: !Wallpapers.busy && !Wallpapers.scanning
-                    Accessible.name: modelData.name + (current ? ", current wallpaper" : "")
-                    onClicked: Wallpapers.select(modelData.path)
-                    background: StyledContainer {
-                        radius: Theme.radius
-                        color: tile.current ? Colors.primaryContainer
-                            : tile.hovered ? Colors.surfaceContainerHigh : "transparent"
-                        border.width: tile.visualFocus ? Theme.borderSelectedWidth : Theme.borderNone
-                        border.color: Colors.primary
-                    }
-                    contentItem: ColumnLayout {
-                        spacing: Spacing.sm
-                        RoundedImage {
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: Sizing.wallpaperPreviewHeight
-                            source: tile.modelData.url
-                            sourceSize.width: Sizing.wallpaperThumbnailWidth
-                            sourceSize.height: Sizing.wallpaperThumbnailHeight
-                        }
-                        RowLayout {
-                            Layout.fillWidth: true
-                            Layout.leftMargin: Spacing.xs
-                            Layout.rightMargin: Spacing.xs
-                            spacing: Spacing.xs
-                            Text {
-                                Layout.fillWidth: true
-                                text: tile.modelData.name
-                                elide: Text.ElideMiddle
-                                color: tile.current ? Colors.onPrimaryContainer : Colors.text
-                                font.family: Theme.fontFamily
-                                font.pixelSize: Theme.fontSizeSmall
-                            }
-                            ShellIcon {
-                                visible: tile.current
-                                kind: "check"
-                                tint: Colors.onPrimaryContainer
-                            }
-                        }
-                    }
-                }
                 Text {
-                    id: emptyState
-                    anchors.centerIn: parent
-                    visible: grid.count === 0 && !Wallpapers.scanning
-                    text: search.text ? "No matching wallpapers" : "No wallpapers found"
+                    Layout.fillWidth: true
+                    Layout.minimumWidth: 0
+                    text: Wallpapers.error || (Wallpapers.busy ? "Applying wallpaper…" : Wallpapers.scanning ? "Refreshing…" : "")
+                    color: Wallpapers.error ? Colors.error : Colors.textMuted
+                    wrapMode: Text.Wrap
+                    maximumLineCount: 2
+                    elide: Text.ElideRight
                     font.family: Theme.fontFamily
                     font.pixelSize: Theme.fontSizeSmall
-                    color: Colors.textMuted
                 }
             }
         }

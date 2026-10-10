@@ -5,7 +5,7 @@ import qs.components
 import qs.config
 
 // Animate the visible surface inside a fixed-size window, never the window itself.
-StyledContainer {
+RevealingContainer {
     id: root
     property ShellScreen screen
     property bool expanded: false
@@ -37,13 +37,15 @@ StyledContainer {
     readonly property bool showing: preparing || expanded || progress > 0 || fadeProgress > 0 || transitioning
 
     x: anchoredExpansion ? belowSource ? destinationX : sourceRect.x + (destinationX - sourceRect.x) * progress : 0
-    y: anchoredExpansion ? belowSource ? destinationY - Spacing.popupSlideOffset * (1 - progress)
+    y: anchoredExpansion ? belowSource ? destinationY
         : startY + (destinationY - startY) * progress : 0
     width: belowSource ? expandedWidth : (anchoredExpansion ? sourceRect.width : collapsedWidth)
         + (expandedWidth - (anchoredExpansion ? sourceRect.width : collapsedWidth)) * progress
-    height: belowSource ? expandedHeight : (anchoredExpansion ? startHeight : collapsedHeight)
+    fullHeight: expandedHeight
+    revealProgress: progress
+    height: belowSource ? revealedHeight : (anchoredExpansion ? startHeight : collapsedHeight)
         + (expandedHeight - (anchoredExpansion ? startHeight : collapsedHeight)) * progress
-    opacity: preparing ? 0 : belowSource ? fadeProgress : 1
+    opacity: preparing ? 0 : 1
     function captureSource(item: Item) {
         if (item) {
             const window = item.QsWindow.window
@@ -71,7 +73,6 @@ StyledContainer {
         when: (root.expanded || root.progress > 0) && !root.belowSource && root.sourceItem !== null
         restoreMode: Binding.RestoreBindingOrValue
     }
-    clip: true
     activeFocusOnTab: true
     Keys.onEscapePressed: expanded = false
     Behavior on progress {

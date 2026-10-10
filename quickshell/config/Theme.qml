@@ -35,7 +35,6 @@ Singleton {
     readonly property int fontSize: ShellConfig.scaled(12)
     readonly property int fontSizeLarge: ShellConfig.scaled(16)
     readonly property int headingLineHeight: ShellConfig.scaled(28)
-    readonly property int clockExpandedFontSize: ShellConfig.scaled(42)
     readonly property real iconStrokeWidth: 1.5 * ShellConfig.effectiveUiScale
     readonly property real inactiveCalendarOpacity: 0.45
 

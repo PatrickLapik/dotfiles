@@ -4,6 +4,7 @@ import Quickshell
 
 Singleton {
     id: root
+    readonly property date currentDate: clock.date
     readonly property string time: {
         Qt.formatDateTime(clock.date, "hh:mm");
     }

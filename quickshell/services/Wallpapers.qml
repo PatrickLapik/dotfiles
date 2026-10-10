@@ -15,7 +15,7 @@ Singleton {
     readonly property bool busy: selection.running
     readonly property bool scanning: discovery.running
     readonly property string script: decodeURIComponent(Qt.resolvedUrl("../scripts/wallpapers.py").toString().replace(/^file:\/\//, ""))
-    readonly property url source: current ? "file://" + current.split("/").map(encodeURIComponent).join("/") : Qt.resolvedUrl("../assets/Wallpaper.jpg")
+    readonly property url source: "file://" + current.split("/").map(encodeURIComponent).join("/")
     property string pendingResult: ""
 
     function refresh() {

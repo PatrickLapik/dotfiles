@@ -20,8 +20,6 @@ RowLayout {
         color: "transparent"
         RowLayout {
             anchors.fill: parent
-            anchors.leftMargin: Spacing.sm
-            anchors.rightMargin: Spacing.sm
             spacing: Spacing.sm
             BarIcon {
                 kind: "music"
@@ -41,12 +39,9 @@ RowLayout {
             }
         }
         MouseArea {
-            id: hover
             anchors.fill: parent
-            hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
             onClicked: Widgets.toggle("media", track.QsWindow.window.screen.name)
         }
-        BarToolTip { target: track; hovered: hover.containsMouse; text: Media.description }
     }
 }

@@ -136,7 +136,6 @@ Scope {
                     highlightInteractions: false
                     Accessible.name: "Open calendar"
                     WidgetAnchor { name: "clock"; target: centerSection }
-                    BarToolTip { target: centerSection; hovered: centerSection.hovered; text: Time.date }
                     background: StyledContainer {
                         border.width: centerSection.visualFocus ? Theme.borderSelectedWidth : Theme.borderNone
                         border.color: Colors.primary

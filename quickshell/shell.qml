@@ -17,6 +17,7 @@ ShellRoot{
     Background{}
     Bar{}
     ClockMenu{}
+    BrightnessPanel{}
     WallpaperPicker{}
     WidgetHost{}
     ClipboardViewer{}

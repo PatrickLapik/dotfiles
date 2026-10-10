@@ -9,14 +9,11 @@ Singleton {
     readonly property int lockCompactHeight: ShellConfig.scaled(620)
     readonly property int lockBlurRadius: 64
 
-    readonly property int tooltipMaxWidth: ShellConfig.scaled(520)
     readonly property int mediaPanelWidth: ShellConfig.scaled(400)
     readonly property int mediaPanelHeight: ShellConfig.scaled(260)
     readonly property int scrollBarWidth: ShellConfig.scaled(6)
     readonly property int scrollBarThumbWidth: ShellConfig.scaled(2)
-    readonly property int clipboardTypeHeight: ShellConfig.scaled(24)
-    readonly property int clipboardTypeWidth: ShellConfig.scaled(46)
-    readonly property int clipboardWidth: ShellConfig.scaled(420)
+    readonly property int clipboardWidth: ShellConfig.scaled(500)
     readonly property int clipboardHeight: ShellConfig.scaled(420)
     readonly property int clipboardRowHeight: ShellConfig.scaled(44)
     readonly property int surfaceTextureSize: 256
@@ -27,6 +24,8 @@ Singleton {
     readonly property int dropdownRowHeight: ShellConfig.scaled(44)
     readonly property int dropdownMaxHeight: ShellConfig.scaled(220)
     readonly property int dropdownIndicatorSize: ShellConfig.scaled(16)
+    readonly property int brightnessPanelWidth: ShellConfig.scaled(360)
+    readonly property int brightnessPanelHeight: ShellConfig.scaled(160)
     readonly property int volumePanelWidth: ShellConfig.scaled(360)
     readonly property int volumePanelHeight: ShellConfig.scaled(160)
     readonly property int networkPanelWidth: ShellConfig.scaled(400)
@@ -50,8 +49,7 @@ Singleton {
     readonly property int barIconSize: ShellConfig.scaled(20)
     readonly property int barHeight: ShellConfig.scaled(46)
     readonly property int clockMenuWidth: ShellConfig.scaled(460)
-    readonly property int clockMenuHeight: ShellConfig.scaled(550)
-    readonly property int clockMenuCompactHeight: ShellConfig.scaled(490)
+    readonly property int clockMenuHeight: ShellConfig.scaled(420)
     readonly property int calendarHeight: ShellConfig.scaled(240)
     readonly property int calendarDaySize: ShellConfig.scaled(32)
     readonly property int calendarWeekdayHeight: ShellConfig.scaled(20)
@@ -77,23 +75,25 @@ Singleton {
     readonly property int wallpaperPickerWidth: ShellConfig.scaled(960)
     readonly property int wallpaperPickerHeight: ShellConfig.scaled(660)
     readonly property int wallpaperMinCellWidth: ShellConfig.scaled(220)
-    readonly property int wallpaperCellHeight: ShellConfig.scaled(206)
-    readonly property int wallpaperPreviewHeight: ShellConfig.scaled(148)
+    readonly property int wallpaperCaptionHeight: ShellConfig.scaled(24)
+    readonly property int wallpaperSchemeWidth: ShellConfig.scaled(220)
     readonly property int wallpaperThumbnailWidth: 640
     readonly property int wallpaperThumbnailHeight: 360
+    readonly property real wallpaperPreviewAspectRatio: wallpaperThumbnailWidth / wallpaperThumbnailHeight
     // Numeric dimensions are unscaled logical pixels; percentages use the host's
     // available monitor space. "content" fits that axis within its bounds.
     // Omitted width/height follow ShellConfig.popupHugContents and legacy defaults.
     readonly property var popupLimits: ({
         network: { width: "content", minWidth: 400, maxWidth: 460, height: "content", maxHeight: "70%" },
+        brightness: { width: "content", minWidth: 360, maxWidth: 460, height: "content", maxHeight: 160 },
         volume: { width: "content", minWidth: 400, maxWidth: 460, height: "content", maxHeight: 160 },
         microphone: { width: "content", minWidth: 400, maxWidth: 460, height: "content", maxHeight: 160 },
         media: { width: "30%", minWidth: 400, maxWidth: 460, height: "content", maxHeight: 260 },
-        clock: { width: "content", minWidth: 400, maxWidth: 460, height: "content", maxHeight: 550 },
+        clock: { width: "content", minWidth: 400, maxWidth: 460, height: "content", maxHeight: 420 },
         notifications: { width: "30%", minWidth: 400, maxWidth: 500, height: "content", maxHeight: "50%" },
-        clipboard: { width: "content", minWidth: 460, maxWidth: 460, height: "content", maxHeight: "30%" },
+        clipboard: { width: 500, minWidth: 460, maxWidth: 500, height: 420, maxHeight: "70%" },
         launcher: { width: "40%", minWidth: 480, maxWidth: 900, height: 640, maxHeight: "80%" },
         power: { width: "50%", maxWidth: 1080, height: "20%", maxHeight: 360 },
-        wallpapers: { width: "65%", minWidth: 600, maxWidth: 1200, height: "content", maxHeight: "80%" }
+        wallpapers: { width: "40%", minWidth: 480, maxWidth: 900, height: 660, maxHeight: "80%" }
     })
 }

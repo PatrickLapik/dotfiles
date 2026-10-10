@@ -10,11 +10,17 @@ Singleton {
     property int percent: 0
     property string device: ""
     property int pending: -1
+    property int requestedPercent: -1
     property string error: ""
 
+    function adjust(direction: int) {
+        setPercent((requestedPercent >= 0 ? requestedPercent : percent)
+            + direction * ShellConfig.brightnessStep)
+    }
     function setPercent(value: real) {
         if (!available) return
         pending = Math.max(1, Math.min(100, Math.round(value)))
+        requestedPercent = pending
         flush()
     }
     function flush() {
@@ -35,7 +41,11 @@ Singleton {
                 const parts = fields.split(",")
                 const value = parseInt(parts[3])
                 root.available = Number.isFinite(value)
-                if (root.available) { root.device = parts[0]; root.percent = value }
+                if (root.available) {
+                    root.device = parts[0]
+                    root.percent = value
+                    if (!setter.running && root.pending < 0) root.requestedPercent = -1
+                }
             }
         }
     }

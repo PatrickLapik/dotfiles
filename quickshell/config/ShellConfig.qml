@@ -17,4 +17,5 @@ Singleton {
     // Default for axes omitted from Sizing.popupLimits; explicit rules take priority.
     readonly property bool popupHugContents: true
     readonly property real volumeStep: 0.05
+    readonly property int brightnessStep: 5
 }

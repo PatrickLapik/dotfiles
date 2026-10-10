@@ -9,12 +9,11 @@ StyledButton {
     id: root
     property string statusIcon: ""
     property string label: ""
-    property string tooltip: ""
     property color tint: Colors.text
     property bool interactive: false
     enabled: interactive
     highlightInteractions: false
-    Accessible.name: tooltip.split("\n")[0]
+    Accessible.name: label || statusIcon
     scrollActionEnabled: interactive
     implicitWidth: content.implicitWidth + Spacing.sm
     implicitHeight: Sizing.widgetHeight
@@ -38,10 +37,5 @@ StyledButton {
             font.pixelSize: Theme.fontSizeSmall
             font.features: { "tnum": 1 }
         }
-    }
-    BarToolTip {
-        target: root
-        hovered: root.cursorArea.containsMouse
-        text: root.tooltip
     }
 }

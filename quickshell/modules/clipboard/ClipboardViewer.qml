@@ -7,14 +7,13 @@ import qs.components
 import qs.components.containers
 import qs.config
 import qs.services
-import qs.modules.bar
+import "ClipboardModel.js" as ClipboardModel
 
 Scope {
-    FontMetrics { id: previewFont; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall }
     WidgetEndpoint {
         name: "clipboard"
-        openAction: screenName => { popup.screen = Widgets.screenFor(screenName); popup.open() }
-        closeAction: () => popup.close()
+        openAction: screenName => { popup.openFresh(screenName) }
+        closeAction: () => popup.dismiss()
     }
     StyledPopup {
         id: popup
@@ -24,35 +23,64 @@ Scope {
         alignment: Qt.AlignTop | Qt.AlignRight
         topMargin: ScreenLayout.barPopupTop
         rightMargin: Spacing.barRightMargin
-        padding: Spacing.sm
+        padding: Spacing.lg
+        property bool opening: false
+        property int openingTicket: 0
+        property bool resettingSearch: false
         property bool confirmClear: false
         property string selectedEntryId: ""
         property int selectedEntryIndex: 0
-        readonly property var results: Clipboard.entries.filter(entry => search.text.trim().toLocaleLowerCase().split(/\s+/).every(word => entry.preview.toLocaleLowerCase().includes(word)))
-        // Replacing a ListView model resets its index. Restore by ID after that reset.
-        onResultsChanged: Qt.callLater(restoreSelection)
-        onOpened: {
+        readonly property var results: Clipboard.entries.filter(entry => toolbar.searchText.trim().toLocaleLowerCase().split(/\s+/).every(word => entry.preview.toLocaleLowerCase().includes(word)))
+        ListModel { id: entryModel }
+        onResultsChanged: syncRows()
+        function openFresh(screenName: string) {
+            if (isOpen || opening) return
+            screen = Widgets.screenFor(screenName)
+            opening = true
             confirmClear = false
-            search.clear()
-            selectEntry(0)
-            Clipboard.refresh()
-            Qt.callLater(() => search.forceActiveFocus())
+            resettingSearch = true
+            toolbar.clearSearch()
+            resettingSearch = false
+            selectedEntryId = ""
+            selectedEntryIndex = -1
+            openingTicket = Clipboard.refresh()
         }
-        onDismissed: Widgets.closed("clipboard")
-        function selectEntry(index: int) {
-            const next = results.length ? Math.max(0, Math.min(index, results.length - 1)) : -1
+        function dismiss() {
+            opening = false
+            close()
+            Widgets.closed("clipboard")
+        }
+        onOpened: Qt.callLater(() => toolbar.focusSearch())
+        onDismissed: { opening = false; Widgets.closed("clipboard") }
+        function selectEntry(index, scroll = true) {
+            const next = entryModel.count ? Math.max(0, Math.min(index, entryModel.count - 1)) : -1
             selectedEntryIndex = next
-            selectedEntryId = next >= 0 ? results[next].id : ""
+            selectedEntryId = next >= 0 ? entryModel.get(next).entryId : ""
             list.currentIndex = next
-            if (next >= 0) list.positionViewAtIndex(next, ListView.Contain)
+            if (scroll && next >= 0) list.positionViewAtIndex(next, ListView.Contain)
         }
-        function restoreSelection() {
-            const index = results.findIndex(entry => entry.id === selectedEntryId)
-            selectEntry(index >= 0 ? index : selectedEntryIndex)
+        function syncRows() {
+            const stride = Sizing.clipboardRowHeight + list.spacing
+            const offset = Math.max(0, list.contentY - list.originY)
+            const topIndex = Math.min(entryModel.count - 1, Math.floor(offset / stride))
+            const anchor = topIndex >= 0 ? entryModel.get(topIndex).entryId : ""
+            const inset = offset - Math.max(0, topIndex) * stride
+            ClipboardModel.syncEntries(entryModel, results)
+            const selected = ClipboardModel.indexOf(entryModel, selectedEntryId)
+            selectEntry(selected >= 0 ? selected : selectedEntryIndex, false)
+            if (isOpen && !opening && anchor) {
+                list.forceLayout()
+                const anchorIndex = ClipboardModel.indexOf(entryModel, anchor)
+                if (anchorIndex >= 0) {
+                    list.positionViewAtIndex(anchorIndex, ListView.Beginning)
+                    list.contentY = Math.max(list.originY, Math.min(list.contentY + inset,
+                        list.originY + Math.max(0, list.contentHeight - list.height)))
+                }
+            }
         }
         function moveSelection(delta: int) {
-            if (!results.length) return
-            selectEntry((Math.max(0, list.currentIndex) + delta + results.length) % results.length)
+            if (!entryModel.count) return
+            selectEntry((Math.max(0, list.currentIndex) + delta + entryModel.count) % entryModel.count)
         }
         function copySelected() {
             const entry = results[list.currentIndex]
@@ -69,53 +97,40 @@ Scope {
             if (selectedEntryId === id) selectEntry(index > 0 ? index - 1 : index + 1)
             Clipboard.remove(id)
         }
-        Connections { target: Clipboard; function onCopied() { if (popup.isOpen) popup.close() } }
+        Connections {
+            target: Clipboard
+            function onCopied() { if (popup.isOpen) popup.close() }
+            function onRefreshed(ticket, success) {
+                if (!popup.opening || ticket < popup.openingTicket) return
+                popup.opening = false
+                // Show cached results with the error footer if refreshing failed.
+                popup.syncRows()
+                popup.selectEntry(0)
+                list.positionViewAtBeginning()
+                popup.open()
+            }
+        }
         Timer { interval: Theme.clipboardPollInterval; running: popup.isOpen; repeat: true; onTriggered: Clipboard.refresh() }
         ColumnLayout {
             anchors.fill: parent
-            spacing: Spacing.sm
-            RowLayout {
+            spacing: Spacing.md
+            PopupToolbar {
+                id: toolbar
                 Layout.fillWidth: true
-                spacing: Spacing.md
-                Text {
-                    Layout.fillWidth: true
-                    text: "Clipboard"
-                    color: Colors.text
-                    font.family: Theme.fontFamily
-                    font.pixelSize: Theme.fontSize
-                    font.weight: Theme.headingFontWeight
+                title: "Clipboard"
+                placeholderText: "Search clipboard…"
+                countText: searchText.trim() ? popup.results.length + " of " + Clipboard.entries.length
+                    : Clipboard.entries.length + " items"
+                onSearchTextChanged: {
+                    if (!popup.resettingSearch) { popup.syncRows(); popup.selectEntry(0); list.positionViewAtBeginning() }
+                    popup.confirmClear = false
                 }
-                Text {
-                    text: search.text.trim() ? popup.results.length + " matches" : Clipboard.entries.length + " items"
-                    color: Colors.textMuted
-                    font.family: Theme.fontFamily
-                    font.pixelSize: Theme.fontSizeSmall
-                }
-            }
-            TextField {
-                id: search
-                Layout.fillWidth: true
-                placeholderText: "Search your clipboard…"
-                placeholderTextColor: Colors.textMuted
-                selectionColor: Colors.primaryContainer
-                selectedTextColor: Colors.onPrimaryContainer
-                padding: Spacing.sm
-                color: Colors.text
-                font.weight: Theme.fontWeight; font.family: Theme.fontFamily
-                font.pixelSize: Theme.fontSize
-                background: StyledContainer {
-                    color: Colors.surfaceContainerLow
-                    radius: Theme.radiusSmall
-                    border.width: Theme.borderWidth
-                    border.color: search.activeFocus ? Colors.primary : Colors.border
-                }
-                onTextChanged: { popup.selectEntry(0); popup.confirmClear = false }
-                Keys.priority: Keys.BeforeItem
-                Keys.onPressed: event => {
-                    if (event.key === Qt.Key_Down) popup.moveSelection(1)
-                    else if (event.key === Qt.Key_Up) popup.moveSelection(-1)
+                onSearchKeyPressed: event => {
+                    const control = !!(event.modifiers & Qt.ControlModifier)
+                    if (event.key === Qt.Key_Down || control && event.key === Qt.Key_N) popup.moveSelection(1)
+                    else if (event.key === Qt.Key_Up || control && event.key === Qt.Key_P) popup.moveSelection(-1)
                     else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) popup.copySelected()
-                    else if (event.key === Qt.Key_Delete && event.modifiers & Qt.ControlModifier) popup.deleteSelected()
+                    else if (event.key === Qt.Key_Delete && control) popup.deleteSelected()
                     else if (event.key === Qt.Key_Escape) popup.close()
                     else return
                     event.accepted = true
@@ -147,48 +162,37 @@ Scope {
                     }
                 }
             }
-            Text {
-                Layout.fillWidth: true
-                visible: Clipboard.error !== ""
-                text: Clipboard.error
-                wrapMode: Text.Wrap
-                color: Colors.error
-                font.family: Theme.fontFamily
-                font.pixelSize: Theme.fontSizeSmall
-            }
             ListView {
                 boundsBehavior: Flickable.StopAtBounds
                 id: list
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 Layout.minimumHeight: 0
-                implicitWidth: count ? Math.max(Sizing.dropdownMinWidth, ...popup.results.map(entry =>
-                    previewFont.advanceWidth(String(entry.preview).replace(/\s+/g, " ").trim())
-                    + Sizing.clipboardTypeWidth + Sizing.widgetHeight + Spacing.sm * 4 + Sizing.scrollBarWidth + Spacing.xs))
-                    : emptyState.implicitWidth
-                implicitHeight: Math.max(1, count) * Sizing.clipboardRowHeight + Math.max(0, count - 1) * spacing
                 clip: true
                 spacing: Spacing.xs
-                model: popup.results
-                currentIndex: count ? 0 : -1
+                model: entryModel
+                currentIndex: -1
                 ScrollBar.vertical: StyledScrollBar {}
                 delegate: StyledContainer {
                     id: row
-                    required property var modelData
+                    required property string entryId
+                    required property string rawPreview
+                    required property bool binaryEntry
+                    readonly property var modelData: ({ id: entryId, preview: rawPreview, binary: binaryEntry })
                     required property int index
                     readonly property bool selected: ListView.isCurrentItem
                     readonly property string preview: String(modelData.preview).replace(/\s+/g, " ").trim()
                     readonly property var imageInfo: modelData.binary ? preview.match(/binary data (.+?) (png|jpg|jpeg|webp|gif|bmp) (\d+)x(\d+)/i) : null
-                    readonly property string kind: imageInfo ? "IMG" : modelData.binary ? "FILE" : /^https?:\/\//i.test(preview) ? "LINK" : preview.startsWith("/") ? "PATH" : /^<(?:!doctype|html|meta|div|span)\b/i.test(preview) ? "HTML" : "TEXT"
                     readonly property string displayPreview: imageInfo
                         ? imageInfo[2].toUpperCase() + " image · " + imageInfo[3] + " × " + imageInfo[4] + " · " + imageInfo[1]
                         : modelData.binary ? preview.replace(/^\[\[\s*binary data\s*/, "File · ").replace(/\s*\]\]$/, "") : preview
                     width: list.width - Sizing.scrollBarWidth - Spacing.xs
                     height: Sizing.clipboardRowHeight
                     radius: Theme.radiusSmall
-                    color: selected ? Colors.primaryContainer : copyButton.hovered || removeButton.hovered ? Colors.surfaceContainerHigh : "transparent"
-                    border.width: copyButton.visualFocus ? Theme.borderWidth : Theme.borderNone
+                    color: selected || rowHover.hovered ? Colors.surfaceContainerHigh : "transparent"
+                    border.width: selected || copyButton.visualFocus || removeButton.visualFocus ? Theme.borderSelectedWidth : Theme.borderNone
                     border.color: Colors.primary
+                    HoverHandler { id: rowHover }
                     RowLayout {
                         anchors.fill: parent
                         anchors.leftMargin: Spacing.sm
@@ -203,48 +207,36 @@ Scope {
                             onClicked: { popup.selectEntry(row.index); Clipboard.copy(row.modelData.id) }
                             enabled: !Clipboard.busy
                             background: StyledContainer { color: "transparent"; border.width: Theme.borderNone }
-                            contentItem: RowLayout {
-                                spacing: Spacing.sm
-                                StyledContainer {
-                                    Layout.preferredWidth: Sizing.clipboardTypeWidth
-                                    Layout.preferredHeight: Sizing.clipboardTypeHeight
-                                    color: row.selected ? Colors.surfaceContainerHigh : Colors.surfaceContainerLow
-                                    radius: Theme.radiusSmall
-                                    border.width: Theme.borderNone
-                                    Text {
-                                        anchors.centerIn: parent
-                                        text: row.kind
-                                        color: Colors.textMuted
-                                        font.family: Theme.fontFamily
-                                        font.pixelSize: Theme.fontSizeSmall
-                                        font.weight: Theme.headingFontWeight
-                                    }
-                                }
-                                Text {
-                                    Layout.fillWidth: true
-                                    text: row.displayPreview
-                                    textFormat: Text.PlainText
-                                    wrapMode: Text.NoWrap
-                                    maximumLineCount: 1
-                                    elide: Text.ElideRight
-                                    color: row.selected ? Colors.onPrimaryContainer : Colors.text
-                                    font.weight: Theme.fontWeight
-                                    font.family: Theme.fontFamily
-                                    font.pixelSize: Theme.fontSizeSmall
-                                    verticalAlignment: Text.AlignVCenter
-                                }
+                            contentItem: Text {
+                                text: row.displayPreview
+                                textFormat: Text.PlainText
+                                wrapMode: Text.NoWrap
+                                maximumLineCount: 1
+                                elide: Text.ElideRight
+                                color: Colors.text
+                                font.weight: Theme.fontWeight
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontSizeSmall
+                                verticalAlignment: Text.AlignVCenter
                             }
                         }
                         StyledIconButton {
                             id: removeButton
                             iconName: "trash"
-                            tint: hovered ? Colors.onErrorContainer : Colors.textMuted
+                            // Reserve the slot so revealing the action never shifts text.
+                            opacity: rowHover.hovered || visualFocus ? 1 : 0
+                            Behavior on opacity {
+                                NumberAnimation {
+                                    duration: Animations.enabled ? Animations.feedbackDuration : 0
+                                    easing.type: Animations.feedbackEasing
+                                }
+                            }
+                            tint: hovered ? Colors.onErrorContainer : row.selected ? Colors.text : Colors.textMuted
                             Layout.preferredWidth: Sizing.widgetHeight
                             Layout.preferredHeight: Sizing.widgetHeight
                             enabled: !Clipboard.busy
                             Accessible.name: "Remove clipboard entry"
                             onClicked: popup.removeEntry(row.modelData.id)
-                            BarToolTip { target: removeButton; hovered: removeButton.hovered; text: "Remove entry · Ctrl+Delete" }
                             background: StyledContainer {
                                 color: removeButton.hovered ? Colors.errorContainer : "transparent"
                                 radius: Theme.radiusSmall
@@ -254,7 +246,25 @@ Scope {
                         }
                     }
                 }
-                Text { id: emptyState; anchors.centerIn: parent; width: parent.width; horizontalAlignment: Text.AlignHCenter; wrapMode: Text.Wrap; visible: list.count === 0; text: Clipboard.busy ? "Loading clipboard history…" : search.text ? "No matching entries" : "Your clipboard history is empty"; color: Colors.textMuted; font.weight: Theme.fontWeight; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSize }
+                Text { id: emptyState; anchors.centerIn: parent; width: parent.width; horizontalAlignment: Text.AlignHCenter; wrapMode: Text.Wrap; visible: list.count === 0; text: Clipboard.error ? "Could not load clipboard history" : toolbar.searchText ? "No matching entries" : "Your clipboard history is empty"; color: Colors.textMuted; font.weight: Theme.fontWeight; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSize }
+            }
+            Rectangle {
+                Layout.fillWidth: true
+                height: Theme.borderWidth
+                color: Colors.border
+            }
+            Text {
+                Layout.fillWidth: true
+                Layout.preferredHeight: Sizing.widgetHeight
+                text: Clipboard.error || "Ctrl+N/P · Navigate    Enter · Copy    Ctrl+Delete · Remove"
+                textFormat: Text.PlainText
+                color: Clipboard.error ? Colors.error : Colors.textMuted
+                font.family: Theme.fontFamily
+                font.pixelSize: Theme.fontSize
+                verticalAlignment: Text.AlignVCenter
+                wrapMode: Text.Wrap
+                maximumLineCount: 2
+                elide: Text.ElideRight
             }
         }
     }

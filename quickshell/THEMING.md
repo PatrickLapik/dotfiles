@@ -64,10 +64,9 @@ They share the same gradient strength and use the standard surface text color.
 
 Backdrop blur is enabled by `Theme.backdropBlurEnabled`, independently of
 `Theme.panelOpacity`. It applies behind the bar sections, popup panels, dropdowns,
-tooltips, and notification toasts. `BackdropBlurRegion` follows each visible
+and notification toasts. `BackdropBlurRegion` follows each visible
 surface's rounded bounds and animation; transparent fullscreen dismissal areas
-are excluded. Nested controls share their host's backdrop. Tooltips use a fixed, click-through
-layer-shell host so they follow the same compositor blur path as dropdowns.
+are excluded. Nested controls share their host's backdrop.
 Media artwork opacity is `Theme.mediaArtworkOpacity * Theme.panelOpacity`, so
 its overlay becomes more transparent together with the panel.
 
@@ -113,7 +112,7 @@ This also runs your other configured templates and wallpaper command. The
 Quickshell background follows the wallpaper picker selection; running Matugen
 from a terminal changes colors but does not change the picker selection.
 
-Use `components/containers/StyledContainer.qml` for every visual container, including bars, tooltips, popups, cards, and widget backgrounds. It supplies shared surface color, radius, and border defaults; override these with theme tokens as needed. Keep window behavior separate and use normal anchors/layouts for its children.
+Use `components/containers/StyledContainer.qml` for every visual container, including bars, popups, cards, and widget backgrounds. It supplies shared surface color, radius, and border defaults; override these with theme tokens as needed. Keep window behavior separate and use normal anchors/layouts for its children.
 
 Use shared tokens in components:
 
@@ -155,8 +154,14 @@ and [Matugen templates](https://github.com/InioX/matugen/wiki/Configuration).
 Click **Wallpapers** at the bottom of the clock dropdown to browse thumbnails from
 `dotfiles/wallpapers`, including subdirectories. Search filters filenames.
 The refresh icon picks up newly added images. Supported formats: JPG, JPEG, PNG,
-WebP, BMP. The current wallpaper has a selected background and checkmark. The
+WebP, BMP. The current wallpaper has an accent outline and checkmark. The
 picker is registered as `wallpapers` and also opens with `scripts/widget.sh wallpapers`.
+
+The wallpaper, clipboard, and app launcher menus use `components/PopupToolbar.qml` for their
+title, search field, count, and optional trailing actions. Keep filtering and
+keyboard actions in the owning widget through `searchText` and
+`searchKeyPressed`; use `focusSearch()` when opening. Both menus keep a stable
+height while their results scroll.
 
 Selecting an image regenerates all configured Matugen application themes in dark mode, changes the
 background on all monitors, and saves the selection to
@@ -238,7 +243,7 @@ Unsupported player actions are disabled. Long track labels are truncated;
 hover to read the full label.
 
 The right side shows notifications, network state, microphone level, output
-volume, and an optional laptop battery. The clock sits in the center. Hover for
+volume, brightness when a backlight is available, and an optional laptop battery. The clock sits in the center. Hover for
 connection and device details. Click an audio control to open its dropdown;
 middle-click toggles mute and scrolling adjusts the level in 5% steps, up to 100%.
 Network state comes from NetworkManager, audio from PipeWire, and battery state
@@ -287,8 +292,8 @@ The wallpaper picker uses this component and focuses its search field on open.
 ## Bar visibility locks
 
 The auto-hiding bar stays revealed while hovered or while an interaction holds a
-lock for its monitor. Tooltips hold a lock and pass pointer input through;
-`CenteredPopup` holds a lock while open (`keepBarVisible` defaults to true).
+lock for its monitor. `CenteredPopup` holds a lock while open
+(`keepBarVisible` defaults to true).
 After the last lock releases and the pointer leaves, the usual hide delay resumes.
 
 Future custom widget expansions should include an automatically managed lock:
@@ -325,7 +330,7 @@ popup top, and animated notification offset; use it for new top-aligned widgets.
 Click the center clock to open a compact dropdown underneath it. The time and
 full date lead into a calendar, with month arrows, Today, and keyboard-accessible
 day buttons. The selected day has an accent fill; today uses accent text. The
-footer opens the wallpaper picker and displays brightness when available.
+footer opens the wallpaper picker.
 There are no agenda or settings placeholders.
 
 The clock button stays at its normal size, so the left and right bar sections
@@ -334,11 +339,23 @@ per-monitor anchor and the shared registry. Opening another widget closes it;
 clicking the clock again, pressing Escape, or clicking outside also dismisses it.
 It can be opened with `scripts/widget.sh clock`.
 
-Brightness appears only when `brightnessctl` reports a backlight device; its
-slider changes that device and refreshes the reported level. Desktop monitors
-without a backlight device do not show this control. `Sizing.popupLimits.clock`,
-`Sizing.calendarHeight`, and `Theme.clockExpandedFontSize` control its layout.
-Content fitting shrinks the panel without brightness controls; animations use `config/Animations.qml` presets.
+`Sizing.popupLimits.clock`, `Sizing.calendarHeight`, and
+`Theme.clockExpandedFontSize` control its layout; animations use
+`config/Animations.qml` presets.
+
+## Brightness dropdown
+
+The sun button on the right side of the topbar opens the shared anchored popup
+with a brightness slider and current percentage. It appears only when
+`brightnessctl` reports a backlight device. The slider changes that device and
+refreshes the reported level; errors appear below it.
+Scroll over the sun button to adjust brightness without opening the popup.
+`ShellConfig.brightnessStep` sets the percentage points per scroll step (default 5).
+
+Use `Sizing.brightnessPanelWidth`, `Sizing.brightnessPanelHeight`, and
+`Sizing.popupLimits.brightness` to configure its dimensions and content fitting.
+It shares popup spacing, styling, dismissal, and animation presets with the
+other bar dropdowns. Open it with `scripts/widget.sh brightness`.
 
 ## Interaction animations
 
@@ -354,8 +371,7 @@ masks release full-screen dismissal input as soon as closing starts; the bar
 remains clickable throughout transitions.
 
 Shared centered dialogs use expand/collapse presets and animate their surface
-with a vertical translation and opacity inside a fixed window. Tooltips use
-reveal/collapse presets. Notification toasts slide horizontally from and back
+by growing from the center inside a fixed window. Notification toasts slide horizontally from and back
 to the right screen edge at full opacity. Their display snapshots and delegates
 remain alive until the exit completes; surviving cards then move into position.
 Model updates preserve existing cards, so receiving another notification does
@@ -456,11 +472,18 @@ available through `widget.sh notifications` and the bar bell.
 
 **Super + V** opens the `clipboard` widget through `scripts/widget.sh clipboard`.
 The existing `wl-paste --watch cliphist store` history backend is preserved.
-Search previews, navigate with Up/Down or Tab/Shift+Tab, and press Enter to copy.
+Search previews, navigate with Ctrl+N/P, Up/Down, or Tab/Shift+Tab, and press Enter to copy.
 Ctrl+Delete or the Delete button removes an entry; Clear history requires a
 second confirmation click. Escape closes the panel. Binary entries use their
 cliphist preview and copy their original bytes. The old `scripts/cliphist.sh`
 entry point forwards to the viewer rather than starting Rofi.
+
+History is prefetched at shell startup. Each opening waits for a fresh history
+snapshot, then selects the newest entry and resets the scroll position before
+revealing the panel. Refresh requests during a clipboard operation are queued.
+Unchanged snapshots leave the list alone; changed entries update existing rows
+by ID and preserve the selected entry and scroll position while browsing.
+If an opening refresh fails, the panel shows cached history and the error.
 
 The widget refreshes while open using `Theme.clipboardPollInterval`; its size
 is controlled by `Sizing.popupLimits.clipboard` and

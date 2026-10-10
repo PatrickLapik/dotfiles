@@ -100,31 +100,24 @@ Item {
         }
         MouseArea { anchors.fill: parent; onPressed: root.popup.close() }
         property real progress: root.popup.visible ? 1 : 0
-        property real fadeProgress: root.popup.visible ? 1 : 0
-        visible: root.popup.visible || progress > 0 || fadeProgress > 0
+        visible: root.popup.visible || progress > 0 || motion.running
         onVisibleChanged: { if (!visible && root.popup.visible) root.popup.close() }
         Behavior on progress {
             NumberAnimation {
+                id: motion
                 duration: !Animations.enabled ? 0 : root.popup.visible ? Animations.expandDuration : Animations.collapseDuration
                 easing.type: root.popup.visible ? Animations.expandEasing : Animations.collapseEasing
             }
         }
-        Behavior on fadeProgress {
-            NumberAnimation {
-                duration: !Animations.enabled ? 0 : root.popup.visible ? Animations.fadeInDuration : Animations.fadeOutDuration
-                easing.type: Animations.fadeEasing
-            }
-        }
-        StyledContainer {
+        RevealingContainer {
             id: menuContent
             x: menu.origin.x
             y: menu.origin.y
             width: root.width
-            height: menu.menuHeight
+            fullHeight: menu.menuHeight
+            revealProgress: menu.progress
             // Inherit the shared panel opacity, palette gradient, and border defaults.
             radius: Theme.radiusSmall
-            opacity: menu.fadeProgress
-            transform: Translate { y: -Spacing.popupSlideOffset * (1 - menu.progress) }
             enabled: root.popup.visible
             focus: true
             Keys.onPressed: event => {
@@ -138,8 +131,10 @@ Item {
             }
             ListView {
                 id: choices
-                anchors.fill: parent
-                anchors.margins: Spacing.xs
+                x: Spacing.xs
+                y: Spacing.xs
+                width: Math.max(0, menuContent.width - Spacing.xs * 2)
+                height: Math.max(0, menuContent.fullHeight - Spacing.xs * 2)
                 clip: true
                 model: root.model
                 ScrollBar.vertical: StyledScrollBar {}

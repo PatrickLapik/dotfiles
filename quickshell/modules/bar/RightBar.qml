@@ -12,23 +12,22 @@ RowLayout {
     spacing: Spacing.sm
 
     StatusItem {
-        statusIcon: "package"
-        label: PackageUpdates.available ? String(PackageUpdates.count) : PackageUpdates.checking ? "…" : "?"
-        tooltip: PackageUpdates.details + "\nClick to update · Middle-click to check again"
-        interactive: true
-        middleClickEnabled: true
-        tint: !PackageUpdates.available ? Colors.textMuted
-            : PackageUpdates.severity === "red" ? Colors.error
-            : PackageUpdates.severity === "yellow" ? Colors.tertiary : Colors.text
-        onClicked: PackageUpdates.install()
-        onMiddleClicked: PackageUpdates.refresh()
+        id: brightnessButton
+        visible: Brightness.available
+        WidgetAnchor { name: "brightness"; target: brightnessButton }
+        statusIcon: "sun"
+        label: Brightness.percent + "%"
+        Accessible.name: "Screen brightness · " + Brightness.percent + "%"
+        interactive: Brightness.available
+        onClicked: Widgets.toggle("brightness", brightnessButton.QsWindow.window.screen.name)
+        onScrolled: direction => Brightness.adjust(direction)
     }
     StatusItem {
         id: microphone
         WidgetAnchor { name: "microphone"; target: microphone }
         statusIcon: Audio.inputMuted ? "microphone-muted" : "microphone"
         label: Audio.inputAvailable ? Audio.inputPercent + "%" : "—"
-        tooltip: Audio.inputDescription + (Audio.inputMuted ? " · Muted" : "") + "\nClick for input controls · Middle-click to mute · Scroll to adjust"
+        Accessible.name: Audio.inputDescription + (Audio.inputMuted ? " · Muted" : "")
         interactive: Audio.inputAvailable
         middleClickEnabled: true
         tint: Audio.inputMuted || !Audio.inputAvailable ? Colors.textMuted : Colors.text
@@ -43,7 +42,7 @@ RowLayout {
         WidgetAnchor { name: "volume"; target: volumeButton }
         statusIcon: !Audio.available || Audio.muted ? "muted" : Audio.percent < 50 ? "volume-low" : "volume"
         label: Audio.available ? Audio.percent + "%" : "—"
-        tooltip: Audio.description + (Audio.muted ? " · Muted" : "") + "\nClick for volume controls · Middle-click to mute · Scroll to adjust"
+        Accessible.name: Audio.description + (Audio.muted ? " · Muted" : "")
         interactive: Audio.available
         tint: Audio.muted ? Colors.textMuted : Colors.text
         onClicked: Widgets.toggle("volume", volumeButton.QsWindow.window.screen.name)
@@ -53,7 +52,7 @@ RowLayout {
         id: networkButton
         WidgetAnchor { name: "network"; target: networkButton }
         statusIcon: Network.icon
-        tooltip: Network.details + "\nClick for network controls"
+        Accessible.name: Network.details
         interactive: true
         tint: Network.connected ? Colors.text : Colors.textMuted
         onClicked: Widgets.toggle("network", networkButton.QsWindow.window.screen.name)
@@ -62,15 +61,14 @@ RowLayout {
         visible: Environment.showBattery
         statusIcon: Environment.charging ? "charging" : "battery"
         label: Environment.batteryPercent + "%"
-        tooltip: Environment.charging ? "Charging" : Environment.onBattery ? "On battery" : "Plugged in"
+        Accessible.name: Environment.charging ? "Charging" : Environment.onBattery ? "On battery" : "Plugged in"
         tint: Environment.onBattery && Environment.batteryPercent <= 20 ? Colors.error : Colors.text
     }
     StatusItem {
         id: bell
         WidgetAnchor { name: "notifications"; target: bell }
         statusIcon: (Notifications.dnd ? "bell-off" : "bell") + (Notifications.count > 0 ? "-dot" : "")
-        tooltip: "Notifications · " + Notifications.count + (Notifications.dnd ? " · Do not disturb" : "")
-            + "\nClick for notifications · Middle-click to mute"
+        Accessible.name: "Notifications · " + Notifications.count + (Notifications.dnd ? " · Do not disturb" : "")
         interactive: true
         middleClickEnabled: true
         tint: Notifications.dnd ? Colors.textMuted : Colors.text

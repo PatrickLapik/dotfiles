@@ -42,8 +42,7 @@ PanelWindow {
     property bool preparing: false
     property bool revealed: false
     property real progress: revealed ? 1 : 0
-    property real fadeProgress: revealed ? 1 : 0
-    visible: isOpen || progress > 0 || fadeProgress > 0 || motion.running || fade.running
+    visible: isOpen || progress > 0 || motion.running
     Behavior on progress {
         NumberAnimation {
             id: motion
@@ -52,14 +51,7 @@ PanelWindow {
             onRunningChanged: if (!running) root.updateSize()
         }
     }
-    Behavior on fadeProgress {
-        NumberAnimation {
-            id: fade
-            duration: !Animations.enabled ? 0 : root.isOpen ? Animations.fadeInDuration : Animations.fadeOutDuration
-            easing.type: Animations.fadeEasing
-        }
-    }
-    BackgroundEffect.blurRegion: BackdropBlurRegion { target: popupSurface; animating: motion.running || fade.running }
+    BackgroundEffect.blurRegion: BackdropBlurRegion { target: popupSurface; animating: motion.running }
     color: "transparent"
     anchors { top: true; bottom: true; left: true; right: true }
     exclusionMode: ExclusionMode.Ignore
@@ -130,25 +122,27 @@ PanelWindow {
                 if (!inside) root.close()
             }
         }
-        StyledContainer {
+        RevealingContainer {
             id: popupSurface
             color: Colors.withAlpha(Colors.panel, Theme.panelOpacity)
             x: root.alignment & Qt.AlignRight
                 ? Math.max(0, parent.width - width - root.rightMargin)
                 : root.alignment & Qt.AlignLeft ? root.edgeMargin : (parent.width - width) / 2
             y: root.alignment & Qt.AlignTop
-                ? Math.min(root.topMargin, Math.max(0, parent.height - height - root.edgeMargin))
+                ? Math.min(root.topMargin, Math.max(0, parent.height - fullHeight - root.edgeMargin))
                 : root.alignment & Qt.AlignBottom ? parent.height - height - root.edgeMargin : (parent.height - height) / 2
             width: Math.min(root.layoutWidth, Math.max(0, parent.width - root.edgeMargin * 2))
-            height: Math.min(root.layoutHeight, Math.max(0, parent.height - (root.alignment & Qt.AlignTop ? root.topMargin : root.edgeMargin) - root.edgeMargin))
-            opacity: root.fadeProgress
-            transform: Translate { y: Spacing.popupSlideOffset * (1 - root.progress) }
+            fullHeight: Math.min(root.layoutHeight, Math.max(0, parent.height - (root.alignment & Qt.AlignTop ? root.topMargin : root.edgeMargin) - root.edgeMargin))
+            revealProgress: root.progress
+            revealOrigin: root.alignment & Qt.AlignTop ? 0 : root.alignment & Qt.AlignBottom ? 1 : 0.5
             Item {
                 id: body
                 implicitWidth: PopupSizing.implicitExtent(children, "implicitWidth")
                 implicitHeight: PopupSizing.implicitExtent(children, "implicitHeight")
-                anchors.fill: parent
-                anchors.margins: root.padding
+                x: root.padding
+                y: popupSurface.contentOffsetY + root.padding
+                width: Math.max(0, popupSurface.width - root.padding * 2)
+                height: Math.max(0, popupSurface.fullHeight - root.padding * 2)
             }
         }
     }

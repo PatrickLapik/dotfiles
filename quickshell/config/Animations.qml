@@ -15,7 +15,7 @@ Singleton {
     readonly property int collapseEasing: Easing.OutCubic
     // Opacity needs a steady fade rather than the fast initial jump of motion.
     readonly property int fadeInDuration: 160
-    readonly property int fadeOutDuration: 80
+    readonly property int fadeOutDuration: 120
     readonly property int fadeEasing: Easing.Linear
     readonly property int feedbackDuration: 80
     readonly property int feedbackEasing: Easing.OutCubic

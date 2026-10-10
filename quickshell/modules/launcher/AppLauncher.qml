@@ -19,7 +19,7 @@ Scope {
         popup.screen = Widgets.screenFor(screenName)
         popup.reset()
         if (!popup.isOpen) popup.open()
-        else search.forceActiveFocus()
+        else toolbar.focusSearch()
     }
     WidgetEndpoint {
         name: "launcher"
@@ -36,14 +36,14 @@ Scope {
         property bool settings: false
         property bool confirmClear: false
         property string notice: ""
-        readonly property bool searching: search.text.trim().length > 0
+        readonly property bool searching: toolbar.searchText.trim().length > 0
         readonly property var selected: results[list.currentIndex] || null
         readonly property var results: buildResults()
         onResultsChanged: list.currentIndex = results.length ? 0 : -1
         onDismissed: Widgets.closed("launcher")
-        onOpened: Qt.callLater(() => search.forceActiveFocus())
+        onOpened: Qt.callLater(() => toolbar.focusSearch())
 
-        function reset() { settings = false; confirmClear = false; notice = ""; search.clear() }
+        function reset() { settings = false; confirmClear = false; notice = ""; toolbar.clearSearch() }
         function appRow(entry: var): var {
             const count = Applications.windowsFor(entry.id).length
             return {kind: "app", entry: entry, id: entry.id, name: entry.name, genericName: entry.genericName,
@@ -51,7 +51,7 @@ Scope {
                 detail: count ? "Launch new · " + count + (count === 1 ? " open window" : " open windows") : "Launch application"}
         }
         function buildResults(): var {
-            const query = search.text.trim()
+            const query = toolbar.searchText.trim()
             const windowRows = Applications.windows.map(row => Object.assign({}, row, {detail: "Switch to window · " + row.genericName}))
             const apps = Applications.entries.map(entry => appRow(entry))
             const rows = Fuzzy.grouped(query, apps, windowRows, id => Applications.boost(id))
@@ -69,7 +69,7 @@ Scope {
             if (event.key === Qt.Key_Down || control && event.key === Qt.Key_N) moveSelection(1)
             else if (event.key === Qt.Key_Up || control && event.key === Qt.Key_P) moveSelection(-1)
             else return false
-            search.forceActiveFocus()
+            toolbar.focusSearch()
             event.accepted = true
             return true
         }
@@ -94,39 +94,25 @@ Scope {
             spacing: Spacing.md
             Keys.onPressed: event => popup.navigate(event)
             Keys.onEscapePressed: event => { popup.close(); event.accepted = true }
-            RowLayout {
+            PopupToolbar {
+                id: toolbar
                 Layout.fillWidth: true
-                Text {
-                    text: "Launch & switch"
-                    color: Colors.text
-                    font.family: Theme.headingFontFamily
-                    font.weight: Theme.headingFontWeight
-                    font.pixelSize: Theme.fontSizeLarge
-                    Layout.fillWidth: true
-                }
-                StyledButton { text: "History"; flat: true; onClicked: popup.settings = !popup.settings }
-            }
-            TextField {
-                id: search
-                objectName: "launcherSearch"
-                Layout.fillWidth: true
+                title: "Launch & switch"
                 placeholderText: "Search apps, windows, or calculate…"
-                placeholderTextColor: Colors.textMuted
-                selectionColor: Colors.primaryContainer
-                selectedTextColor: Colors.onPrimaryContainer
-                padding: Spacing.md
-                color: Colors.text
-                font.family: Theme.fontFamily
-                font.pixelSize: Theme.fontSize
-                onTextChanged: popup.notice = ""
-                background: StyledContainer { radius: Theme.radiusSmall; color: Colors.surfaceContainerHigh }
-                Keys.priority: Keys.BeforeItem
-                Keys.onPressed: event => {
+                countText: popup.results.length + " results"
+                Component.onCompleted: searchField.objectName = "launcherSearch"
+                onSearchTextChanged: popup.notice = ""
+                onSearchKeyPressed: event => {
                     if (popup.navigate(event)) return
                     if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) popup.activate(popup.selected)
                     else if (event.key === Qt.Key_Escape) popup.close()
                     else return
                     event.accepted = true
+                }
+                StyledButton {
+                    text: "History"
+                    flat: true
+                    onClicked: popup.settings = !popup.settings
                 }
             }
             RowLayout {
@@ -212,7 +198,7 @@ Scope {
                     horizontalAlignment: Text.AlignHCenter
                     wrapMode: Text.WordWrap
                     visible: list.count === 0
-                    text: popup.searching ? (search.text.trim().startsWith("=") ? "Enter a valid expression, such as = (12 + 8) / 5" : "No matching apps or windows")
+                    text: popup.searching ? (toolbar.searchText.trim().startsWith("=") ? "Enter a valid expression, such as = (12 + 8) / 5" : "No matching apps or windows")
                         : "No applications or windows available"
                     color: Colors.textMuted
                     font.family: Theme.fontFamily
