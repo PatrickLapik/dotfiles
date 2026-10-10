@@ -43,6 +43,11 @@ Scope {
             // Resizing a Wayland surface every animation frame causes configure stalls.
             implicitHeight: Sizing.barHeight + Spacing.barTopMargin
 
+            BackgroundEffect.blurRegion: Region {
+                BackdropBlurRegion { target: leftSection; animating: barMotion.running }
+                BackdropBlurRegion { target: centerSection.background; animating: barMotion.running }
+                BackdropBlurRegion { target: rightSection; animating: barMotion.running }
+            }
             WlrLayershell.layer: WlrLayer.Top
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
             // Reserve the full bar height (including its top margin) only when pinned.
@@ -100,6 +105,7 @@ Scope {
 
                 Behavior on y {
                     NumberAnimation {
+                        id: barMotion
                         duration: !Animations.enabled ? 0 : barWindow.revealed ? Animations.revealDuration : Animations.collapseDuration
                         easing.type: barWindow.revealed ? Animations.revealEasing : Animations.collapseEasing
                     }
@@ -110,7 +116,6 @@ Scope {
                     height: parent.height
                     width: Math.min(leftContent.implicitWidth + Spacing.panelPadding * 2,
                         Math.max(0, centerSection.x - Spacing.barSectionGap))
-                    color: Colors.withAlpha(Colors.panel, Theme.panelOpacity)
                     HoverHandler { id: leftHover }
                     BarVisibilityLock { screen: barWindow.screen; active: leftHover.hovered }
                     LeftBar {
@@ -133,7 +138,6 @@ Scope {
                     WidgetAnchor { name: "clock"; target: centerSection }
                     BarToolTip { target: centerSection; hovered: centerSection.hovered; text: Time.date }
                     background: StyledContainer {
-                        color: Colors.withAlpha(Colors.panel, Theme.panelOpacity)
                         border.width: centerSection.visualFocus ? Theme.borderSelectedWidth : Theme.borderNone
                         border.color: Colors.primary
                     }
@@ -145,7 +149,6 @@ Scope {
                     height: parent.height
                     width: Math.min(rightContent.implicitWidth + Spacing.panelPadding * 2,
                         Math.max(0, centerSection.x - Spacing.barSectionGap))
-                    color: Colors.withAlpha(Colors.panel, Theme.panelOpacity)
                     HoverHandler { id: rightHover }
                     BarVisibilityLock { screen: barWindow.screen; active: rightHover.hovered }
                     RightBar {

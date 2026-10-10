@@ -4,7 +4,7 @@ import Quickshell
 Singleton {
     readonly property int lockFormWidth: ShellConfig.scaled(320)
     readonly property int lockInputHeight: ShellConfig.scaled(48)
-    readonly property int lockAvatarSize: ShellConfig.scaled(112)
+    readonly property int lockIconSize: ShellConfig.scaled(64)
     readonly property int lockJokeWidth: ShellConfig.scaled(540)
     readonly property int lockCompactHeight: ShellConfig.scaled(620)
     readonly property int lockBlurRadius: 64
@@ -20,6 +20,8 @@ Singleton {
     readonly property int clipboardHeight: ShellConfig.scaled(420)
     readonly property int clipboardRowHeight: ShellConfig.scaled(44)
     readonly property int surfaceTextureSize: 256
+    readonly property real containerGlassRimWidth: 1.4 * ShellConfig.effectiveUiScale
+    readonly property int containerGlassGlowWidth: ShellConfig.scaled(6)
     readonly property int dropdownMinWidth: ShellConfig.scaled(160)
     readonly property int dropdownHeight: ShellConfig.scaled(36)
     readonly property int dropdownRowHeight: ShellConfig.scaled(44)
@@ -89,8 +91,8 @@ Singleton {
         media: { width: "30%", minWidth: 400, maxWidth: 460, height: "content", maxHeight: 260 },
         clock: { width: "content", minWidth: 400, maxWidth: 460, height: "content", maxHeight: 550 },
         notifications: { width: "30%", minWidth: 400, maxWidth: 500, height: "content", maxHeight: "50%" },
-        clipboard: { width: "content", minWidth: 400, maxWidth: 460, height: "content", maxHeight: "30%" },
-        launcher: { width: "40%", minWidth: 480, maxWidth: 900, height: "content", maxHeight: "70%" },
+        clipboard: { width: "content", minWidth: 460, maxWidth: 460, height: "content", maxHeight: "30%" },
+        launcher: { width: "40%", minWidth: 480, maxWidth: 900, height: 640, maxHeight: "80%" },
         power: { width: "50%", maxWidth: 1080, height: "20%", maxHeight: 360 },
         wallpapers: { width: "65%", minWidth: 600, maxWidth: 1200, height: "content", maxHeight: "80%" }
     })

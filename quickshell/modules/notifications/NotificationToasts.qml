@@ -3,6 +3,7 @@ import QtQuick
 import Quickshell
 import Quickshell.Wayland
 import qs.components
+import qs.components.containers
 import qs.config
 import qs.services
 
@@ -45,7 +46,22 @@ Scope {
             required property var modelData
             screen: modelData
             readonly property var entries: Notifications.toasts.filter(t => (t.screenName || Quickshell.screens[0].name) === modelData.name)
-            visible: presentation.count > 0
+            // Keep the native surface mapped between toasts. Mapping/unmapping lets
+            // the compositor animate a second time around the card's own slide.
+            // An empty stack has no input region and paints no pixels.
+            visible: true
+            property var blurRegions: []
+            BackgroundEffect.blurRegion: Region {
+                Region { regions: window.blurRegions }
+                // The slide continues beyond this window's right edge. Submit an
+                // empty region once it leaves, not a nonempty off-surface region:
+                // Hyprland can otherwise blur the entire host when clipping it.
+                Region {
+                    intersection: Intersection.Intersect
+                    width: window.width
+                    height: window.height
+                }
+            }
             color: "transparent"
             anchors { top: true; bottom: true; right: true }
             margins { right: Spacing.barMargin }
@@ -88,6 +104,8 @@ Scope {
             Column {
                 id: stack
                 width: parent.width
+                // Regions track the card itself; also invalidate when its ancestors move.
+                onYChanged: window.blurRegions.forEach(region => region.changed())
                 y: PopupLayout.notificationTop(window.screen,
                     window.screen.width - Spacing.barMargin - width, width,
                     ScreenLayout.topOffset(window.screen, Spacing.notificationTopMargin, Spacing.notificationBarGap),
@@ -107,6 +125,7 @@ Scope {
                     model: presentation
                     delegate: Item {
                         id: toast
+                        onYChanged: blurRegion.changed()
                         required property var entry
                         required property bool closing
                         readonly property int serial: entry.serial
@@ -116,7 +135,18 @@ Scope {
                         implicitHeight: closing ? retainedHeight : card.implicitHeight
                         Binding { target: toast; property: "retainedHeight"; value: card.implicitHeight; when: !toast.closing; restoreMode: Binding.RestoreNone }
                         property real reveal: 0
-                        Component.onCompleted: reveal = closing ? 0 : 1
+                        property BackdropBlurRegion blurRegion: BackdropBlurRegion {
+                            target: card
+                            // Opaque cards do not need a backdrop effect. Keep offscreen
+                            // delegates from briefly registering a blur region on creation.
+                            active: Theme.backdropBlurEnabled && toast.reveal > 0 && card.color.a < 1
+                            animating: toast.reveal > 0 && toast.reveal < 1
+                        }
+                        Component.onCompleted: {
+                            window.blurRegions = window.blurRegions.concat([blurRegion])
+                            reveal = closing ? 0 : 1
+                        }
+                        Component.onDestruction: window.blurRegions = window.blurRegions.filter(region => region !== blurRegion)
                         onClosingChanged: {
                             reveal = closing ? 0 : 1
                             if (closing && reveal === 0) Qt.callLater(() => window.finishExit(entry.id))
@@ -132,7 +162,9 @@ Scope {
                             id: card
                             width: parent.width
                             height: implicitHeight
-                            notification: toast.closing ? null : toast.entry.notification
+                            // Keep the live data through ordinary timeout; fallbackDetails
+                            // still retains the visual if a transient native object closes.
+                            notification: toast.entry.notification
                             fallbackDetails: toast.entry.snapshot
                             enabled: !toast.closing
                             compact: true

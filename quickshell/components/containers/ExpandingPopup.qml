@@ -39,6 +39,7 @@ PanelWindow {
     property alias expanded: panel.expanded
     property alias radius: panel.radius
     signal dismissed()
+    BackgroundEffect.blurRegion: BackdropBlurRegion { target: panel; animating: panel.transitioning }
     color: "transparent"
     visible: panel.showing
     anchors { top: true; bottom: true; left: true; right: true }
@@ -107,13 +108,12 @@ PanelWindow {
             expandedWidth: Math.max(0, Math.min(root.layoutWidth, root.width - Spacing.barMargin * 2))
             expandedHeight: Math.max(0, Math.min(root.layoutHeight,
                 root.height - (belowSource ? startY : Spacing.barTopMargin) - Spacing.barMargin))
-            color: Colors.panel
             Item {
                 id: backdrop
                 x: (panel.width - width) / 2
                 width: panel.expandedWidth
                 height: panel.expandedHeight
-                opacity: panel.progress
+                opacity: panel.belowSource ? 1 : panel.fadeProgress
             }
             MouseArea { anchors.fill: parent; onClicked: panel.forceActiveFocus() }
             ExpandingContent { id: body; surface: panel }

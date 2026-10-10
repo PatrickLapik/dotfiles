@@ -1,14 +1,7 @@
 hl.config({
     decoration = {
         rounding = 10,
-        blur = {
-            enabled = true,
-            size = 12,
-            passes = 4,
-            new_optimizations = true,
-            ignore_opacity = true,
-            xray = true,
-        },
+        blur = require("conf.blur"),
         active_opacity = 0.9,
         inactive_opacity = 0.6,
         fullscreen_opacity = 0.9,

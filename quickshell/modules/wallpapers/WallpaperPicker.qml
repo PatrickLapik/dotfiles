@@ -24,7 +24,10 @@ Scope {
             Wallpapers.refresh()
             Qt.callLater(() => search.forceActiveFocus())
         }
-        onDismissed: Widgets.closed("wallpapers")
+        onDismissed: {
+            schemeDropdown.popup.close()
+            Widgets.closed("wallpapers")
+        }
         ColumnLayout {
             anchors.fill: parent
             spacing: Spacing.md
@@ -43,6 +46,25 @@ Scope {
                     Accessible.name: "Refresh wallpapers"
                     enabled: !Wallpapers.busy && !Wallpapers.scanning
                     onClicked: Wallpapers.refresh()
+                }
+            }
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Spacing.md
+                Text {
+                    text: "Color scheme"
+                    color: Colors.textMuted
+                    font.family: Theme.fontFamily
+                    font.pixelSize: Theme.fontSizeSmall
+                }
+                StyledDropdown {
+                    id: schemeDropdown
+                    Layout.fillWidth: true
+                    model: Wallpapers.schemeTypes
+                    currentIndex: Wallpapers.schemeIndex
+                    enabled: !Wallpapers.busy && !Wallpapers.scanning
+                    Accessible.name: "Matugen color scheme"
+                    onActivated: index => Wallpapers.setScheme(index)
                 }
             }
             TextField {

@@ -16,6 +16,7 @@ StyledContainer {
     property real expandedWidth: Sizing.popupWidth
     property real expandedHeight: Sizing.popupHeight
     property real progress: expanded ? 1 : 0
+    property real fadeProgress: expanded ? 1 : 0
     property bool anchoredExpansion: false
     property string expansionMode: "replace"
     property real sourceGap: Spacing.sm
@@ -32,17 +33,17 @@ StyledContainer {
             (parent ? parent.width : expandedWidth) - edgeMargin - expandedWidth))
     readonly property real destinationY: belowSource ? startY : Math.max(0,
         Math.min(sourceRect.y, (parent ? parent.height : expandedHeight) - edgeMargin - expandedHeight))
-    readonly property bool transitioning: progressAnimation.running
-    readonly property bool showing: preparing || expanded || progress > 0
+    readonly property bool transitioning: progressAnimation.running || fadeAnimation.running
+    readonly property bool showing: preparing || expanded || progress > 0 || fadeProgress > 0 || transitioning
 
     x: anchoredExpansion ? belowSource ? destinationX : sourceRect.x + (destinationX - sourceRect.x) * progress : 0
-    y: anchoredExpansion ? belowSource ? destinationY - Spacing.md * (1 - progress)
+    y: anchoredExpansion ? belowSource ? destinationY - Spacing.popupSlideOffset * (1 - progress)
         : startY + (destinationY - startY) * progress : 0
     width: belowSource ? expandedWidth : (anchoredExpansion ? sourceRect.width : collapsedWidth)
         + (expandedWidth - (anchoredExpansion ? sourceRect.width : collapsedWidth)) * progress
     height: belowSource ? expandedHeight : (anchoredExpansion ? startHeight : collapsedHeight)
         + (expandedHeight - (anchoredExpansion ? startHeight : collapsedHeight)) * progress
-    opacity: preparing ? 0 : belowSource ? progress : 1
+    opacity: preparing ? 0 : belowSource ? fadeProgress : 1
     function captureSource(item: Item) {
         if (item) {
             const window = item.QsWindow.window
@@ -78,6 +79,13 @@ StyledContainer {
             id: progressAnimation
             duration: !Animations.enabled ? 0 : root.expanded ? Animations.expandDuration : Animations.collapseDuration
             easing.type: root.expanded ? Animations.expandEasing : Animations.collapseEasing
+        }
+    }
+    Behavior on fadeProgress {
+        NumberAnimation {
+            id: fadeAnimation
+            duration: !Animations.enabled ? 0 : root.expanded ? Animations.fadeInDuration : Animations.fadeOutDuration
+            easing.type: Animations.fadeEasing
         }
     }
     BarVisibilityLock { screen: root.screen; active: root.showing }

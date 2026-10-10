@@ -2,18 +2,22 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
+import qs.services
 
 Singleton {
     readonly property int lockClockFontSize: ShellConfig.scaled(76)
     readonly property int lockUserFontSize: ShellConfig.scaled(24)
-    readonly property real mediaArtworkOpacity: 0.18
+    readonly property real mediaArtworkOpacity: 1
     readonly property real scrollBarOpacity: 0.4
+    readonly property int launcherFocusDelay: 1200
+    readonly property int launcherSaveDelay: 300
+    readonly property int launcherVisitInterval: 30 * 60 * 1000
     readonly property int clipboardPollInterval: 2000
     readonly property int notificationTimeout: 5000
     readonly property int notificationProgressInterval: 33
     readonly property int networkConnectionTimeout: 45000
     // Layout dimensions remain in Spacing and Sizing.
-    // Disable to return to the live Matugen palette and softer surfaces.
+    // Enable the optional iron palette; the default follows live Matugen colors.
     readonly property bool metalStyle: false
     readonly property string fontFamily: "Adwaita Sans"
     readonly property string headingFontFamily: fontFamily
@@ -50,8 +54,11 @@ Singleton {
     readonly property int brightnessPollInterval: 3000
     readonly property int wallpaperTransitionDuration: 700
     readonly property int easing: Easing.OutCubic
-    readonly property real panelOpacity: 0.6
-    readonly property color containerHighlightColor: "#c5d0d2"
-    readonly property real containerHighlightOpacity: metalStyle ? 0.045 : 0.1
-    readonly property real containerHighlightFadeEnd: 0.55
+    // Strength is compositor-wide: hypr/conf/blur.lua (size and passes).
+    readonly property bool backdropBlurEnabled: true
+    readonly property real panelOpacity: 0.1
+    readonly property color containerHighlightColor: Colors.primary
+    readonly property color containerHighlightSecondary: Colors.secondary
+    readonly property color containerHighlightTertiary: Colors.tertiary
+    readonly property real containerHighlightOpacity: metalStyle ? 0 : 0.08
 }

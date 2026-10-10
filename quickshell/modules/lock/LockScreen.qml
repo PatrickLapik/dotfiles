@@ -7,11 +7,40 @@ import qs.config
 Scope {
     id: root
     property string joke: LockConfig.fallbackJoke
+    property bool revealed: false
+    property bool unlocking: false
+    property real progress: 0
+    NumberAnimation {
+        id: transition
+        target: root
+        property: "progress"
+        duration: !Animations.enabled ? 0 : root.unlocking ? Animations.collapseDuration : Animations.expandDuration
+        easing.type: root.unlocking ? Animations.collapseEasing : Animations.expandEasing
+        onFinished: {
+            if (!root.unlocking) return
+            sessionLock.locked = false
+            Qt.callLater(() => Qt.quit())
+        }
+    }
+    // Present the initial frame on all lock surfaces before revealing content.
+    FrameAnimation {
+        property int frames: 0
+        running: sessionLock.secure && !root.revealed && !root.unlocking
+        onTriggered: {
+            if (++frames < 2) return
+            root.revealed = true
+            transition.to = 1
+            transition.start()
+        }
+    }
     LockAuth {
         id: authentication
         onAuthenticated: {
-            sessionLock.locked = false
-            Qt.callLater(() => Qt.quit())
+            if (root.unlocking) return
+            transition.stop()
+            root.unlocking = true
+            transition.to = 0
+            transition.start()
         }
     }
     WlSessionLock {
@@ -22,6 +51,8 @@ Scope {
             LockView {
                 anchors.fill: parent
                 auth: authentication
+                progress: root.progress
+                enabled: !root.unlocking
                 joke: root.joke
                 backgroundSource: Quickshell.env("QS_LOCK_BACKGROUNDS")
                     ? "file://" + Quickshell.env("QS_LOCK_BACKGROUNDS") + "/" + encodeURIComponent(encodeURIComponent(surface.screen.name)) + ".png" : ""

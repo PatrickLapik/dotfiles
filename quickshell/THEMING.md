@@ -45,13 +45,43 @@ values fall back to the default behavior.
 Hosts keep native windows fixed and hold content dimensions steady during entry
 and exit. Sizing is resolved separately for the monitor opening each popup.
 
-The default style uses the live Matugen palette, rounded surfaces, subtle
-highlights, and Adwaita Sans. Body text is regular, controls are medium, and
-headings are semibold. Bar labels use 14 px, body text 15 px, and headings 20 px.
-Typography and corner tokens live in `Theme.qml`.
+The default style uses the live Matugen palette, opaque rounded surfaces,
+subtle color highlights, and Adwaita Sans. Body text is regular, controls are medium,
+and headings are semibold. Typography and corner tokens live in `Theme.qml`.
+
+`StyledContainer` paints a solid base with a subtle primary, secondary, and
+tertiary gradient and no decorative border. It uses native Qt fills on both
+hardware and software renderers. `Theme.containerHighlightOpacity` controls
+fill tinting. Override
+`highlightColor`, `highlightSecondary`, or `highlightTertiary` for a surface's
+palette roles. `highlightOpacity: 0` keeps exact fills for masks and flat
+controls, and fully transparent fills remain clear.
+
+`Theme.panelOpacity` defaults to 1 so panels remain readable over any wallpaper.
+All top bar sections use the same shared container fill: primary at the top,
+secondary in the middle, and tertiary at the bottom, over an opaque surface base.
+They share the same gradient strength and use the standard surface text color.
+
+Backdrop blur is enabled by `Theme.backdropBlurEnabled`, independently of
+`Theme.panelOpacity`. It applies behind the bar sections, popup panels, dropdowns,
+tooltips, and notification toasts. `BackdropBlurRegion` follows each visible
+surface's rounded bounds and animation; transparent fullscreen dismissal areas
+are excluded. Nested controls share their host's backdrop. Tooltips use a fixed, click-through
+layer-shell host so they follow the same compositor blur path as dropdowns.
+Media artwork opacity is `Theme.mediaArtworkOpacity * Theme.panelOpacity`, so
+its overlay becomes more transparent together with the panel.
+
+Adjust blur strength in `hypr/conf/blur.lua`: `size` controls the blur radius and
+`passes` controls the number of blur passes. Current defaults are 12 and 4.
+These are compositor-wide settings and also affect normal app windows. The
+`enabled` setting there is Hyprland's master switch; `backdropBlurEnabled` only
+controls Quickshell's requests. Reload Hyprland after changing the Lua settings.
+Opaque fills hide the effect; lower `panelOpacity` to reveal more of it.
+Quickshell uses the compositor's `ext-background-effect-v1` support rather than
+sampling the wallpaper or blurring the container's text and icons.
 
 Set `Theme.metalStyle` to `true` for the optional cold iron palette, tighter
-corners, thin borders, and grain inspired by the Death Above Life wallpaper.
+corners, and grain inspired by the Death Above Life wallpaper.
 Both styles use the same typography. `StyledContainer` shares a cached SVG grain
 tile across metal surfaces; `Theme.surfaceTextureOpacity` controls its strength.
 Matugen continues to update other applications while metal styling is active.
@@ -135,6 +165,12 @@ restores this selection on launch, falling back to `assets/Wallpaper.jpg` if the
 saved image is missing. Failed generation keeps the existing selection and shows
 an error in the picker.
 
+The **Color scheme** dropdown selects Matugen's `--type` from all ten supported
+schemes, defaulting to `scheme-tonal-spot`. Changing it regenerates themes for the
+current wallpaper. The scheme is saved alongside the wallpaper after successful
+generation and reused for later selections and shell restarts. Before selecting
+a first wallpaper, the dropdown chooses the scheme to use for that selection.
+
 The picker requires Python 3 and Matugen. It uses a temporary copy of
 `matugen/config.toml`, keeping all application templates and their reload hooks.
 The wallpaper command is disabled in this copy so Quickshell renders the selected
@@ -147,18 +183,46 @@ during a fade are applied after it finishes, using the latest selection.
 
 ## Application launcher
 
-Press **Super + Ctrl + Return** to open the app launcher on the focused monitor.
-Type to fuzzy-search app names, generic names, keywords, and desktop IDs.
-Use Up/Down or Tab/Shift+Tab to select, Enter to launch, and Escape or a click
-outside the panel to close. Clicking a result also launches it. Reopening the
-launcher clears the search, matching the previous Rofi shortcut behavior.
+Press **Super + Ctrl + Return** to open a single search list of installed apps
+and running windows. With an empty search, apps are ordered by recent and frequent
+usage, with alphabetical ties. Typing matches app names, keywords, IDs, and window
+titles; exact app names take priority and usage boosts close matches.
 
-The launcher uses `CenteredPopup` and `StyledContainer` with shared theme tokens.
-`Sizing.popupLimits.launcher` controls the panel dimensions;
-`Sizing.launcherRowHeight` and `launcherIconSize` control the results. `scripts/app-launcher.sh` forwards to
-the shared `widgets` IPC endpoint; Hyprland starts this Quickshell configuration on login.
-App discovery uses Quickshell DesktopEntries, and `gtk-launch` launches the
-desktop entry, including applications that request a terminal.
+Each app's launch action comes first, followed by its open windows as indented,
+selectable children. Searching an app shows its windows; searching a window title
+shows matching windows below their parent app. Unmapped windows remain searchable.
+Enter on an app launches it even if it is already running (the app decides whether
+to create a new window); Enter on a window closes the launcher and focuses that
+window through Hyprland’s address-based focus dispatcher, using `hl.dsp.focus`
+in Lua sessions and `focuswindow` in legacy sessions. The live window
+address identifies the target even when several windows have the same title.
+Use Up/Down or Ctrl+N/Ctrl+P to navigate and scroll through all entries, including
+child windows. Tab moves between controls; Escape closes the launcher.
+
+Arithmetic queries such as `(12 + 8) / 5` show a result that Enter copies.
+Prefix with `=` to calculate a plain number. Supported operations are `+ - * / %`
+(remainder), `^` (power), parentheses, `pi`, `e`, and `sqrt`, `abs`, `round`,
+`floor`, and `ceil`. The calculator parses arithmetic without executing code;
+incomplete expressions, division by zero, and nonfinite results are rejected.
+
+The `Applications` service watches focused Wayland windows while the shell runs,
+including apps opened outside the launcher. Focus must remain for
+`Theme.launcherFocusDelay`; repeated visits within `launcherVisitInterval` do not
+inflate usage counts. Launcher activations update recency immediately. History
+starts when tracking is enabled; it cannot recover past sessions retroactively.
+
+Tracking preference and a bounded history of app IDs, timestamps,
+and counts are saved atomically to `$XDG_STATE_HOME/quickshell/app-history.json`
+(default `~/.local/state`). Window titles and search queries are not saved.
+**History** exposes tracking on/off and a two-step clear-history action. Disabling tracking keeps existing history. Uninstalled
+apps are removed on subsequent saves once the app catalog is populated. Optional
+`ShellConfig.launcherAppAliases` maps unusual window app IDs to desktop entry IDs.
+
+The launcher uses the shared centered popup and borderless container styling.
+`Sizing.popupLimits.launcher` sets a stable panel size while searching; the
+list scrolls within the available space. Dimensions are in `Sizing.qml`. The launcher uses the shared `widgets` IPC endpoint.
+App discovery uses Quickshell DesktopEntries, `gtk-launch` opens apps, and Python 3
+handles state persistence.
 
 ## Bar widgets
 
@@ -279,8 +343,11 @@ Content fitting shrinks the panel without brightness controls; animations use `c
 ## Interaction animations
 
 `config/Animations.qml` controls snappy interaction transitions: bar reveals use
-`revealDuration` (160 ms), menu expansion uses `expandDuration` (180 ms), and
-collapse uses `collapseDuration` (130 ms), each with its own easing. Set `enabled`
+`revealDuration` (140 ms), menu expansion uses `expandDuration` (160 ms), and
+collapse uses `collapseDuration` (100 ms), each with its own easing. Opacity uses
+separate linear `fadeInDuration` (140 ms) and `fadeOutDuration` (100 ms) presets
+so eased movement does not make the fade jump at the start. Popup travel uses
+`Spacing.popupSlideOffset` (4 logical pixels before UI scaling). Set `enabled`
 to false for instant transitions. Dropdowns keep fixed windows and content
 layouts, fading/sliding cached content while their surfaces expand. Their input
 masks release full-screen dismissal input as soon as closing starts; the bar
@@ -436,13 +503,13 @@ same independent Quickshell locker. Lock requests are idempotent; `close` cannot
 unlock it. Hyprlock remains installed as the startup-failure fallback.
 
 The layout follows the old Hyprlock setup: a blurred screenshot, Chuck Norris
-jokes at the top left, the Arch avatar and password in the center, and a clock
+jokes at the top left, a lock icon and password in the center, and a clock
 and date at the bottom right. Colors follow the shared Matugen palette. Each
 monitor gets its own lock surface. Missing screenshots fall back to a solid
 palette background. Jokes refresh every minute with a cached/offline fallback;
 network requests never hold up locking.
 
-Edit `config/LockConfig.qml` for the avatar, blur, dimming, joke refresh interval,
+Edit `config/LockConfig.qml` for blur, dimming, joke refresh interval,
 and PAM service. Lock dimensions and typography live in `Sizing.qml`,
 `Spacing.qml`, and `Theme.qml` and follow `ShellConfig.uiScale`. The default PAM
 service is the existing `/etc/pam.d/hyprlock`; no system PAM files are changed.
@@ -452,7 +519,11 @@ disabled during the lock. `scripts/lock.py` serializes launches, bounds screensh
 capture time, stores captures in a private runtime directory, and removes them
 when the locker exits. Only PAM success releases the session lock. Escape clears
 the entry; it does not dismiss the lockscreen. The status-only `sessionLock`
-IPC target exposes no unlock method.
+IPC target exposes no unlock method. Lock content fades and slides in with the
+shared `Animations.qml` expansion preset while the captured background blurs and
+dims. Successful authentication reverses the transition with the collapse preset;
+the session lock is released only after that animation finishes. Setting
+`Animations.enabled` to false makes both transitions immediate.
 
 Hypridle uses `inhibit_sleep = 3` so suspend waits for compositor confirmation of
 the lock, rather than merely the launch of the command. See the

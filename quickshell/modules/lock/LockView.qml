@@ -13,6 +13,7 @@ StyledContainer {
     required property var auth
     property string joke: LockConfig.fallbackJoke
     property url backgroundSource: ""
+    property real progress: 1
     readonly property real edgeInset: Math.min(Spacing.lockEdgeInset, width * 0.06)
     radius: Theme.radiusNone
     color: Colors.background
@@ -23,7 +24,7 @@ StyledContainer {
         anchors.fill: parent
         source: root.backgroundSource
         fillMode: Image.PreserveAspectCrop
-        visible: false
+        visible: status === Image.Ready
         asynchronous: true
         cache: false
     }
@@ -31,6 +32,7 @@ StyledContainer {
         anchors.fill: parent
         source: screenshot
         visible: screenshot.status === Image.Ready
+        opacity: root.progress
         blurEnabled: true
         blurMax: Sizing.lockBlurRadius
         blur: LockConfig.backgroundBlur
@@ -41,8 +43,11 @@ StyledContainer {
         radius: Theme.radiusNone
         color: Colors.withAlpha(Colors.background, LockConfig.backgroundDim)
         highlightOpacity: 0
+        opacity: root.progress
     }
     ColumnLayout {
+        opacity: root.progress
+        transform: Translate { y: Spacing.lg * (1 - root.progress) }
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.margins: root.edgeInset
@@ -69,22 +74,24 @@ StyledContainer {
         }
     }
     ColumnLayout {
+        opacity: root.progress
+        transform: Translate { y: Spacing.lg * (1 - root.progress) }
         anchors.centerIn: parent
         width: Math.min(Sizing.lockFormWidth, root.width - Spacing.xl * 2)
         spacing: Spacing.md
         StyledContainer {
             Layout.alignment: Qt.AlignHCenter
-            Layout.preferredWidth: Sizing.lockAvatarSize
-            Layout.preferredHeight: Sizing.lockAvatarSize
-            radius: width / 2
-            color: Colors.surfaceContainer
-            border.width: Theme.borderWidth
-            border.color: Colors.primary
-            RoundedImage {
+            Layout.preferredWidth: Sizing.lockIconSize
+            Layout.preferredHeight: Sizing.lockIconSize
+            radius: Theme.radiusNone
+            color: "transparent"
+            highlightOpacity: 0
+            ShellIcon {
                 anchors.fill: parent
-                anchors.margins: Spacing.sm
-                source: "file://" + LockConfig.avatarPath
-                radius: width / 2
+                kind: "lock"
+                tint: Colors.primary
+                Accessible.role: Accessible.Graphic
+                Accessible.name: "Locked"
             }
         }
         Text {
@@ -106,7 +113,7 @@ StyledContainer {
             enabled: !root.auth.busy
             echoMode: root.auth.responseVisible ? TextInput.Normal : TextInput.Password
             inputMethodHints: Qt.ImhSensitiveData | Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase
-            placeholderText: root.auth.responseVisible ? "Response…" : "Input password…"
+            placeholderText: root.auth.responseVisible ? "Response…" : "Password"
             placeholderTextColor: Colors.onSurfaceVariant
             color: Colors.onSurface
             selectionColor: Colors.primary
@@ -125,25 +132,10 @@ StyledContainer {
             Component.onCompleted: forceActiveFocus()
             Keys.onEscapePressed: clear()
         }
-        StyledButton {
-            Layout.fillWidth: true
-            text: root.auth.busy ? "Checking…" : "Unlock"
-            enabled: !root.auth.busy
-            onClicked: root.auth.submit(password.text)
-        }
-        Text {
-            Layout.fillWidth: true
-            Layout.minimumHeight: Theme.headingLineHeight
-            text: root.auth.message || (root.auth.busy ? "Authenticating…" : "Enter your password to unlock")
-            textFormat: Text.PlainText
-            wrapMode: Text.WordWrap
-            horizontalAlignment: Text.AlignHCenter
-            color: root.auth.failed ? Colors.error : Colors.onBackground
-            font.family: Theme.fontFamily
-            font.pixelSize: Theme.fontSize
-        }
     }
     ColumnLayout {
+        opacity: root.progress
+        transform: Translate { y: Spacing.lg * (1 - root.progress) }
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         anchors.margins: root.edgeInset

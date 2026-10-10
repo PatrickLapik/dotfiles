@@ -12,6 +12,12 @@ DIRECTORY = ROOT / 'wallpapers'
 STATE = Path(os.environ.get('XDG_STATE_HOME', Path.home() / '.local/state')) / 'quickshell/wallpaper.json'
 CONFIG = Path(os.environ.get('XDG_CONFIG_HOME', Path.home() / '.config'))
 EXTENSIONS = {'.jpg', '.jpeg', '.png', '.webp', '.bmp'}
+SCHEME_TYPES = (
+    'scheme-content', 'scheme-expressive', 'scheme-fidelity', 'scheme-fruit-salad',
+    'scheme-monochrome', 'scheme-neutral', 'scheme-rainbow', 'scheme-tonal-spot',
+    'scheme-vibrant', 'scheme-smart',
+)
+DEFAULT_SCHEME = 'scheme-tonal-spot'
 
 
 def images():
@@ -20,16 +26,25 @@ def images():
 
 def scan():
     current = ''
+    scheme = DEFAULT_SCHEME
     try:
-        saved = json.loads(STATE.read_text()).get('current', '')
+        state = json.loads(STATE.read_text())
+        saved = state.get('current', '')
+        if state.get('schemeType') in SCHEME_TYPES:
+            scheme = state['schemeType']
         if Path(saved).is_file():
             current = saved
     except (OSError, ValueError):
         pass
-    return {'current': current, 'items': [{'path': str(p), 'url': p.as_uri(), 'name': str(p.relative_to(DIRECTORY))} for p in images()]}
+    return {'current': current, 'schemeType': scheme, 'schemeTypes': SCHEME_TYPES,
+            'items': [{'path': str(p), 'url': p.as_uri(), 'name': str(p.relative_to(DIRECTORY))} for p in images()]}
 
 
-def apply(filename):
+def apply(filename, scheme=None):
+    if scheme is None:
+        scheme = scan()['schemeType']
+    if scheme not in SCHEME_TYPES:
+        raise ValueError('Choose a supported Matugen color scheme type.')
     path = Path(filename).resolve()
     if not path.is_relative_to(DIRECTORY.resolve()) or path not in [p.resolve() for p in images()]:
         raise ValueError('Choose an image from the wallpapers directory.')
@@ -47,24 +62,24 @@ def apply(filename):
         # Existing input paths are relative to the Matugen configuration directory.
         (Path(tmp) / 'templates').symlink_to(matugen_directory / 'templates', target_is_directory=True)
         config.write_text(config_text)
-        result = subprocess.run(['matugen', '-c', str(config), '-m', 'dark', '--source-color-index', '0', 'image', str(path)], capture_output=True, text=True, timeout=120)
+        result = subprocess.run(['matugen', '-c', str(config), '-m', 'dark', '--type', scheme, '--source-color-index', '0', 'image', str(path)], capture_output=True, text=True, timeout=120)
         if result.returncode:
             raise RuntimeError(result.stderr.strip() or result.stdout.strip() or 'Matugen failed.')
     STATE.parent.mkdir(parents=True, exist_ok=True)
     temporary = STATE.with_suffix('.tmp')
-    temporary.write_text(json.dumps({'current': str(path)}))
+    temporary.write_text(json.dumps({'current': str(path), 'schemeType': scheme}))
     temporary.replace(STATE)
-    return {'current': str(path), 'url': path.as_uri()}
+    return {'current': str(path), 'url': path.as_uri(), 'schemeType': scheme}
 
 
 if __name__ == '__main__':
     try:
         if sys.argv[1:] == ['list']:
             print(json.dumps(scan()))
-        elif len(sys.argv) == 3 and sys.argv[1] == 'apply':
-            print(json.dumps(apply(sys.argv[2])))
+        elif len(sys.argv) in (3, 4) and sys.argv[1] == 'apply':
+            print(json.dumps(apply(sys.argv[2], sys.argv[3] if len(sys.argv) == 4 else None)))
         else:
-            raise ValueError('Usage: wallpapers.py list | apply PATH')
+            raise ValueError('Usage: wallpapers.py list | apply PATH [SCHEME_TYPE]')
     except (OSError, ValueError, RuntimeError, subprocess.TimeoutExpired) as error:
         print(str(error), file=sys.stderr)
         sys.exit(1)

@@ -6,7 +6,7 @@ import qs.services
 // Shared surfaces; slantedEdge supports a straight outer edge and angled inner edge.
 Item {
     id: root
-    property color color: Colors.surfaceContainer
+    property color color: Colors.withAlpha(Colors.surfaceContainer, Theme.panelOpacity)
     Behavior on color {
         ColorAnimation { duration: Animations.enabled ? Animations.feedbackDuration : 0; easing.type: Animations.feedbackEasing }
     }
@@ -16,11 +16,19 @@ Item {
     property real slantWidth: Sizing.barSlantWidth
     readonly property real slant: Math.min(slantWidth, width / 2)
     property real highlightOpacity: Theme.containerHighlightOpacity
-    readonly property color highlightTint: Qt.tint(color,
-        Colors.withAlpha(Theme.containerHighlightColor, highlightOpacity))
-    // Preserve the surface alpha so transparent widget backgrounds stay clear.
-    readonly property color highlightedColor: Qt.rgba(highlightTint.r,
-        highlightTint.g, highlightTint.b, color.a)
+    property color highlightColor: Theme.containerHighlightColor
+    property color highlightSecondary: Theme.containerHighlightSecondary
+    property color highlightTertiary: Theme.containerHighlightTertiary
+
+    // Paint the fill directly on every renderer, with quiet palette highlights.
+    // Preserve caller alpha so transparent controls and image masks stay clear.
+    function highlighted(accent: color): color {
+        return Colors.withAlpha(Qt.tint(root.color,
+            Colors.withAlpha(accent, root.highlightOpacity)), root.color.a)
+    }
+    readonly property color topColor: highlighted(highlightColor)
+    readonly property color middleColor: highlighted(highlightSecondary)
+    readonly property color bottomColor: highlighted(highlightTertiary)
 
     Rectangle {
         id: normalSurface
@@ -28,12 +36,12 @@ Item {
         visible: root.slantedEdge === "none"
         color: root.color
         gradient: Gradient {
-            GradientStop { position: 0; color: root.highlightedColor }
-            GradientStop { position: Theme.containerHighlightFadeEnd; color: root.color }
-            GradientStop { position: 1; color: root.color }
+            GradientStop { position: 0; color: root.topColor }
+            GradientStop { position: 0.5; color: root.middleColor }
+            GradientStop { position: 1; color: root.bottomColor }
         }
         radius: root.radius
-        border.width: Theme.metalStyle && root.color.a > 0 ? Theme.borderWidth : Theme.borderNone
+        border.width: Theme.borderNone
         border.color: Colors.border
     }
     Shape {
@@ -44,9 +52,9 @@ Item {
             fillGradient: LinearGradient {
                 x1: 0; y1: 0
                 x2: 0; y2: root.height
-                GradientStop { position: 0; color: root.highlightedColor }
-                GradientStop { position: Theme.containerHighlightFadeEnd; color: root.color }
-                GradientStop { position: 1; color: root.color }
+                GradientStop { position: 0; color: root.topColor }
+                GradientStop { position: 0.5; color: root.middleColor }
+                GradientStop { position: 1; color: root.bottomColor }
             }
             strokeColor: root.border.color
             strokeWidth: root.border.width > 0 ? root.border.width : -1

@@ -85,6 +85,7 @@ Item {
         // Keep topbar actions reachable while a selection menu is open.
         WlrLayershell.keyboardFocus: !root.popup.visible ? WlrKeyboardFocus.None
             : barInputHole.pointerInside ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.Exclusive
+        BackgroundEffect.blurRegion: BackdropBlurRegion { target: menuContent; animating: menu.progress > 0 && menu.progress < 1 }
         color: "transparent"
         readonly property point origin: {
             const host = root.QsWindow.window
@@ -99,12 +100,19 @@ Item {
         }
         MouseArea { anchors.fill: parent; onPressed: root.popup.close() }
         property real progress: root.popup.visible ? 1 : 0
-        visible: root.popup.visible || progress > 0
+        property real fadeProgress: root.popup.visible ? 1 : 0
+        visible: root.popup.visible || progress > 0 || fadeProgress > 0
         onVisibleChanged: { if (!visible && root.popup.visible) root.popup.close() }
         Behavior on progress {
             NumberAnimation {
                 duration: !Animations.enabled ? 0 : root.popup.visible ? Animations.expandDuration : Animations.collapseDuration
                 easing.type: root.popup.visible ? Animations.expandEasing : Animations.collapseEasing
+            }
+        }
+        Behavior on fadeProgress {
+            NumberAnimation {
+                duration: !Animations.enabled ? 0 : root.popup.visible ? Animations.fadeInDuration : Animations.fadeOutDuration
+                easing.type: Animations.fadeEasing
             }
         }
         StyledContainer {
@@ -113,12 +121,10 @@ Item {
             y: menu.origin.y
             width: root.width
             height: menu.menuHeight
-            color: Colors.panel
+            // Inherit the shared panel opacity, palette gradient, and border defaults.
             radius: Theme.radiusSmall
-            highlightOpacity: 0
-            border.width: Theme.borderWidth
-            border.color: Colors.border
-            opacity: menu.progress
+            opacity: menu.fadeProgress
+            transform: Translate { y: -Spacing.popupSlideOffset * (1 - menu.progress) }
             enabled: root.popup.visible
             focus: true
             Keys.onPressed: event => {

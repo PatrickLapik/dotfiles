@@ -3,6 +3,7 @@ import Quickshell
 import Quickshell.Wayland
 import qs.components
 import qs.config
+import qs.services
 import "PopupSizing.js" as PopupSizing
 
 // Fixed fullscreen host; position only the surface and retain shared dismissal/animations.
@@ -41,7 +42,8 @@ PanelWindow {
     property bool preparing: false
     property bool revealed: false
     property real progress: revealed ? 1 : 0
-    visible: isOpen || progress > 0 || motion.running
+    property real fadeProgress: revealed ? 1 : 0
+    visible: isOpen || progress > 0 || fadeProgress > 0 || motion.running || fade.running
     Behavior on progress {
         NumberAnimation {
             id: motion
@@ -50,6 +52,14 @@ PanelWindow {
             onRunningChanged: if (!running) root.updateSize()
         }
     }
+    Behavior on fadeProgress {
+        NumberAnimation {
+            id: fade
+            duration: !Animations.enabled ? 0 : root.isOpen ? Animations.fadeInDuration : Animations.fadeOutDuration
+            easing.type: Animations.fadeEasing
+        }
+    }
+    BackgroundEffect.blurRegion: BackdropBlurRegion { target: popupSurface; animating: motion.running || fade.running }
     color: "transparent"
     anchors { top: true; bottom: true; left: true; right: true }
     exclusionMode: ExclusionMode.Ignore
@@ -122,6 +132,7 @@ PanelWindow {
         }
         StyledContainer {
             id: popupSurface
+            color: Colors.withAlpha(Colors.panel, Theme.panelOpacity)
             x: root.alignment & Qt.AlignRight
                 ? Math.max(0, parent.width - width - root.rightMargin)
                 : root.alignment & Qt.AlignLeft ? root.edgeMargin : (parent.width - width) / 2
@@ -130,8 +141,8 @@ PanelWindow {
                 : root.alignment & Qt.AlignBottom ? parent.height - height - root.edgeMargin : (parent.height - height) / 2
             width: Math.min(root.layoutWidth, Math.max(0, parent.width - root.edgeMargin * 2))
             height: Math.min(root.layoutHeight, Math.max(0, parent.height - (root.alignment & Qt.AlignTop ? root.topMargin : root.edgeMargin) - root.edgeMargin))
-            opacity: root.progress
-            transform: Translate { y: Spacing.lg * (1 - root.progress) }
+            opacity: root.fadeProgress
+            transform: Translate { y: Spacing.popupSlideOffset * (1 - root.progress) }
             Item {
                 id: body
                 implicitWidth: PopupSizing.implicitExtent(children, "implicitWidth")

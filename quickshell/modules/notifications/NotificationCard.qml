@@ -34,7 +34,6 @@ StyledContainer {
     signal clicked()
     implicitHeight: Math.max(minimumHeight, content.implicitHeight + verticalPadding * 2)
         + (showTimeout ? Spacing.xs + Sizing.notificationProgressHeight : 0)
-    color: Colors.surfaceContainerHigh
     border.width: details && details.urgency === 2 ? Theme.borderWidth : Theme.borderNone
     border.color: details && details.urgency === 2 ? Colors.error : Colors.border
     activeFocusOnTab: true

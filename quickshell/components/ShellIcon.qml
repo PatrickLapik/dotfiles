@@ -79,8 +79,9 @@ Canvas {
         } else if (kind === "suspend") {
             c.beginPath(); c.moveTo(12, 2); c.bezierCurveTo(0, 0, 0, 19, 13, 17); c.bezierCurveTo(16, 16, 18, 13, 18, 10); c.bezierCurveTo(10, 13, 7, 6, 12, 2); c.closePath(); c.stroke()
         } else if (kind === "restart") {
-            c.beginPath(); c.arc(10, 10, 7, -0.7, Math.PI * 1.7); c.stroke()
-            line(14, 2, 14, 7); line(14, 7, 19, 7)
+            // Open circular arrow with a connected, clockwise arrowhead.
+            c.beginPath(); c.arc(10, 10, 7, 0.15, Math.PI * 1.75); c.lineTo(17, 7); c.stroke()
+            c.beginPath(); c.moveTo(12, 7); c.lineTo(17, 7); c.lineTo(17, 2); c.stroke()
         } else if (kind === "power") {
             c.beginPath(); c.arc(10, 11, 7, -0.95, Math.PI + 0.95); c.stroke()
             line(10, 2, 10, 10)

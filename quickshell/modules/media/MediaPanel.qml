@@ -25,7 +25,8 @@ Scope {
             sourceSize.width: Sizing.mediaPanelWidth * 2
             sourceSize.height: Sizing.mediaPanelHeight * 2
             radius: Theme.radius
-            opacity: Theme.mediaArtworkOpacity
+            // Artwork is part of the panel surface and follows its transparency.
+            opacity: Theme.mediaArtworkOpacity * Theme.panelOpacity
             visible: status === Image.Ready
         }
         FrameAnimation {
