@@ -61,12 +61,9 @@ Singleton {
     readonly property int launcherHeight: ShellConfig.scaled(560)
     readonly property int launcherRowHeight: ShellConfig.scaled(64)
     readonly property int launcherIconSize: ShellConfig.scaled(32)
-    readonly property int powerMenuWidth: ShellConfig.scaled(760)
-    readonly property int powerMenuHeight: ShellConfig.scaled(240)
-    readonly property int powerMenuCompactHeight: ShellConfig.scaled(360)
-    readonly property int powerMenuCompactBreakpoint: ShellConfig.scaled(600)
-    readonly property int powerMenuCompactColumns: 3
-    readonly property int powerIconSize: ShellConfig.scaled(32)
+    readonly property int powerMenuWidth: ShellConfig.scaled(360)
+    readonly property int powerMenuHeight: ShellConfig.scaled(360)
+    readonly property int powerMenuRowHeight: ShellConfig.scaled(44)
     readonly property int popupWidth: ShellConfig.scaled(640)
     readonly property int popupHeight: ShellConfig.scaled(540)
     readonly property int popupMinWidth: ShellConfig.scaled(0)
@@ -93,7 +90,7 @@ Singleton {
         notifications: { width: "30%", minWidth: 400, maxWidth: 500, height: "content", maxHeight: "50%" },
         clipboard: { width: 500, minWidth: 460, maxWidth: 500, height: 420, maxHeight: "70%" },
         launcher: { width: "40%", minWidth: 480, maxWidth: 900, height: 640, maxHeight: "80%" },
-        power: { width: "50%", maxWidth: 1080, height: "20%", maxHeight: 360 },
+        power: { width: 360, maxWidth: 360, height: "content", maxHeight: "80%" },
         wallpapers: { width: "40%", minWidth: 480, maxWidth: 900, height: 660, maxHeight: "80%" }
     })
 }

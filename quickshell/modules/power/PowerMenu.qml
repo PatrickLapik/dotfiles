@@ -36,8 +36,7 @@ Scope {
         id: popup
         popupName: "power"
         popupWidth: Sizing.powerMenuWidth
-        popupHeight: screen && Math.min(popupWidth, screen.width - Spacing.xl * 2) < Sizing.powerMenuCompactBreakpoint
-            ? Sizing.powerMenuCompactHeight : Sizing.powerMenuHeight
+        popupHeight: Sizing.powerMenuHeight
         keepBarVisible: false
         onOpened: Qt.callLater(() => content.forceActiveFocus())
         onDismissed: Widgets.closed("power")
@@ -58,51 +57,61 @@ Scope {
                 font.weight: Theme.headingFontWeight
                 font.pixelSize: Theme.fontSizeLarge
             }
-            GridLayout {
+            ColumnLayout {
                 Layout.fillWidth: true
-                Layout.fillHeight: true
-                uniformCellWidths: true
-                uniformCellHeights: true
-                columns: Math.min(popup.popupMaxWidth, popup.screen ? popup.screen.width - Spacing.xl * 2 : popup.popupMaxWidth)
-                    < Sizing.powerMenuCompactBreakpoint ? Sizing.powerMenuCompactColumns : root.actions.length
-                rowSpacing: Spacing.sm
-                columnSpacing: Spacing.sm
+                spacing: Spacing.xs
                 Repeater {
                     model: root.actions
-                    delegate: StyledButton {
-                        id: card
+                    delegate: ColumnLayout {
+                        id: actionRow
                         required property var modelData
                         required property int index
                         Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        Layout.preferredWidth: implicitWidth
-                        Layout.minimumWidth: 0
-                        Accessible.name: modelData.text
-                        onClicked: root.execute(index)
-                        contentItem: ColumnLayout {
-                            spacing: Spacing.sm
-                            Item { Layout.fillHeight: true }
-                            ShellIcon {
-                                Layout.alignment: Qt.AlignHCenter
-                                Layout.preferredWidth: Sizing.powerIconSize
-                                Layout.preferredHeight: Sizing.powerIconSize
-                                kind: card.modelData.icon
-                                tint: card.down ? Colors.onPrimaryContainer : Colors.text
+                        spacing: Spacing.xs
+                        Item {
+                            Layout.fillWidth: true
+                            implicitHeight: Spacing.sm + Theme.borderWidth
+                            visible: actionRow.index === 3
+                            Rectangle {
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: parent.width
+                                height: Theme.borderWidth
+                                color: Colors.border
                             }
-                            Text {
-                                Layout.alignment: Qt.AlignHCenter
-                                text: card.modelData.text
-                                color: card.down ? Colors.onPrimaryContainer : Colors.text
-                                font: card.font
+                        }
+                        StyledButton {
+                            id: actionButton
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: Sizing.powerMenuRowHeight
+                            flat: true
+                            text: actionRow.modelData.text
+                            font.pixelSize: Theme.fontSizeSmall
+                            readonly property color foreground: down ? Colors.onPrimaryContainer
+                                : actionRow.modelData.action === "shutdown" ? Colors.error : Colors.text
+                            Accessible.name: actionRow.modelData.text
+                            onClicked: root.execute(actionRow.index)
+                            contentItem: RowLayout {
+                                spacing: Spacing.sm
+                                ShellIcon {
+                                    Layout.preferredWidth: Sizing.barIconSize
+                                    Layout.preferredHeight: Sizing.barIconSize
+                                    kind: actionRow.modelData.icon
+                                    tint: actionButton.foreground
+                                }
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: actionRow.modelData.text
+                                    color: actionButton.foreground
+                                    font: actionButton.font
+                                    elide: Text.ElideRight
+                                }
+                                Text {
+                                    text: actionRow.modelData.shortcut
+                                    color: actionButton.down ? Colors.onPrimaryContainer : Colors.textMuted
+                                    font.family: Theme.fontFamily
+                                    font.pixelSize: Theme.fontSizeSmall
+                                }
                             }
-                            Text {
-                                Layout.alignment: Qt.AlignHCenter
-                                text: card.modelData.shortcut
-                                color: Colors.textMuted
-                                font.family: Theme.fontFamily
-                                font.pixelSize: Theme.fontSizeSmall
-                            }
-                            Item { Layout.fillHeight: true }
                         }
                     }
                 }

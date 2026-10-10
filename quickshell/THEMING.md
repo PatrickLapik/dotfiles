@@ -384,6 +384,9 @@ Super+Q toggles the Quickshell power menu, replacing wlogout. It preserves the
 five configured actions and shortcuts: L Lock, E Log Out, U Suspend, R Restart,
 and S Power Off. Actions use `hypr/scripts/power.sh`; Escape or clicking outside
 closes the menu. Tab and Enter/Space support keyboard button navigation.
+The centered menu uses compact rows with icons, labels, and right-aligned
+shortcuts. A divider separates Restart and Power Off from the other actions;
+Power Off uses the error accent without a permanent filled background.
 
 Super+Ctrl+Return opens the application launcher. Both bindings use the shared
 helper, selecting the currently focused monitor and targeting the running shell:
