@@ -15,7 +15,10 @@ Singleton {
     readonly property int clipboardPollInterval: 2000
     readonly property int notificationTimeout: 5000
     readonly property int notificationProgressInterval: 33
+    readonly property int packageUpdatesPollInterval: 30 * 60 * 1000
     readonly property int networkConnectionTimeout: 45000
+    readonly property int networkCacheRefreshInterval: 1000
+    readonly property int networkCacheTimeout: 30000
     // Layout dimensions remain in Spacing and Sizing.
     // Enable the optional iron palette; the default follows live Matugen colors.
     readonly property bool metalStyle: false
@@ -56,7 +59,7 @@ Singleton {
     readonly property int easing: Easing.OutCubic
     // Strength is compositor-wide: hypr/conf/blur.lua (size and passes).
     readonly property bool backdropBlurEnabled: true
-    readonly property real panelOpacity: 0.1
+    readonly property real panelOpacity: 0.2
     readonly property color containerHighlightColor: Colors.primary
     readonly property color containerHighlightSecondary: Colors.secondary
     readonly property color containerHighlightTertiary: Colors.tertiary

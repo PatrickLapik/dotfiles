@@ -12,26 +12,16 @@ RowLayout {
     spacing: Spacing.sm
 
     StatusItem {
-        id: bell
-        WidgetAnchor { name: "notifications"; target: bell }
-        statusIcon: (Notifications.dnd ? "bell-off" : "bell") + (Notifications.count > 0 ? "-dot" : "")
-        tooltip: "Notifications · " + Notifications.count + (Notifications.dnd ? " · Do not disturb" : "")
-            + "\nClick for notifications · Middle-click to mute"
+        statusIcon: "package"
+        label: PackageUpdates.available ? String(PackageUpdates.count) : PackageUpdates.checking ? "…" : "?"
+        tooltip: PackageUpdates.details + "\nClick to update · Middle-click to check again"
         interactive: true
         middleClickEnabled: true
-        tint: Notifications.dnd ? Colors.textMuted : Colors.text
-        onClicked: Widgets.toggle("notifications", bell.QsWindow.window.screen.name)
-        onMiddleClicked: Notifications.dnd = !Notifications.dnd
-    }
-
-    StatusItem {
-        id: networkButton
-        WidgetAnchor { name: "network"; target: networkButton }
-        statusIcon: Network.icon
-        tooltip: Network.details + "\nClick for network controls"
-        interactive: true
-        tint: Network.connected ? Colors.text : Colors.textMuted
-        onClicked: Widgets.toggle("network", networkButton.QsWindow.window.screen.name)
+        tint: !PackageUpdates.available ? Colors.textMuted
+            : PackageUpdates.severity === "red" ? Colors.error
+            : PackageUpdates.severity === "yellow" ? Colors.tertiary : Colors.text
+        onClicked: PackageUpdates.install()
+        onMiddleClicked: PackageUpdates.refresh()
     }
     StatusItem {
         id: microphone
@@ -60,10 +50,31 @@ RowLayout {
         onScrolled: direction => Audio.adjust(direction)
     }
     StatusItem {
+        id: networkButton
+        WidgetAnchor { name: "network"; target: networkButton }
+        statusIcon: Network.icon
+        tooltip: Network.details + "\nClick for network controls"
+        interactive: true
+        tint: Network.connected ? Colors.text : Colors.textMuted
+        onClicked: Widgets.toggle("network", networkButton.QsWindow.window.screen.name)
+    }
+    StatusItem {
         visible: Environment.showBattery
         statusIcon: Environment.charging ? "charging" : "battery"
         label: Environment.batteryPercent + "%"
         tooltip: Environment.charging ? "Charging" : Environment.onBattery ? "On battery" : "Plugged in"
         tint: Environment.onBattery && Environment.batteryPercent <= 20 ? Colors.error : Colors.text
+    }
+    StatusItem {
+        id: bell
+        WidgetAnchor { name: "notifications"; target: bell }
+        statusIcon: (Notifications.dnd ? "bell-off" : "bell") + (Notifications.count > 0 ? "-dot" : "")
+        tooltip: "Notifications · " + Notifications.count + (Notifications.dnd ? " · Do not disturb" : "")
+            + "\nClick for notifications · Middle-click to mute"
+        interactive: true
+        middleClickEnabled: true
+        tint: Notifications.dnd ? Colors.textMuted : Colors.text
+        onClicked: Widgets.toggle("notifications", bell.QsWindow.window.screen.name)
+        onMiddleClicked: Notifications.dnd = !Notifications.dnd
     }
 }

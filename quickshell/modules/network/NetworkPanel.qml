@@ -113,7 +113,7 @@ Scope {
                 Layout.fillHeight: true
                 Layout.minimumHeight: 0
                 implicitWidth: networks.count ? Math.max(Sizing.dropdownMinWidth,
-                    ...Network.nearbyNetworks.map(network => networkFont.advanceWidth(network.name)
+                    ...Array.from({length: Network.nearbyNetworks.count}, (_, index) => networkFont.advanceWidth(Network.nearbyNetworks.get(index).networkData.name)
                         + networkFont.advanceWidth("100%") + Sizing.barIconSize + Spacing.sm * 4 + Sizing.scrollBarWidth + Spacing.xs))
                     : emptyState.implicitWidth
                 implicitHeight: networks.count
@@ -129,50 +129,50 @@ Scope {
                     ScrollBar.vertical: StyledScrollBar {}
                     delegate: StyledButton {
                         id: option
-                        required property var modelData
+                        required property var networkData
                         width: networks.width - Sizing.scrollBarWidth - Spacing.xs
                         height: Sizing.networkRowHeight
-                        enabled: !Network.busy && !modelData.stateChanging
-                        Accessible.name: modelData.name + (modelData.connected ? ", connected" : ", connect")
+                        enabled: networkData.available && !Network.busy && !networkData.stateChanging
+                        Accessible.name: networkData.name + (networkData.connected ? ", connected" : ", connect")
                         highlightInteractions: false
                         padding: Spacing.sm
-                        onClicked: Network.selectWifi(modelData)
+                        onClicked: Network.selectWifi(networkData)
                         background: StyledContainer {
                             radius: Theme.radiusSmall
-                            color: option.modelData.connected ? Colors.primaryContainer
+                            color: option.networkData.connected ? Colors.primaryContainer
                                 : option.hovered ? Colors.surfaceContainerHigh : "transparent"
                             border.width: option.visualFocus ? Theme.borderSelectedWidth : Theme.borderNone
                             border.color: Colors.primary
                         }
                         contentItem: RowLayout {
                             spacing: Spacing.sm
-                            ShellIcon { kind: "wifi"; tint: option.modelData.connected ? Colors.onPrimaryContainer : Colors.textMuted }
+                            ShellIcon { kind: "wifi"; tint: option.networkData.connected ? Colors.onPrimaryContainer : Colors.textMuted }
                             ColumnLayout {
                                 Layout.fillWidth: true
                                 spacing: Spacing.xs
                                 Text {
                                     Layout.fillWidth: true
-                                    text: option.modelData.name
+                                    text: option.networkData.name
                                     textFormat: Text.PlainText
                                     elide: Text.ElideRight
-                                    color: option.modelData.connected ? Colors.onPrimaryContainer : Colors.text
+                                    color: option.networkData.connected ? Colors.onPrimaryContainer : Colors.text
                                     font.family: Theme.fontFamily
                                     font.weight: Theme.emphasisFontWeight
                                     font.pixelSize: Theme.fontSizeSmall
                                 }
                                 Text {
                                     Layout.fillWidth: true
-                                    text: option.modelData.connected ? "Connected" : option.modelData.stateChanging ? "Connecting…"
-                                        : option.modelData.known ? "Saved" : Network.usesPassword(option.modelData) ? "Password required" : ""
+                                    text: option.networkData.connected ? "Connected" : option.networkData.stateChanging ? "Connecting…"
+                                        : option.networkData.known ? "Saved" : Network.usesPassword(option.networkData) ? "Password required" : ""
                                     visible: text !== ""
-                                    color: option.modelData.connected ? Colors.onPrimaryContainer : Colors.textMuted
+                                    color: option.networkData.connected ? Colors.onPrimaryContainer : Colors.textMuted
                                     font.family: Theme.fontFamily
                                     font.pixelSize: Theme.fontSize
                                 }
                             }
                             Text {
-                                text: Math.round(option.modelData.signalStrength * 100) + "%"
-                                color: option.modelData.connected ? Colors.onPrimaryContainer : Colors.textMuted
+                                text: Math.round(option.networkData.signalStrength * 100) + "%"
+                                color: option.networkData.connected ? Colors.onPrimaryContainer : Colors.textMuted
                                 font.family: Theme.fontFamily
                                 font.pixelSize: Theme.fontSize
                             }

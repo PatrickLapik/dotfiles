@@ -20,10 +20,70 @@ Singleton {
     readonly property bool wifiAvailable: !!wifiDevice
     readonly property bool wifiEnabled: Net.Networking.wifiEnabled
     readonly property bool wifiHardwareEnabled: Net.Networking.wifiHardwareEnabled
-    readonly property var nearbyNetworks: wifiDevice && wifiEnabled ? wifiDevice.networks.values
+    readonly property var liveNetworks: wifiDevice && wifiEnabled ? wifiDevice.networks.values
         .filter(network => network.name !== "")
         .slice().sort((a, b) => Number(b.connected) - Number(a.connected)
             || b.signalStrength - a.signalStrength || a.name.localeCompare(b.name)) : []
+    // Cache plain data, never scan-owned QObjects that may disappear during a scan.
+    readonly property alias nearbyNetworks: networkCache
+    property var networkLastSeen: ({})
+    ListModel { id: networkCache; dynamicRoles: true }
+
+    function networkKey(network) { return JSON.stringify([network.name, network.security]) }
+    function refreshNetworks() {
+        if (!wifiDevice || !wifiEnabled || !wifiHardwareEnabled) {
+            networkCache.clear()
+            networkLastSeen = ({})
+            return
+        }
+        const now = Date.now()
+        const seen = new Set()
+        for (const network of liveNetworks) {
+            const key = networkKey(network)
+            if (seen.has(key)) continue
+            seen.add(key)
+            networkLastSeen[key] = now
+            const data = {
+                key: key, name: network.name, security: network.security,
+                connected: network.connected, known: network.known,
+                stateChanging: network.stateChanging, signalStrength: network.signalStrength,
+                available: true
+            }
+            let index = -1
+            for (let i = 0; i < networkCache.count; ++i) {
+                if (networkCache.get(i).networkData.key === key) { index = i; break }
+            }
+            if (index < 0) networkCache.append({networkData: data})
+            else if (JSON.stringify(networkCache.get(index).networkData) !== JSON.stringify(data))
+                networkCache.setProperty(index, "networkData", data)
+        }
+        for (let i = networkCache.count - 1; i >= 0; --i) {
+            const data = networkCache.get(i).networkData
+            if (seen.has(data.key)) continue
+            if (now - networkLastSeen[data.key] >= Theme.networkCacheTimeout) {
+                delete networkLastSeen[data.key]
+                networkCache.remove(i)
+            } else if (data.available) {
+                networkCache.setProperty(i, "networkData", Object.assign({}, data, {
+                    available: false, connected: false, stateChanging: false
+                }))
+            }
+        }
+    }
+    onLiveNetworksChanged: refreshNetworks()
+    onWifiDeviceChanged: {
+        networkCache.clear()
+        networkLastSeen = ({})
+        refreshNetworks()
+    }
+    onWifiHardwareEnabledChanged: refreshNetworks()
+    Component.onCompleted: refreshNetworks()
+    Timer {
+        interval: Theme.networkCacheRefreshInterval
+        running: root.wifiAvailable && root.wifiEnabled && root.wifiHardwareEnabled
+        repeat: true
+        onTriggered: root.refreshNetworks()
+    }
     property bool menuOpen: false
     property Net.WifiNetwork passwordNetwork: null
     property Net.WifiNetwork attemptNetwork: null
@@ -35,11 +95,14 @@ Singleton {
         target: root.wifiDevice
         property: "scannerEnabled"
         when: root.wifiDevice !== null
-        value: root.menuOpen && root.wifiEnabled
+        value: root.wifiEnabled && root.wifiHardwareEnabled
         restoreMode: Binding.RestoreBindingOrValue
     }
     onMenuOpenChanged: if (!menuOpen) passwordNetwork = null
-    onWifiEnabledChanged: if (!wifiEnabled) passwordNetwork = null
+    onWifiEnabledChanged: {
+        if (!wifiEnabled) passwordNetwork = null
+        refreshNetworks()
+    }
 
     function usesPassword(network) {
         return network && (network.security === Net.WifiSecurityType.WpaPsk
@@ -51,7 +114,9 @@ Singleton {
             Net.Networking.wifiEnabled = enabled
         }
     }
-    function selectWifi(network) {
+    function selectWifi(cachedNetwork) {
+        const network = liveNetworks.find(candidate => networkKey(candidate) === cachedNetwork.key)
+
         if (!network || busy || network.stateChanging || !wifiEnabled) return
         error = ""
         passwordNetwork = null

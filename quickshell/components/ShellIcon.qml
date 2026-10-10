@@ -50,6 +50,9 @@ Canvas {
             if (kind === "bell-dot" || kind === "bell-off-dot") {
                 c.beginPath(); c.arc(17, 3, 2, 0, Math.PI * 2); c.fill()
             }
+        } else if (kind === "package") {
+            c.beginPath(); c.moveTo(10, 2); c.lineTo(17, 6); c.lineTo(17, 14); c.lineTo(10, 18); c.lineTo(3, 14); c.lineTo(3, 6); c.closePath(); c.stroke();
+            c.beginPath(); c.moveTo(3, 6); c.lineTo(10, 10); c.lineTo(17, 6); c.moveTo(10, 10); c.lineTo(10, 18); c.stroke();
         } else if (kind === "wallpaper") {
             c.strokeRect(2, 3, 16, 14)
             c.beginPath(); c.moveTo(3, 15); c.lineTo(8, 9); c.lineTo(12, 13); c.lineTo(15, 10); c.lineTo(18, 14); c.stroke()
