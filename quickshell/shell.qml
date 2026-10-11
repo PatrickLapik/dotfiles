@@ -9,6 +9,7 @@ import qs.modules.media
 import qs.modules.power
 import qs.modules.notifications
 import qs.modules.lock
+import qs.modules.bluetooth
 import qs.modules.network
 import qs.components
 
@@ -26,6 +27,7 @@ ShellRoot{
     VolumePanel { }
     MicrophonePanel {}
     NetworkPanel {}
+    BluetoothPanel {}
     MediaPanel {}
     NotificationCenter{}
     NotificationToasts{}

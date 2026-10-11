@@ -28,6 +28,9 @@ Canvas {
             }
             c.beginPath(); c.arc(10, 16, 1, 0, Math.PI * 2); c.fill()
             if (kind === "offline") line(3, 3, 17, 17)
+        } else if (kind === "bluetooth" || kind === "bluetooth-off") {
+            c.beginPath(); c.moveTo(6, 5); c.lineTo(14, 13); c.lineTo(10, 17); c.lineTo(10, 3); c.lineTo(14, 7); c.lineTo(6, 15); c.stroke()
+            if (kind === "bluetooth-off") line(2, 2, 18, 18)
         } else if (kind === "microphone" || kind === "microphone-muted") {
             c.beginPath(); c.moveTo(7, 5); c.bezierCurveTo(7, 1, 13, 1, 13, 5); c.lineTo(13, 10); c.bezierCurveTo(13, 14, 7, 14, 7, 10); c.closePath(); c.stroke()
             c.beginPath(); c.moveTo(4, 9); c.lineTo(4, 10); c.bezierCurveTo(4, 18, 16, 18, 16, 10); c.lineTo(16, 9); c.stroke()

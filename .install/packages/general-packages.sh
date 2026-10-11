@@ -29,6 +29,7 @@ packagesPacman=(
     "python-psutil" 
     "python-rich" 
     "python-click" 
+    "python-dbus"
     "python-gobject"
     "pavucontrol" 
     "tumbler" 

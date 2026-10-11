@@ -28,6 +28,9 @@ Singleton {
     readonly property int brightnessPanelHeight: ShellConfig.scaled(160)
     readonly property int volumePanelWidth: ShellConfig.scaled(360)
     readonly property int volumePanelHeight: ShellConfig.scaled(160)
+    readonly property int bluetoothPanelWidth: networkPanelWidth
+    readonly property int bluetoothPanelHeight: networkPanelHeight
+    readonly property int bluetoothRowHeight: networkRowHeight
     readonly property int networkPanelWidth: ShellConfig.scaled(400)
     readonly property int networkPanelHeight: ShellConfig.scaled(520)
     readonly property int networkRowHeight: ShellConfig.scaled(58)
@@ -81,6 +84,7 @@ Singleton {
     // available monitor space. "content" fits that axis within its bounds.
     // Omitted width/height follow ShellConfig.popupHugContents and legacy defaults.
     readonly property var popupLimits: ({
+        bluetooth: { width: "content", minWidth: 400, maxWidth: 460, height: "content", maxHeight: "70%" },
         network: { width: "content", minWidth: 400, maxWidth: 460, height: "content", maxHeight: "70%" },
         brightness: { width: "content", minWidth: 360, maxWidth: 460, height: "content", maxHeight: 160 },
         volume: { width: "content", minWidth: 400, maxWidth: 460, height: "content", maxHeight: 160 },

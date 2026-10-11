@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Effects
 import QtQuick.Layouts
 import Quickshell
 import Quickshell as QS
@@ -92,7 +93,7 @@ Item {
             const point = host ? root.mapToItem(host.contentItem, 0, root.height + Spacing.xs) : Qt.point(0, 0)
             return Qt.point(Math.max(0, Math.min(point.x, width - root.width)), Math.min(point.y, height - menuHeight))
         }
-        readonly property real menuHeight: Math.min(Sizing.dropdownMaxHeight, root.count * Sizing.dropdownRowHeight + Spacing.xs * 2)
+        readonly property real menuHeight: Math.min(Sizing.dropdownMaxHeight, root.count * Sizing.dropdownRowHeight)
         mask: QS.Region {
             width: root.popup.visible ? menu.width : 0
             height: root.popup.visible ? menu.height : 0
@@ -109,6 +110,17 @@ Item {
                 easing.type: root.popup.visible ? Animations.expandEasing : Animations.collapseEasing
             }
         }
+        StyledContainer {
+            id: menuMask
+            width: menuContent.width
+            height: menuContent.height
+            radius: menuContent.radius
+            color: "white"
+            highlightOpacity: 0
+            border.width: Theme.borderNone
+            visible: false
+            layer.enabled: true
+        }
         RevealingContainer {
             id: menuContent
             x: menu.origin.x
@@ -118,6 +130,13 @@ Item {
             revealProgress: menu.progress
             // Inherit the shared panel opacity, palette gradient, and border defaults.
             radius: Theme.radiusSmall
+            layer.enabled: true
+            layer.effect: MultiEffect {
+                maskEnabled: true
+                maskSource: menuMask
+                maskThresholdMin: 0.5
+                maskSpreadAtMin: 1.0
+            }
             enabled: root.popup.visible
             focus: true
             Keys.onPressed: event => {
@@ -131,10 +150,8 @@ Item {
             }
             ListView {
                 id: choices
-                x: Spacing.xs
-                y: Spacing.xs
-                width: Math.max(0, menuContent.width - Spacing.xs * 2)
-                height: Math.max(0, menuContent.fullHeight - Spacing.xs * 2)
+                width: menuContent.width
+                height: menuContent.fullHeight
                 clip: true
                 model: root.model
                 ScrollBar.vertical: StyledScrollBar {}

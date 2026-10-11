@@ -12,7 +12,7 @@ RowLayout {
     StyledContainer {
         id: track
         WidgetAnchor { name: "media"; target: track }
-        Layout.preferredWidth: Math.min(title.implicitWidth + Sizing.barIconSize + Spacing.xs, Sizing.mediaTextMaxWidth)
+        Layout.preferredWidth: Math.min(title.implicitWidth + 10 + Sizing.barIconSize + Spacing.xs, Sizing.mediaTextMaxWidth)
         Layout.maximumWidth: Sizing.mediaTextMaxWidth
         implicitHeight: Sizing.widgetHeight
         radius: Theme.radiusSmall

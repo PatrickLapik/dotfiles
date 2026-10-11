@@ -16,6 +16,7 @@ Singleton {
     readonly property int notificationTimeout: 5000
     readonly property int notificationProgressInterval: 33
     readonly property int packageUpdatesPollInterval: 30 * 60 * 1000
+    readonly property int bluetoothOperationTimeout: 60000
     readonly property int networkConnectionTimeout: 45000
     readonly property int networkCacheRefreshInterval: 1000
     readonly property int networkCacheTimeout: 30000

@@ -12,6 +12,15 @@ RowLayout {
     spacing: Spacing.sm
 
     StatusItem {
+        id: bluetoothButton
+        WidgetAnchor { name: "bluetooth"; target: bluetoothButton }
+        statusIcon: Bluetooth.icon
+        Accessible.name: Bluetooth.details
+        interactive: true
+        tint: Bluetooth.enabled ? Colors.text : Colors.textMuted
+        onClicked: Widgets.toggle("bluetooth", bluetoothButton.QsWindow.window.screen.name)
+    }
+    StatusItem {
         id: brightnessButton
         visible: Brightness.available
         WidgetAnchor { name: "brightness"; target: brightnessButton }
