@@ -19,6 +19,8 @@ Scope {
             readonly property bool visibilityLocked: BarVisibility.isLocked(screen)
             readonly property bool pointerAtEdge: PointerPosition.nearTop(screen, Sizing.barRevealHeight)
             readonly property bool pointerInBar: PointerPosition.nearTop(screen, ScreenLayout.barBottom)
+            readonly property bool popupOpen: Widgets.activeName !== ""
+                && Widgets.activeScreenName === screen.name
             onPointerAtEdgeChanged: updateVisibility()
             onPointerInBarChanged: updateVisibility()
             onVisibilityLockedChanged: updateVisibility()
@@ -53,9 +55,14 @@ Scope {
             // Reserve the full bar height (including its top margin) only when pinned.
             exclusionMode: autoHide ? ExclusionMode.Ignore : ExclusionMode.Auto
 
-            // Only the screen-edge strip receives input while hidden.
+            // Include the gaps while a popup is open so they can dismiss it.
+            // Otherwise only the visible sections and reveal strip receive input.
             mask: Region {
                 item: hoverArea
+                Region {
+                    width: barWindow.popupOpen ? barWindow.width : 0
+                    height: barWindow.popupOpen ? Math.max(0, sections.y + sections.height) : 0
+                }
                 Region {
                     x: sections.x + leftSection.x
                     y: sections.y
@@ -79,6 +86,11 @@ Scope {
                 id: hoverArea
                 width: parent.width
                 height: Sizing.barRevealHeight
+            }
+            MouseArea {
+                anchors.fill: parent
+                enabled: barWindow.popupOpen
+                onClicked: Widgets.close(Widgets.activeName)
             }
             Timer {
                 id: hideDelay
