@@ -1,27 +1,8 @@
-[config.wallpaper]
-command = "awww"
-arguments = ["img", "transition-type", "center"]
-set = true
-
-[templates.waybar]
-input_path = "./templates/colors.css"
-output_path = "~/.config/waybar/colors.css"
-
-[templates.wlogout]
-input_path = "./templates/colors.css"
-output_path = "~/.config/wlogout/colors.css"
-
-[templates.swaync]
-input_path = "./templates/colors.css"
-output_path = "~/.config/swaync/colors.css"
+[config]
 
 [templates.alacritty]
 input_path = "./templates/matugen-alacritty.toml"
 output_path = "~/.config/alacritty/matugen-alacritty.toml"
-
-[templates.rofi]
-input_path = "./templates/matugen-rofi.rasi"
-output_path = "~/.config/rofi/colors.rasi"
 
 [templates.lualine]
 input_path = "./templates/matugen-lualine.lua"

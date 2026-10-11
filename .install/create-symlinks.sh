@@ -1,75 +1,44 @@
-#!/bin/bash
-
-# Define the base directory
-BASE_DIR=~/.config
-CURRENT_DIR="$HOME/dotfiles"
-
-
-# Define the subdirectories to be created
-SUBDIRS=("alacritty" "wlogout" "hypr" "dunst" "eww" "fastfetch" "rofi" "waybar" "swaync" "nvim" "matugen" "quickshell")
-
-echo -e "${GREEN}"
-figlet "Symlinks"
-echo -e "${NONE}"
-
-# Create the base directory if it doesn't exist
-if [ ! -d "$BASE_DIR" ]; then
-    echo ":: Base directory $BASE_DIR does not exist. Creating it now..."
-    mkdir -p "$BASE_DIR"
-else
-    echo ":: Base directory $BASE_DIR already exists."
-fi
-
-# Create each subdirectory if it doesn't exist
-for SUBDIR in "${SUBDIRS[@]}"; do
-    TARGET_DIR="$BASE_DIR/$SUBDIR"
-    if [ ! -d "$TARGET_DIR" ]; then
-        echo ":: Subdirectory $TARGET_DIR does not exist. Creating it now..."
-        mkdir -p "$TARGET_DIR"
-    else
-        echo ":: Subdirectory $TARGET_DIR already exists."
+# Sourced by install.sh. Preflight every existing target before applying links.
+config_root=${XDG_CONFIG_HOME:-$HOME/.config}
+config_packages=(alacritty hypr fastfetch nvim matugen quickshell)
+link_packages=("${config_packages[@]}" starship zsh tmux)
+link_targets=()
+for package in "${config_packages[@]}"; do
+    link_targets+=("$config_root/$package")
+done
+link_targets+=("$config_root" "$HOME" "$HOME")
+command -v stow >/dev/null || { printf 'Install GNU Stow first.\n' >&2; exit 1; }
+command -v python3 >/dev/null || { printf 'Install Python first.\n' >&2; exit 1; }
+printf 'Checking configuration links for conflicts...\n'
+for index in "${!link_packages[@]}"; do
+    package=${link_packages[index]}
+    target=${link_targets[index]}
+    if [[ ! -d "$DOTFILES_ROOT/$package" ]]; then
+        printf 'Missing package directory: %s\n' "$package" >&2
+        exit 1
+    fi
+    if [[ -e "$target" || -L "$target" ]]; then
+        if [[ ! -d "$target" ]]; then
+            printf 'Not a directory: %s\n' "$target" >&2
+            exit 1
+        fi
+        # Keep conflict diagnostics and the failing status (install.sh uses pipefail).
+        stow --simulate --restow --dir="$DOTFILES_ROOT" --target="$target" "$package" 2>&1 \
+            | sed '/^WARNING: in simulation mode so not modifying filesystem\.$/d' >&2
     fi
 done
-
-# Execute the stow command for each subdirectory
-for SUBDIR in "${SUBDIRS[@]}"; do
-    TARGET_DIR="$BASE_DIR/$SUBDIR"
-    echo ":: Creating symlink for $SUBDIR"
-    stow -t "$TARGET_DIR" -d "$CURRENT_DIR" "$SUBDIR"
-    echo ":: Symlink created for $SUBDIR"
+if ! $dry_run; then printf 'Linking configuration...\n'; fi
+for index in "${!link_packages[@]}"; do
+    package=${link_packages[index]}
+    target=${link_targets[index]}
+    if $dry_run; then
+        printf 'Would link %s into %s\n' "$package" "$target"
+    else
+        mkdir -p "$target"
+        stow --restow --dir="$DOTFILES_ROOT" --target="$target" "$package"
+    fi
 done
-
-# Manual commands
-stow -t "$BASE_DIR" -d "$CURRENT_DIR" starship
-stow -t ~/ -d "$CURRENT_DIR" zsh
-stow -t ~/ -d "$CURRENT_DIR" tmux
-
-# Copy themes to sddm themes folder because it doesn't work any other way rn
-read -p "Copy sddm themes from dotfiles to default sddm themes folder? [y/N]: " copy_themes
-
-case "$copy_themes" in 
-    [Yy]* )
-        echo ":: Copying themes from dotfiles to default sddm themes folder."
-        sudo cp -r ~/dotfiles/sddm/themes/* /usr/share/sddm/themes
-        ;;
-    * )
-        echo ":: Proceeding without copying the themes"
-        ;;
-esac
-
-if [ ! -e "/etc/sddm.conf.d" ]; then
-    sudo ln -s ~/dotfiles/sddm/default.conf /etc/sddm.conf.d
-fi
-
-if [ ! -f ~/.cache/zsh/.zsh_history ]; then
-    read -p ":: No zsh command cache file present. Create the file? [y/N]: " create_cache
-    case "$create_cache" in
-        [Yy]* )
-            mkdir -p ~/.cache/zsh
-            touch ~/.cache/zsh/.zsh_history
-            echo ":: Created cache file in ~/.cache/zsh/.zsh_history"
-            ;;
-        * )
-            echo ":: Proceeding without creating the cache file"
-    esac
+if ! $dry_run; then
+    mkdir -p "$HOME/.cache/zsh"
+    [[ -e "$HOME/.cache/zsh/.zsh_history" ]] || touch "$HOME/.cache/zsh/.zsh_history"
 fi

@@ -4,6 +4,7 @@ packagesPacman=(
     "zsh"
     "vim"
     "stow"
+    "python"
     "bluez"
     "keepassxc"
     "bluez-utils"
@@ -14,6 +15,7 @@ packagesPacman=(
     "starship"
     "mpv" 
     "thunar" 
+    "nautilus"
     "mousepad"
     "noto-fonts" 
     "otf-font-awesome" 
@@ -55,7 +57,6 @@ packagesPacman=(
     "imagemagick"
     "guvcview"
     "jq"
-    "rofi-wayland"
     "fastfetch"
     "blueman"
 );
@@ -64,5 +65,4 @@ packagesYay=(
     "bibata-cursor-theme" 
     "trizen"
     "pacseek"
-    "hyprpanel-bin"
 );

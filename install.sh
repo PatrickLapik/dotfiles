@@ -1,59 +1,50 @@
-#!/bin/bash
-source .install/includes/colors.sh
-source .install/includes/library.sh
-clear
+#!/usr/bin/env bash
+# Link the current checkout; package installation is explicitly opt-in.
+set -euo pipefail
+DOTFILES_ROOT=$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+export DOTFILES_ROOT
+install_packages=false
+install_sddm=false
+dry_run=false
+for option in "$@"; do
+    case "$option" in
+        --dry-run) dry_run=true ;;
+        --packages) install_packages=true ;;
+        --sddm) install_sddm=true ;;
+        --help|-h)
+            cat <<'HELP'
+Usage: ./install.sh [--dry-run] [--packages] [--sddm]
 
-# Set installation mode
-mode="dev"
-if [ ! -z $1 ]; then
-    mode="dev"
-    echo "IMPORTANT: DEV MODE ACTIVATED. "
-    echo "Existing dotfiles folder will not be modified."
-    echo "Symbolic links will not be created."
+Default: link the current dotfiles with Stow and check runtime dependencies.
+--dry-run   Show changes and check existing targets without modifying files.
+--packages  Install the package lists with pacman and yay first (Arch Linux).
+--sddm      Copy the Monochrome theme and default configuration into /usr/share
+            and /etc. Does not enable or replace your display manager.
+
+Existing configuration conflicts are reported, never adopted or overwritten.
+Runtime helpers expect this checkout at ~/dotfiles.
+HELP
+            exit 0 ;;
+        *) printf 'Unknown option: %s\n' "$option" >&2; exit 2 ;;
+    esac
+done
+if [[ "$DOTFILES_ROOT" != "$HOME/dotfiles" ]]; then
+    printf 'Keep this checkout at ~/dotfiles; runtime helpers use that location.\n' >&2
+    exit 1
 fi
-echo -e "${GREEN}"
-cat <<"EOF"
- __  __ _    _  ___        __  ____        _    __ _ _           
-|  \/  | |  | || \ \      / / |  _ \  ___ | |_ / _(_) | ___  ___ 
-| |\/| | |  | || |\ \ /\ / /  | | | |/ _ \| __| |_| | |/ _ \/ __|
-| |  | | |__|__   _\ V  V /   | |_| | (_) | |_|  _| | |  __/\__ \
-|_|  |_|_____| |_|  \_/\_/    |____/ \___/ \__|_| |_|_|\___||___/
-                                                                 
-EOF
-echo -e "${NONE}"
-
-echo "Version: $version"
-echo "by Stephan Raabe 2024"
-echo ""
-source .install/required.sh
-source .install/confirm-start.sh
-source .install/paralleldownloads.sh
-source .install/yay.sh
-source .install/updatesystem.sh
-source .install/backup.sh
-source .install/preparation.sh
-source .install/installer.sh
-source .install/remove.sh
-source .install/general.sh
-source .install/packages/general-packages.sh
-source .install/install-packages.sh
-source .install/packages/hyprland-packages.sh
-source .install/install-packages.sh
-source .install/wallpaper.sh
-source .install/displaymanager.sh
-source .install/issue.sh
-source .install/restore.sh
-source .install/keyboard.sh
-source .install/neovim.sh
-source .install/hook.sh
-source .install/vm.sh
-source .install/copy.sh
-source .install/init-pywal.sh
-source .install/create-symlinks.sh
-source .install/settings.sh
-source .install/apps.sh
-source .install/gtk.sh
-source .install/cleanup.sh
-source .install/diagnosis.sh
-source .install/reboot.sh
-sleep 3
+if $install_packages; then
+    source "$DOTFILES_ROOT/.install/install-packages.sh"
+fi
+source "$DOTFILES_ROOT/.install/create-symlinks.sh"
+if $install_sddm; then
+    if $dry_run; then
+        printf 'Would install sddm/themes/monochrome and sddm/default.conf.\n'
+    else
+        sudo mkdir -p /usr/share/sddm/themes /etc/sddm.conf.d
+        sudo cp -a "$DOTFILES_ROOT/sddm/themes/monochrome" /usr/share/sddm/themes/
+        sudo install -m 644 "$DOTFILES_ROOT/sddm/default.conf" /etc/sddm.conf.d/default.conf
+    fi
+fi
+if ! $dry_run; then
+    source "$DOTFILES_ROOT/.install/diagnosis.sh"
+fi

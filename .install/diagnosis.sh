@@ -1,28 +1,29 @@
-echo -e "${GREEN}"
-figlet "System check"
-echo -e "${NONE}"
-
-echo "The system check will test that essential packages and "
-echo "execution commands are available now on your system."
-echo 
-if gum confirm "Do you want to run a short system check?" ;then
-
-    _folderExists "$HOME/dotfiles" "Please repeat the installation."
-    _commandExists "rofi" "rofi-wayland"
-    _commandExists "dunst" "dunst"
-    _commandExists "waybar" "waybar"
-    _commandExists "hyprpaper" "hyprpaper"
-    _commandExists "hyprlock" "hyprpaper"
-    _commandExists "hypridle" "hyprpaper"
-    _commandExists "wal" "python-pywal"
-    _commandExists "gum" "gum"
-    _commandExists "wlogout" "wlogout"
-    _commandExists "eww" "eww"
-    _commandExists "magick" "imagemagick"
-
-elif [ $? -eq 130 ]; then
-    exit 130
-else
-    echo ":: System check skipped"
+# Read-only runtime checks; missing tools do not undo successful symlinks.
+missing=0
+for command in Hyprland quickshell hyprlock hypridle matugen python3 \
+    cliphist wl-copy wl-paste brightnessctl wpctl pw-dump pw-metadata \
+    pactl playerctl grim hyprshot checkupdates trizen yay gum figlet; do
+    if ! command -v "$command" >/dev/null; then
+        printf 'Missing runtime command: %s\n' "$command" >&2
+        missing=1
+    fi
+done
+if [[ ! -r /etc/pam.d/hyprlock ]]; then
+    printf 'Missing /etc/pam.d/hyprlock; install Hyprlock for lock authentication.\n' >&2
+    missing=1
 fi
-echo ""
+if ! python3 -c 'import dbus; from gi.repository import GLib' >/dev/null 2>&1; then
+    printf 'Bluetooth pairing requires python-dbus and python-gobject.\n' >&2
+    missing=1
+fi
+for service in NetworkManager bluetooth; do
+    if ! systemctl is-active --quiet "$service"; then
+        printf 'Service is not active: %s. Enable it if required for this machine.\n' "$service" >&2
+        missing=1
+    fi
+done
+if (( missing )); then
+    printf 'Dotfiles linked. Resolve the missing dependencies before starting the desktop.\n'
+else
+    printf 'Dotfiles linked; runtime dependency checks passed.\n'
+fi
