@@ -12,15 +12,7 @@ require('conf.windowrule')
 
 require('conf.cursors')
 
-hl.monitor({
-    output = "DP-2",
-    mode = "2560x1440@144",
-})
-
-hl.monitor({
-    output = "",
-    scale = 1
-})
+require("conf.monitors")
 
 hl.config({
     general = {

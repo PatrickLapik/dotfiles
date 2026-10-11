@@ -13,3 +13,12 @@ hl.config({
         },
     },
 })
+
+hl.layer_rule({
+    name = "quickshell-centered-popups",
+    match = {
+        namespace = "centered-popup"
+    },
+    blur_popups = true,
+    dim_around = true
+})

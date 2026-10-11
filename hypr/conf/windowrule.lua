@@ -5,11 +5,23 @@ hl.window_rule({
     },
     float = true,
     center = true,
-    size = {"(monitor_w*0.5)", "(monitor_h*0.5)"}
+    size = { "(monitor_w*0.5)", "(monitor_h*0.5)" }
 })
 
 hl.layer_rule({
     name = "quickshell-surface-animations",
     match = { namespace = "^quickshell$" },
     no_anim = true,
+})
+
+hl.window_rule({
+    name = "xwayland-video-bridge-fixes",
+    match = {
+        class = "xwaylandvideobridge"
+    },
+    no_initial_focus = true,
+    no_focus = true,
+    no_anim = true,
+    no_blur = true,
+    opacity = 0.0
 })
