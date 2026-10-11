@@ -28,6 +28,8 @@ Singleton {
     readonly property real headingLetterSpacing: 0
     readonly property real buttonLetterSpacing: 0
     readonly property real surfaceTextureOpacity: metalStyle ? 0.18 : 0
+    // Lucide stroke width in its 24-unit viewBox. Match this to your font weight.
+    readonly property real iconStrokeWidth: 1.7
     readonly property int fontWeight: Font.Normal
     readonly property int controlFontWeight: Font.Medium
     readonly property int headingFontWeight: Font.DemiBold
@@ -36,7 +38,6 @@ Singleton {
     readonly property int fontSize: ShellConfig.scaled(12)
     readonly property int fontSizeLarge: ShellConfig.scaled(16)
     readonly property int headingLineHeight: ShellConfig.scaled(28)
-    readonly property real iconStrokeWidth: 1.5 * ShellConfig.effectiveUiScale
     readonly property real inactiveCalendarOpacity: 0.45
 
     readonly property int borderNone: 0

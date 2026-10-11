@@ -2,6 +2,7 @@ pragma Singleton
 import Quickshell
 
 Singleton {
+    readonly property int iconBadgeInset: ShellConfig.scaled(1)
     readonly property int lockEdgeInset: ShellConfig.scaled(64)
     readonly property int scrollBarPadding: ShellConfig.scaled(1)
     readonly property int xs: ShellConfig.scaled(4)

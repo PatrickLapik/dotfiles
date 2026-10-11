@@ -7,6 +7,7 @@ import qs.config
 
 StyledButton {
     id: root
+    property real batteryLevel: 100
     property string statusIcon: ""
     property string label: ""
     property color tint: Colors.text
@@ -28,7 +29,7 @@ StyledButton {
         id: content
         anchors.centerIn: parent
         spacing: Spacing.xs
-        BarIcon { visible: root.statusIcon !== ""; kind: root.statusIcon; tint: root.tint }
+        BarIcon { visible: root.statusIcon !== ""; kind: root.statusIcon; tint: root.tint; batteryLevel: root.batteryLevel }
         Text {
             visible: root.label !== ""
             text: root.label

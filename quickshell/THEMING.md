@@ -86,7 +86,7 @@ tile across metal surfaces; `Theme.surfaceTextureOpacity` controls its strength.
 Matugen continues to update other applications while metal styling is active.
 
 Use `StyledButton` for text actions and `StyledIconButton` for icon actions.
-The latter uses `ShellIcon`, the common drawn icon system for status, playback,
+The latter uses `ShellIcon`, the shared Lucide SVG renderer for status, playback,
 calendar navigation, and session controls. Set `flat: true` for quiet actions;
 checked controls and keyboard focus retain their shared indication. `RoundedImage`
 provides consistent rounded previews and artwork.
@@ -556,3 +556,52 @@ the lock, rather than merely the launch of the command. See the
 [Quickshell session-lock documentation](https://quickshell.org/docs/v0.2.1/types/Quickshell.Wayland/WlSessionLock/),
 [PAM API](https://quickshell.org/docs/v0.3.0/types/Quickshell.Services.Pam/PamContext/),
 and [Hypridle sleep inhibition](https://wiki.hypr.land/hypr-ecosystem/user/hypridle/).
+
+## Shell icons
+
+Shell controls use bundled Lucide SVGs in `assets/lucide`, with upstream version
+and licensing recorded there. No system Lucide package or icon theme is needed;
+`qt6-svg` is included in the desktop installer. Application icons resolve through
+the system icon theme separately.
+
+`components/ShellIcon.qml` maps semantic `kind` names to SVG assets, applying
+`tint` and `strokeWidth` directly to the SVG before rendering. Unknown kinds use
+a question icon. Adjust `Theme.iconStrokeWidth` alongside the font settings:
+`1.5` is light, `1.8` is the default, and `2.5` is heavier. Width is measured in
+Lucide's 24-unit viewBox, so it scales with icon dimensions and `ShellConfig.uiScale`
+just like typography. Do not multiply `iconStrokeWidth` by `uiScale` again.
+Changing `fontFamily` or `fontWeight` does not automatically change icon thickness;
+adjust the stroke width alongside them to match the appearance.
+
+Edit `config/Theme.qml` to set the shared default:
+
+```qml
+readonly property real iconStrokeWidth: 1.8
+```
+
+Use `Sizing.barIconSize` for the default shell icon dimensions; widgets may use
+other shared Sizing tokens. Icons hug their artwork horizontally by default,
+keeping a consistent height and including the current stroke width in their bounds.
+Set `hugContents: false` for a square SVG viewBox. Explicit widget dimensions still
+control the available icon box. Changing font size alone does not resize icons.
+Individual icons can override the stroke width while keeping shared sizing:
+
+```qml
+ShellIcon {
+    kind: "volume"
+    tint: Colors.text
+    strokeWidth: 2.5
+}
+```
+
+Stroke and tint changes apply through QML hot reload without a shell restart.
+The upstream SVG files remain unchanged: the renderer adjusts their color and
+stroke width in memory. To add an icon, include its upstream SVG in
+`assets/lucide` and add its semantic name to `ShellIcon.iconNames`. Keep the
+upstream source/version record and license with the bundled assets. Regenerate
+`assets/lucide/bounds.js` using its `update-bounds.py` helper after asset changes.
+
+Lucide supplies the unread bell icon; the disabled bell's unread dot uses
+`Sizing.iconBadgeSize` and `Spacing.iconBadgeInset`. Battery icons use
+`batteryLevel` to select empty (0–10%), low (11–30%), medium (31–70%), or full
+(above 70%). Charging uses Lucide's battery-charging icon.

@@ -68,6 +68,7 @@ RowLayout {
     }
     StatusItem {
         visible: Environment.showBattery
+        batteryLevel: Environment.batteryPercent
         statusIcon: Environment.charging ? "charging" : "battery"
         label: Environment.batteryPercent + "%"
         Accessible.name: Environment.charging ? "Charging" : Environment.onBattery ? "On battery" : "Plugged in"

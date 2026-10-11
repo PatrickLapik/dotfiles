@@ -49,6 +49,7 @@ Singleton {
     readonly property int notificationMaxToasts: 3
     readonly property int notificationHistoryLimit: 100
     readonly property int barSlantWidth: ShellConfig.scaled(20)
+    readonly property int iconBadgeSize: ShellConfig.scaled(4)
     readonly property int barIconSize: ShellConfig.scaled(20)
     readonly property int barHeight: ShellConfig.scaled(46)
     readonly property int clockMenuWidth: ShellConfig.scaled(460)
