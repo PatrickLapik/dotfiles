@@ -2,6 +2,7 @@
 packagesPacman=(
     "hyprland"
     "quickshell"
+    "awww"
     "hyprlock" # Recovery locker and PAM policy used by Quickshell.
     "hypridle"
     "xdg-desktop-portal-hyprland"

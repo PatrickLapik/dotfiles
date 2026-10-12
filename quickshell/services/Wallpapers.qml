@@ -15,7 +15,6 @@ Singleton {
     readonly property bool busy: selection.running
     readonly property bool scanning: discovery.running
     readonly property string script: decodeURIComponent(Qt.resolvedUrl("../scripts/wallpapers.py").toString().replace(/^file:\/\//, ""))
-    readonly property url source: "file://" + current.split("/").map(encodeURIComponent).join("/")
     property string pendingResult: ""
 
     function refresh() {
@@ -68,7 +67,7 @@ Singleton {
                     root.schemeType = result.schemeType
                 }
                 catch (e) { root.error = "Could not read the selected wallpaper." }
-            } else if (!root.error) root.error = "Could not change wallpaper. Check that Matugen is installed."
+            } else if (!root.error) root.error = "Could not change wallpaper. Check Matugen and awww-daemon."
         }
     }
 }

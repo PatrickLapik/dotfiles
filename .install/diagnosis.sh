@@ -1,6 +1,6 @@
 # Read-only runtime checks; missing tools do not undo successful symlinks.
 missing=0
-for command in Hyprland quickshell hyprlock hypridle matugen python3 \
+for command in Hyprland quickshell hyprlock hypridle matugen python3 awww awww-daemon \
     cliphist wl-copy wl-paste brightnessctl wpctl pw-dump pw-metadata \
     pactl playerctl grim hyprshot checkupdates trizen yay gum figlet; do
     if ! command -v "$command" >/dev/null; then

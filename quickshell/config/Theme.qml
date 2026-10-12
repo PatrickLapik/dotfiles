@@ -56,7 +56,6 @@ Singleton {
     readonly property int barHideDelay: 300
     readonly property int pointerPollInterval: 100
     readonly property int brightnessPollInterval: 3000
-    readonly property int wallpaperTransitionDuration: 700
     readonly property int easing: Easing.OutCubic
     // Strength is compositor-wide: hypr/conf/blur.lua (size and passes).
     readonly property bool backdropBlurEnabled: true

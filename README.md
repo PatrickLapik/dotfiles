@@ -46,7 +46,17 @@ Use `scripts/widget.sh list` for available widgets and
 `scripts/widget.sh <name> [open|toggle|close]` to control them. See
 [Quickshell theming and configuration](quickshell/THEMING.md) for details.
 
-Quickshell renders wallpapers itself; no separate wallpaper daemon is started.
+`awww` renders the desktop wallpaper independently of Quickshell. Hyprland starts
+`awww-daemon` directly from Lua autostart, then a separate helper restores the
+saved wallpaper (or the first bundled image on a
+fresh session). The Quickshell picker applies wallpapers through `awww` and keeps
+generating application colors with Matugen. Install both `awww` and `matugen`.
+
+Wallpaper changes use a one-second growing-circle transition at 60 FPS. Set
+`AWWW_TRANSITION`, `AWWW_TRANSITION_DURATION`, and `AWWW_TRANSITION_FPS` in the
+session environment to customize it; other `awww` transition variables also work.
+With the daemon running, restore the wallpaper manually with
+`python3 ~/.config/quickshell/scripts/wallpapers.py restore`.
 Matugen still generates colors for Quickshell, GTK, Qt, Alacritty, Neovim, tmux,
 and Gum. The package-update button uses `scripts/updates.sh` and
 `scripts/installupdates.sh`; keep those helpers and their dependencies.

@@ -108,9 +108,8 @@ matugen image /path/to/wallpaper -m dark
 # Or use -m light for a light palette.
 ```
 
-This also runs your other configured templates and wallpaper command. The
-Quickshell background follows the wallpaper picker selection; running Matugen
-from a terminal changes colors but does not change the picker selection.
+This runs your configured templates. Running Matugen from a terminal changes
+colors but does not change the wallpaper or picker selection.
 
 Use `components/containers/StyledContainer.qml` for every visual container, including bars, popups, cards, and widget backgrounds. It supplies shared surface color, radius, and border defaults; override these with theme tokens as needed. Keep window behavior separate and use normal anchors/layouts for its children.
 
@@ -139,7 +138,7 @@ Use matching `on*` roles for readable text. `panel`, `text`, `textMuted`, `borde
 and `accent` provide common shell aliases. `Colors.withAlpha(color, opacity)`
 adds transparency without embedding alpha in generated colors.
 
-`Theme` holds typography, radii, wallpaper transition timing and panel opacity. `Spacing`
+`Theme` holds typography, radii, and panel opacity. `Spacing`
 and `Sizing` hold layout tokens. The compatibility `success` alias maps to
 `tertiary`, an accent rather than a guaranteed green status color.
 
@@ -165,9 +164,9 @@ height while their results scroll.
 
 Selecting an image regenerates all configured Matugen application themes in dark mode, changes the
 background on all monitors, and saves the selection to
-`$XDG_STATE_HOME/quickshell/wallpaper.json` (default `~/.local/state`). The shell
-restores this selection on launch, falling back to `assets/Wallpaper.jpg` if the
-saved image is missing. Failed generation keeps the existing selection and shows
+`$XDG_STATE_HOME/quickshell/wallpaper.json` (default `~/.local/state`). The session startup helper
+restores this selection through `awww`, falling back to the first bundled image if
+the saved image is missing. Failed generation or rendering keeps the saved selection and shows
 an error in the picker.
 
 The **Color scheme** dropdown selects Matugen's `--type` from all ten supported
@@ -176,15 +175,16 @@ current wallpaper. The scheme is saved alongside the wallpaper after successful
 generation and reused for later selections and shell restarts. Before selecting
 a first wallpaper, the dropdown chooses the scheme to use for that selection.
 
-The picker requires Python 3 and Matugen. It uses a temporary copy of
+The picker requires Python 3, Matugen, and a running `awww-daemon`. It uses a temporary copy of
 `matugen/config.toml`, keeping all application templates and their reload hooks.
-The wallpaper command is disabled in this copy so Quickshell renders the selected
-image with its crossfade. Applications that do not watch their theme files need
+The Matugen wallpaper command is disabled in this copy; the helper sends the
+selected image to `awww` after theme generation. Applications that do not watch their theme files need
 a reload hook or restart to display the generated colors.
 
-Wallpaper changes use a 700 ms crossfade after the next image finishes loading.
-Adjust `Theme.wallpaperTransitionDuration` to change the speed. Selections made
-during a fade are applied after it finishes, using the latest selection.
+Wallpaper changes use a one-second `grow` transition at 60 FPS. Customize with
+`AWWW_TRANSITION`, `AWWW_TRANSITION_DURATION`, and `AWWW_TRANSITION_FPS` in the
+session environment. Startup restoration is instant and does not regenerate themes.
+Quickshell no longer owns a desktop background window.
 
 ## Application launcher
 
