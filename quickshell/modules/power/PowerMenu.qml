@@ -68,17 +68,6 @@ Scope {
                         required property int index
                         Layout.fillWidth: true
                         spacing: Spacing.xs
-                        Item {
-                            Layout.fillWidth: true
-                            implicitHeight: Spacing.sm + Theme.borderWidth
-                            visible: actionRow.index === 3
-                            Rectangle {
-                                anchors.verticalCenter: parent.verticalCenter
-                                width: parent.width
-                                height: Theme.borderWidth
-                                color: Colors.border
-                            }
-                        }
                         StyledButton {
                             id: actionButton
                             Layout.fillWidth: true

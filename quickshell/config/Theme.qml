@@ -59,7 +59,7 @@ Singleton {
     readonly property int easing: Easing.OutCubic
     // Strength is compositor-wide: hypr/conf/blur.lua (size and passes).
     readonly property bool backdropBlurEnabled: true
-    readonly property real panelOpacity: 0.2
+    readonly property real panelOpacity: 0.5
     readonly property color containerHighlightColor: Colors.primary
     readonly property color containerHighlightSecondary: Colors.secondary
     readonly property color containerHighlightTertiary: Colors.tertiary

@@ -9,6 +9,7 @@ import qs.config
 Singleton {
     id: root
     property var usage: ({})
+    property var floatingLaunches: ({})
     property bool tracking: true
     property bool ready: false
     property string error: ""
@@ -46,6 +47,64 @@ Singleton {
         return true
     }
     function windowsFor(id: string): var { return windows.filter(row => row.entry && row.entry.id === id) }
+    function notificationEntry(notification: var): var {
+        if (!notification) return null
+        const desktopId = notification.desktopEntry || ""
+        const appName = notification.appName || ""
+        return (desktopId ? entryFor(desktopId) : null)
+            || (appName ? entryFor(appName) : null)
+            || entries.find(entry => appName && entry.name.toLowerCase() === appName.toLowerCase()) || null
+    }
+    function openNotification(notification: var): bool {
+        if (!notification) return false
+        const entry = notificationEntry(notification)
+        const appName = (notification.appName || "").toLowerCase()
+        const matches = entry ? windowsFor(entry.id) : windows.filter(row => appName && row.appId.toLowerCase() === appName)
+        const existing = matches.find(row => row.active) || matches[0]
+        if (existing && focusWindow(existing.window)) return true
+        if (!entry) return false
+        launch(entry, true)
+        return true
+    }
+    function openScreenshot(path: string) {
+        // Quote the filename for exec_cmd's shell, then quote that command for Lua.
+        const command = "loupe '" + path.replace(/'/g, "'\\''") + "'"
+        Hyprland.dispatch(Hyprland.usingLua
+            ? "hl.dsp.exec_cmd(" + JSON.stringify(command)
+                + ', { float = true, center = true, size = { "(monitor_w*0.5)", "(monitor_h*0.5)" } })'
+            : "exec [float; center; size 50% 50%] " + command)
+    }
+    function floatLaunchedWindows() {
+        const pending = Object.assign({}, floatingLaunches)
+        for (const id of Object.keys(pending)) {
+            const request = pending[id]
+            if (request.expires <= Date.now()) { delete pending[id]; continue }
+            const row = windows.find(row => (row.entry && row.entry.id === id) || row.appId === id)
+            const address = row ? windowAddress(row.window) : ""
+            if (!address) continue
+            Hyprland.dispatch(Hyprland.usingLua
+                ? 'hl.dsp.window.float({ action = "enable", window = "address:' + address + '" })'
+                : "setfloating address:" + address)
+            focusWindow(row.window)
+            delete pending[id]
+        }
+        floatingLaunches = pending
+    }
+    // Match the resulting window rather than a launcher PID: desktop apps may
+    // activate through D-Bus or fork away from gtk-launch.
+    onWindowsChanged: if (Object.keys(floatingLaunches).length) Qt.callLater(() => root.floatLaunchedWindows())
+    // Class metadata can arrive after the Wayland toplevel and its title.
+    // Retry while launches are pending instead of relying on a model change
+    // to refresh Hyprland IPC data. Expired requests stop this timer too.
+    Timer {
+        interval: 100
+        repeat: true
+        running: Object.keys(root.floatingLaunches).length > 0
+        onTriggered: {
+            Hyprland.refreshToplevels()
+            root.floatLaunchedWindows()
+        }
+    }
     function changed() { dirty = true; saveDelay.restart() }
     function record(id: string) {
         if (!ready || !tracking || !id) return
@@ -63,7 +122,12 @@ Singleton {
     }
     function clearHistory() { if (ready) { usage = ({}); changed() } }
     function toggleTracking() { if (ready) { tracking = !tracking; focusDelay.stop(); changed() } }
-    function launch(entry: var) {
+    function launch(entry, floating = false) {
+        if (floating) {
+            const pending = Object.assign({}, floatingLaunches)
+            pending[entry.id] = {expires: Date.now() + 15000}
+            floatingLaunches = pending
+        }
         Quickshell.execDetached(["gtk-launch", entry.id])
         record(entry.id)
     }

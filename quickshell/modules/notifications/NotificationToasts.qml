@@ -171,7 +171,7 @@ Scope {
                             showTimeout: countdown.duration > 0
                             timeoutProgress: countdown.progress
                             transform: Translate { x: (toast.width + Spacing.barMargin) * (1 - toast.reveal) }
-                            onClicked: Widgets.open("notifications", window.screen.name)
+                            onClicked: Notifications.activate(toast.entry.notification, window.screen.name)
                         }
                         HoverHandler { id: hover }
                         BarVisibilityLock { screen: window.screen; active: hover.hovered && !toast.closing }

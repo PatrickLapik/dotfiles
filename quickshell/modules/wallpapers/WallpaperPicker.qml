@@ -146,11 +146,6 @@ Scope {
                     color: Colors.textMuted
                 }
             }
-            Rectangle {
-                Layout.fillWidth: true
-                height: Theme.borderWidth
-                color: Colors.border
-            }
             RowLayout {
                 Layout.fillWidth: true
                 spacing: Spacing.sm

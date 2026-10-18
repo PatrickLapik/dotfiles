@@ -94,7 +94,7 @@ Scope {
                         required property var modelData
                         width: list.width - Sizing.scrollBarWidth - Spacing.xs
                         notification: modelData
-                        onClicked: forceActiveFocus()
+                        onClicked: Notifications.activate(modelData, popup.screen.name)
                     }
                 }
             }

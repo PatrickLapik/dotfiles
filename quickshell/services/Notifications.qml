@@ -17,6 +17,40 @@ Singleton {
         .sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id))
     readonly property int count: history.length
 
+    function screenshotTarget(notification) {
+        if (!notification || (notification.appName || "").toLowerCase() !== "hyprshot") return ""
+        // notify-send sends Hyprshot previews through the image-path hint.
+        // Clipboard-only captures have no saved image to open.
+        const hints = notification.hints || {}
+        const paths = [hints["image-path"], hints.image_path, notification.appIcon]
+        const path = paths.find(path => typeof path === "string"
+            && (path.startsWith("/") || path.startsWith("file:///"))) || ""
+        if (!path.startsWith("file:///")) return path
+        try { return decodeURIComponent(path.slice(7)) }
+        catch (_) { return "" }
+    }
+    function activate(notification, screenName) {
+        if (!notification) return
+        Widgets.close("notifications")
+        const id = notification.id
+        const screenshot = screenshotTarget(notification)
+        // Release popup keyboard focus before switching to an application.
+        Qt.callLater(() => {
+            if (screenshot) {
+                Applications.openScreenshot(screenshot)
+                hideToast(id)
+                return
+            }
+            if (Applications.openNotification(notification)) {
+                hideToast(id)
+                return
+            }
+            const action = notification.actions.find(action => action.identifier === "default")
+                || notification.actions.find(action => /^(view|open)$/i.test(action.text.trim()))
+            if (action) { action.invoke(); hideToast(id) }
+            else Widgets.open("notifications", screenName)
+        })
+    }
     function hideToast(id) { toasts = toasts.filter(t => t.id !== id) }
     function hideAllToasts() {
         const transient = server.trackedNotifications.values.filter(n => n.transient)
@@ -63,7 +97,7 @@ Singleton {
             } else if (!n.lastGeneration) {
                 const screenName = Hyprland.focusedMonitor ? Hyprland.focusedMonitor.name : ""
                 // Keep display data available while a closed notification slides out.
-                const snapshot = { id: n.id, appName: n.appName, appIcon: n.appIcon,
+                const snapshot = { id: n.id, appName: n.appName, appIcon: n.appIcon, desktopEntry: n.desktopEntry,
                     image: n.image, summary: n.summary, body: n.body, urgency: n.urgency, expireTimeout: n.expireTimeout,
                     actions: n.actions.map(action => ({ text: action.text, identifier: action.identifier })) }
                 const toast = { id: n.id, notification: n, snapshot: snapshot, screenName: screenName, serial: ++root.serial }
