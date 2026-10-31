@@ -129,12 +129,45 @@ LazyWidget {
                             anchors.fill: parent
                             clip: true
                             spacing: Spacing.xs
-                            model: Bluetooth.enabled ? Bluetooth.devices : []
+                            model: ListModel { id: deviceModel }
+                            readonly property var discoveredDevices: Bluetooth.enabled ? Bluetooth.devices : []
+                            onDiscoveredDevicesChanged: syncDevices()
+                            Component.onCompleted: syncDevices()
+
+                            function syncDevices() {
+                                // Keep the visible device and its offset stable across discovery updates.
+                                const stride = Sizing.bluetoothRowHeight + spacing
+                                const topIndex = Math.max(0, Math.min(deviceModel.count - 1,
+                                    Math.floor((contentY - originY) / stride)))
+                                const topPath = deviceModel.count ? deviceModel.get(topIndex).path : ""
+                                const offset = contentY - originY - topIndex * stride
+                                for (let i = 0; i < discoveredDevices.length; ++i) {
+                                    const device = discoveredDevices[i]
+                                    let existing = i
+                                    while (existing < deviceModel.count && deviceModel.get(existing).path !== device.dbusPath)
+                                        ++existing
+                                    if (existing === deviceModel.count)
+                                        deviceModel.insert(i, { path: device.dbusPath, device: device })
+                                    else {
+                                        if (existing !== i) deviceModel.move(existing, i, 1)
+                                        deviceModel.setProperty(i, "device", device)
+                                    }
+                                }
+                                if (deviceModel.count > discoveredDevices.length)
+                                    deviceModel.remove(discoveredDevices.length, deviceModel.count - discoveredDevices.length)
+                                forceLayout()
+                                for (let i = 0; i < deviceModel.count; ++i) {
+                                    if (deviceModel.get(i).path !== topPath) continue
+                                    contentY = originY + Math.max(0, Math.min(Math.max(0, contentHeight - height), i * stride + offset))
+                                    break
+                                }
+                            }
                             boundsBehavior: Flickable.StopAtBounds
                             ScrollBar.vertical: StyledScrollBar {}
                             delegate: StyledButton {
                                 id: option
-                                required property var modelData
+                                required property var device
+                                readonly property var modelData: device
                                 readonly property bool connected: !!modelData && modelData.connected
                                 readonly property bool changing: !!modelData && (modelData.pairing || modelData.state === BT.BluetoothDeviceState.Connecting
                                     || modelData.state === BT.BluetoothDeviceState.Disconnecting || Bluetooth.operationPath === modelData.dbusPath)

@@ -25,11 +25,22 @@ LazyWidget {
                 property date monthDate: new Date()
                 property date selectedDate: new Date()
                 function goToToday() {
-                    monthDate = Time.currentDate
+                    showMonth(Time.currentDate)
                     selectedDate = Time.currentDate
                 }
                 function changeMonth(offset: int) {
-                    monthDate = new Date(monthDate.getFullYear(), monthDate.getMonth() + offset, 1)
+                    showMonth(new Date(monthDate.getFullYear(), monthDate.getMonth() + offset, 1))
+                }
+                function showMonth(date: date) {
+                    const difference = (date.getFullYear() - monthDate.getFullYear()) * 12
+                        + date.getMonth() - monthDate.getMonth()
+                    if (!difference) return
+                    monthSlide.stop()
+                    calendarViewport.direction = difference > 0 ? 1 : -1
+                    calendarViewport.previousDate = monthDate
+                    monthDate = date
+                    calendarViewport.progress = Animations.enabled ? 1 : 0
+                    if (Animations.enabled) monthSlide.start()
                 }
                 onExpandedChanged: if (expanded) goToToday()
                 onDismissed: Widgets.closed("clock")
@@ -93,55 +104,91 @@ LazyWidget {
                                 verticalAlignment: Text.AlignVCenter
                             }
                         }
-                        MonthGrid {
-                            id: month
+                        Item {
+                            id: calendarViewport
                             Layout.fillWidth: true
                             Layout.preferredHeight: Sizing.calendarHeight
-                            padding: 0
-                            spacing: Spacing.xs
-                            month: popup.monthDate.getMonth()
-                            year: popup.monthDate.getFullYear()
-                            locale: popup.calendarLocale
-                            delegate: Item {
-                                id: dayCell
-                                required property var model
-                                readonly property bool weekend: model.date.getDay() === 0 || model.date.getDay() === 6
-                                StyledButton {
-                                    id: dayButton
-                                    anchors.centerIn: parent
-                                    width: Sizing.calendarDaySize
-                                    height: Sizing.calendarDaySize
+                            clip: true
+                            property date previousDate: popup.monthDate
+                            property int direction: 1
+                            property real progress: 0
+                            NumberAnimation {
+                                id: monthSlide
+                                target: calendarViewport
+                                property: "progress"
+                                to: 0
+                                duration: Animations.enabled ? Animations.revealDuration : 0
+                                easing.type: Animations.revealEasing
+                            }
+                            Connections {
+                                target: Animations
+                                function onEnabledChanged() {
+                                    if (!Animations.enabled) {
+                                        monthSlide.stop()
+                                        calendarViewport.progress = 0
+                                    }
+                                }
+                            }
+                            Repeater {
+                                model: 2
+                                MonthGrid {
+                                    id: month
+                                    required property int index
+                                    readonly property bool incoming: index === 1
+                                    readonly property date displayedDate: incoming ? popup.monthDate : calendarViewport.previousDate
+                                    width: calendarViewport.width
+                                    height: calendarViewport.height
+                                    x: calendarViewport.direction * calendarViewport.width
+                                        * (incoming ? calendarViewport.progress : calendarViewport.progress - 1)
+                                    visible: incoming || calendarViewport.progress > 0
+                                    enabled: incoming && calendarViewport.progress === 0
                                     padding: 0
-                                    highlightInteractions: false
-                                    text: dayCell.model.day
-                                    checked: dayCell.model.date.toDateString() === popup.selectedDate.toDateString()
-                                    Accessible.name: Qt.formatDateTime(dayCell.model.date, "dddd, d MMMM yyyy")
-                                        + (dayCell.model.today ? ", today" : "")
-                                    onClicked: {
-                                        popup.selectedDate = dayCell.model.date
-                                        if (dayCell.model.month !== month.month)
-                                            popup.monthDate = new Date(dayCell.model.date.getFullYear(), dayCell.model.month, 1)
-                                    }
-                                    background: StyledContainer {
-                                        radius: Theme.radiusSmall
-                                        color: dayButton.checked ? Colors.primaryContainer
-                                            : dayButton.hovered ? Colors.surfaceContainerHigh : "transparent"
-                                        border.width: dayButton.visualFocus ? Theme.borderSelectedWidth
-                                            : dayCell.model.today ? Theme.borderWidth : Theme.borderNone
-                                        border.color: Colors.primary
-                                    }
-                                    contentItem: Text {
-                                        text: dayButton.text
-                                        font.family: Theme.fontFamily
-                                        font.weight: Theme.controlFontWeight
-                                        font.pixelSize: Theme.fontSizeSmall
-                                        font.features: { "tnum": 1 }
-                                        horizontalAlignment: Text.AlignHCenter
-                                        verticalAlignment: Text.AlignVCenter
-                                        color: dayButton.checked ? Colors.onPrimaryContainer
-                                            : dayCell.model.today ? Colors.primary
-                                            : dayCell.weekend ? Colors.secondary : Colors.text
-                                        opacity: dayCell.model.month === month.month ? 1 : Theme.inactiveCalendarOpacity
+                                    spacing: Spacing.xs
+                                    month: displayedDate.getMonth()
+                                    year: displayedDate.getFullYear()
+                                    locale: popup.calendarLocale
+                                    delegate: Item {
+                                        id: dayCell
+                                        required property var model
+                                        readonly property bool weekend: model.date.getDay() === 0 || model.date.getDay() === 6
+                                        StyledButton {
+                                            id: dayButton
+                                            anchors.centerIn: parent
+                                            width: Sizing.calendarDaySize
+                                            height: Sizing.calendarDaySize
+                                            padding: 0
+                                            highlightInteractions: false
+                                            text: dayCell.model.day
+                                            checked: dayCell.model.date.toDateString() === popup.selectedDate.toDateString()
+                                            Accessible.name: Qt.formatDateTime(dayCell.model.date, "dddd, d MMMM yyyy")
+                                                + (dayCell.model.today ? ", today" : "")
+                                            onClicked: {
+                                                popup.selectedDate = dayCell.model.date
+                                                if (dayCell.model.month !== month.month)
+                                                    popup.showMonth(new Date(dayCell.model.date.getFullYear(), dayCell.model.month, 1))
+                                            }
+                                            background: StyledContainer {
+                                                radius: Theme.radiusSmall
+                                                color: dayButton.checked ? Colors.primaryContainer
+                                                    : dayButton.hovered ? Colors.surfaceContainerHigh : "transparent"
+                                                border.width: dayButton.visualFocus ? Theme.borderSelectedWidth
+                                                    : dayCell.model.today ? Theme.borderWidth : Theme.borderNone
+                                                border.color: Colors.primary
+                                            }
+                                            contentItem: Text {
+                                                text: dayButton.text
+                                                font.family: Theme.fontFamily
+                                                font.weight: Theme.controlFontWeight
+                                                font.pixelSize: Theme.fontSizeSmall
+                                                font.features: { "tnum": 1 }
+                                                horizontalAlignment: Text.AlignHCenter
+                                                verticalAlignment: Text.AlignVCenter
+                                                color: dayButton.checked ? Colors.onPrimaryContainer
+                                                    : dayCell.model.today ? Colors.primary
+                                                    : dayCell.weekend ? Colors.secondary : Colors.text
+                                                opacity: dayCell.model.month === month.month ? 1 : Theme.inactiveCalendarOpacity
+                                            }
+                                        }
                                     }
                                 }
                             }

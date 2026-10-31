@@ -83,19 +83,20 @@ Singleton {
     readonly property real wallpaperPreviewAspectRatio: wallpaperThumbnailWidth / wallpaperThumbnailHeight
     // Numeric dimensions are unscaled logical pixels; percentages use the host's
     // available monitor space. "content" fits that axis within its bounds.
+    // minWidth/minHeight provide a floor, capped by the maximum and available space.
     // Omitted width/height follow ShellConfig.popupHugContents and legacy defaults.
     readonly property var popupLimits: ({
-        bluetooth: { width: "content", minWidth: 400, maxWidth: 460, height: "content", maxHeight: "30%" },
-        network: { width: "content", minWidth: 400, maxWidth: 460, height: "content", maxHeight: "30%" },
-        brightness: { width: "content", minWidth: 360, maxWidth: 460, height: "content", maxHeight: 160 },
-        volume: { width: "content", minWidth: 400, maxWidth: 460, height: "content", maxHeight: 160 },
-        microphone: { width: "content", minWidth: 400, maxWidth: 460, height: "content", maxHeight: 160 },
-        media: { width: "30%", minWidth: 400, maxWidth: 460, height: "content", maxHeight: 260 },
-        clock: { width: "content", minWidth: 400, maxWidth: 460, height: "content", maxHeight: 420 },
-        notifications: { width: "30%", minWidth: 400, maxWidth: 500, height: "content", maxHeight: "50%" },
-        clipboard: { width: 500, minWidth: 460, maxWidth: 500, height: 420, maxHeight: "70%" },
-        launcher: { width: "40%", minWidth: 480, maxWidth: 900, height: 640, maxHeight: "80%" },
-        power: { width: 360, maxWidth: 360, height: "content", maxHeight: "80%" },
-        wallpapers: { width: "40%", minWidth: 480, maxWidth: 900, height: 660, maxHeight: "80%" }
+        bluetooth: { width: "content", minWidth: 400, maxWidth: 460, height: "content", minHeight: 240, maxHeight: "30%" },
+        network: { width: "content", minWidth: 400, maxWidth: 460, height: "content", minHeight: 240, maxHeight: "30%" },
+        brightness: { width: "content", minWidth: 360, maxWidth: 460, height: "content", minHeight: 120, maxHeight: 160 },
+        volume: { width: "content", minWidth: 400, maxWidth: 460, height: "content", minHeight: 120, maxHeight: 160 },
+        microphone: { width: "content", minWidth: 400, maxWidth: 460, height: "content", minHeight: 120, maxHeight: 160 },
+        media: { width: "30%", minWidth: 400, maxWidth: 460, height: "content", minHeight: 200, maxHeight: 260 },
+        clock: { width: "content", minWidth: 400, maxWidth: 460, height: "content", minHeight: 420, maxHeight: 420 },
+        notifications: { width: "30%", minWidth: 400, maxWidth: 500, height: "content", minHeight: "20%", maxHeight: "50%" },
+        clipboard: { width: 500, minWidth: 460, maxWidth: 500, height: 420, minHeight: 240, maxHeight: "70%" },
+        launcher: { width: "40%", minWidth: 480, maxWidth: 900, height: 640, minHeight: 320, maxHeight: "80%" },
+        power: { width: 360, maxWidth: 360, height: "content", minHeight: 240, maxHeight: "80%" },
+        wallpapers: { width: "40%", minWidth: 480, maxWidth: 900, height: 660, minHeight: 360, maxHeight: "80%" }
     })
 }
