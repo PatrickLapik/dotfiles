@@ -31,21 +31,30 @@ if [ -z "$CHOICE" ]; then
     exit 130
 fi
 
+WATCHER="$(dirname -- "$(readlink -f -- "${BASH_SOURCE[0]}")")/watch-installer.py"
+
 case "$CHOICE" in
     "$PACMAN")
-        sudo pacman -Syu
+        python3 "$WATCHER" -- sudo -B pacman -Syu
     ;;
     "$AUR")
-        yay --aur
+        python3 "$WATCHER" -- yay --sudoflags "-B" --aur
     ;;
     "$ALL")
-        yay
+        python3 "$WATCHER" -- yay --sudoflags "-B"
     ;;
     *)
         echo ":: Not applying any updates."
     ;;
 esac
 
+status=$?
+if [ "$status" -ne 0 ]; then
+    notify-send "Update unsuccessful" "Installer exited with status $status. Check the update terminal."
+    echo ":: Update unsuccessful (status $status)."
+    read -r -p "Press Enter to close..."
+    exit "$status"
+fi
 
 notify-send "Update complete"
 echo 

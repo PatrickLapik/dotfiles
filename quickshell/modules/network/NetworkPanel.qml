@@ -8,258 +8,261 @@ import qs.components.containers
 import qs.config
 import qs.services
 
-Scope {
-    FontMetrics { id: networkFont; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall }
-    WidgetEndpoint {
-        name: "network"
-        openAction: screenName => { popup.screen = Widgets.screenFor(screenName); popup.open() }
-        closeAction: () => popup.close()
-    }
-    ExpandingPopup {
-        id: popup
-        anchorName: "network"
-        expansionMode: "below"
-        popupWidth: Sizing.networkPanelWidth
-        popupHeight: Sizing.networkPanelHeight
-        onDismissed: { password.clear(); Widgets.closed("network") }
-        Binding { target: Network; property: "menuOpen"; value: popup.expanded }
-        Connections {
-            target: Network
-            function onPasswordNetworkChanged() {
-                password.clear()
-                if (Network.passwordNetwork && popup.expanded) Qt.callLater(() => password.forceActiveFocus())
-            }
-        }
-        ColumnLayout {
-            anchors.fill: parent
-            spacing: Spacing.sm
-            RowLayout {
-                Layout.fillWidth: true
-                Text {
-                    Layout.fillWidth: true
-                    text: "Network"
-                    color: Colors.text
-                    font.family: Theme.headingFontFamily
-                    font.weight: Theme.headingFontWeight
-                    font.pixelSize: Theme.fontSizeLarge
-                }
-                StyledButton {
-                    text: Network.wifiEnabled ? "Wi-Fi on" : "Wi-Fi off"
-                    visible: Network.wifiAvailable
-                    enabled: !Network.busy && Network.wifiHardwareEnabled
-                    checkable: true
-                    checked: Network.wifiEnabled
-                    Accessible.name: Network.wifiEnabled ? "Turn Wi-Fi off" : "Turn Wi-Fi on"
-                    onClicked: Network.setWifiEnabled(!Network.wifiEnabled)
-                }
-            }
-            StyledContainer {
-                Layout.fillWidth: true
-                implicitWidth: connectionInfo.implicitWidth + Spacing.sm * 2
-                implicitHeight: connectionInfo.implicitHeight + Spacing.sm * 2
-                radius: Theme.radiusSmall
-                color: Colors.surfaceContainerHigh
-                RowLayout {
-                    id: connectionInfo
-                    x: Spacing.sm
-                    y: Spacing.sm
-                    width: parent.width - Spacing.sm * 2
-                    spacing: Spacing.sm
-                    ShellIcon { kind: Network.icon; tint: Network.connected ? Colors.primary : Colors.textMuted }
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        spacing: Spacing.xs
-                        Text {
-                            Layout.fillWidth: true
-                            text: Network.name
-                            textFormat: Text.PlainText
-                            elide: Text.ElideRight
-                            color: Colors.text
-                            font.family: Theme.fontFamily
-                            font.weight: Theme.emphasisFontWeight
-                            font.pixelSize: Theme.fontSizeSmall
-                        }
-                        Text {
-                            Layout.fillWidth: true
-                            text: !Network.connected ? "No active connection" : (Network.wireless ? "Wi-Fi" : "Ethernet") + " · " + Network.device.name
-                            elide: Text.ElideRight
-                            color: Colors.textMuted
-                            font.family: Theme.fontFamily
-                            font.pixelSize: Theme.fontSize
-                        }
+LazyWidget {
+    name: "network"
+    widgetComponent: Component {
+        Scope {
+            FontMetrics { id: networkFont; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall }
+            readonly property bool showing: popup.surface.showing
+            function openWidget(screenName: string) { popup.screen = Widgets.screenFor(screenName); popup.open() }
+            function closeWidget() { popup.close() }
+            ExpandingPopup {
+                id: popup
+                anchorName: "network"
+                expansionMode: "below"
+                popupWidth: Sizing.networkPanelWidth
+                popupHeight: Sizing.networkPanelHeight
+                onDismissed: { password.clear(); Widgets.closed("network") }
+                Binding { target: Network; property: "menuOpen"; value: popup.expanded }
+                Connections {
+                    target: Network
+                    function onPasswordNetworkChanged() {
+                        password.clear()
+                        if (Network.passwordNetwork && popup.expanded) Qt.callLater(() => password.forceActiveFocus())
                     }
                 }
-            }
-            RowLayout {
-                Layout.fillWidth: true
-                Text {
-                    Layout.fillWidth: true
-                    text: "Nearby Wi-Fi"
-                    color: Colors.textMuted
-                    font.family: Theme.fontFamily
-                    font.pixelSize: Theme.fontSizeSmall
-                }
-                StyledButton {
-                    text: "Disconnect"
-                    visible: Network.wifiAvailable && Network.wifiDevice.connected
-                    enabled: !Network.busy
-                    flat: true
-                    padding: Spacing.xs
-                    onClicked: Network.disconnectWifi()
-                }
-            }
-            Item {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.minimumHeight: 0
-                implicitWidth: networks.count ? Math.max(Sizing.dropdownMinWidth,
-                    ...Array.from({length: Network.nearbyNetworks.count}, (_, index) => networkFont.advanceWidth(Network.nearbyNetworks.get(index).networkData.name)
-                        + networkFont.advanceWidth("100%") + Sizing.barIconSize + Spacing.sm * 4 + Sizing.scrollBarWidth + Spacing.xs))
-                    : emptyState.implicitWidth
-                implicitHeight: networks.count
-                    ? networks.count * Sizing.networkRowHeight + Math.max(0, networks.count - 1) * Spacing.xs
-                    : emptyState.implicitHeight + Spacing.sm * 2
-                ListView {
-                    id: networks
+                ColumnLayout {
                     anchors.fill: parent
-                    clip: true
-                    spacing: Spacing.xs
-                    model: Network.nearbyNetworks
-                    boundsBehavior: Flickable.StopAtBounds
-                    ScrollBar.vertical: StyledScrollBar {}
-                    delegate: StyledButton {
-                        id: option
-                        required property var networkData
-                        width: networks.width - Sizing.scrollBarWidth - Spacing.xs
-                        height: Sizing.networkRowHeight
-                        enabled: networkData.available && !Network.busy && !networkData.stateChanging
-                        Accessible.name: networkData.name + (networkData.connected ? ", connected" : ", connect")
-                        highlightInteractions: false
-                        padding: Spacing.sm
-                        onClicked: Network.selectWifi(networkData)
-                        background: StyledContainer {
-                            radius: Theme.radiusSmall
-                            color: option.networkData.connected ? Colors.primaryContainer
-                                : option.hovered ? Colors.surfaceContainerHigh : "transparent"
-                            border.width: option.visualFocus ? Theme.borderSelectedWidth : Theme.borderNone
-                            border.color: Colors.primary
+                    spacing: Spacing.sm
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Text {
+                            Layout.fillWidth: true
+                            text: "Network"
+                            color: Colors.text
+                            font.family: Theme.headingFontFamily
+                            font.weight: Theme.headingFontWeight
+                            font.pixelSize: Theme.fontSizeLarge
                         }
-                        contentItem: RowLayout {
+                        StyledButton {
+                            text: Network.wifiEnabled ? "Wi-Fi on" : "Wi-Fi off"
+                            visible: Network.wifiAvailable
+                            enabled: !Network.busy && Network.wifiHardwareEnabled
+                            checkable: true
+                            checked: Network.wifiEnabled
+                            Accessible.name: Network.wifiEnabled ? "Turn Wi-Fi off" : "Turn Wi-Fi on"
+                            onClicked: Network.setWifiEnabled(!Network.wifiEnabled)
+                        }
+                    }
+                    StyledContainer {
+                        Layout.fillWidth: true
+                        implicitWidth: connectionInfo.implicitWidth + Spacing.sm * 2
+                        implicitHeight: connectionInfo.implicitHeight + Spacing.sm * 2
+                        radius: Theme.radiusSmall
+                        color: Colors.surfaceContainerHigh
+                        RowLayout {
+                            id: connectionInfo
+                            x: Spacing.sm
+                            y: Spacing.sm
+                            width: parent.width - Spacing.sm * 2
                             spacing: Spacing.sm
-                            ShellIcon { kind: "wifi"; tint: option.networkData.connected ? Colors.onPrimaryContainer : Colors.textMuted }
+                            ShellIcon { kind: Network.icon; tint: Network.connected ? Colors.primary : Colors.textMuted }
                             ColumnLayout {
                                 Layout.fillWidth: true
                                 spacing: Spacing.xs
                                 Text {
                                     Layout.fillWidth: true
-                                    text: option.networkData.name
+                                    text: Network.name
                                     textFormat: Text.PlainText
                                     elide: Text.ElideRight
-                                    color: option.networkData.connected ? Colors.onPrimaryContainer : Colors.text
+                                    color: Colors.text
                                     font.family: Theme.fontFamily
                                     font.weight: Theme.emphasisFontWeight
                                     font.pixelSize: Theme.fontSizeSmall
                                 }
                                 Text {
                                     Layout.fillWidth: true
-                                    text: option.networkData.connected ? "Connected" : option.networkData.stateChanging ? "Connecting…"
-                                        : option.networkData.known ? "Saved" : Network.usesPassword(option.networkData) ? "Password required" : ""
-                                    visible: text !== ""
-                                    color: option.networkData.connected ? Colors.onPrimaryContainer : Colors.textMuted
+                                    text: !Network.connected ? "No active connection" : (Network.wireless ? "Wi-Fi" : "Ethernet") + " · " + Network.device.name
+                                    elide: Text.ElideRight
+                                    color: Colors.textMuted
                                     font.family: Theme.fontFamily
                                     font.pixelSize: Theme.fontSize
                                 }
                             }
-                            Text {
-                                text: Math.round(option.networkData.signalStrength * 100) + "%"
-                                color: option.networkData.connected ? Colors.onPrimaryContainer : Colors.textMuted
-                                font.family: Theme.fontFamily
-                                font.pixelSize: Theme.fontSize
-                            }
                         }
-                    }
-                }
-                Text {
-                    id: emptyState
-                    anchors.centerIn: parent
-                    width: parent.width
-                    visible: networks.count === 0
-                    text: !Network.wifiAvailable ? "No Wi-Fi adapter available"
-                        : !Network.wifiHardwareEnabled ? "Wi-Fi is blocked by the hardware switch"
-                        : !Network.wifiEnabled ? "Wi-Fi is off" : "Looking for nearby networks…"
-                    horizontalAlignment: Text.AlignHCenter
-                    wrapMode: Text.Wrap
-                    color: Colors.textMuted
-                    font.family: Theme.fontFamily
-                    font.pixelSize: Theme.fontSizeSmall
-                }
-            }
-            StyledContainer {
-                Layout.fillWidth: true
-                visible: Network.passwordNetwork !== null
-                implicitWidth: credentials.implicitWidth + Spacing.sm * 2
-                implicitHeight: credentials.implicitHeight + Spacing.sm * 2
-                radius: Theme.radiusSmall
-                color: Colors.surfaceContainerHigh
-                ColumnLayout {
-                    id: credentials
-                    x: Spacing.sm
-                    y: Spacing.sm
-                    width: parent.width - Spacing.sm * 2
-                    spacing: Spacing.sm
-                    Text {
-                        Layout.fillWidth: true
-                        text: Network.passwordNetwork ? "Connect to " + Network.passwordNetwork.name : ""
-                        textFormat: Text.PlainText
-                        elide: Text.ElideRight
-                        color: Colors.text
-                        font.family: Theme.fontFamily
-                        font.pixelSize: Theme.fontSizeSmall
-                    }
-                    TextField {
-                        id: password
-                        Layout.fillWidth: true
-                        echoMode: TextInput.Password
-                        placeholderText: "Wi-Fi password"
-                        Accessible.name: "Wi-Fi password"
-                        color: Colors.text
-                        placeholderTextColor: Colors.textMuted
-                        selectionColor: Colors.primaryContainer
-                        selectedTextColor: Colors.onPrimaryContainer
-                        font.family: Theme.fontFamily
-                        font.pixelSize: Theme.fontSizeSmall
-                        padding: Spacing.sm
-                        background: StyledContainer {
-                            radius: Theme.radiusSmall
-                            color: Colors.surfaceContainer
-                            border.width: password.activeFocus ? Theme.borderSelectedWidth : Theme.borderWidth
-                            border.color: password.activeFocus ? Colors.primary : Colors.border
-                        }
-                        onAccepted: if (text.length > 0) Network.connectWithPassword(text)
                     }
                     RowLayout {
                         Layout.fillWidth: true
-                        Item { Layout.fillWidth: true }
-                        StyledButton { text: "Cancel"; flat: true; onClicked: Network.cancelPassword() }
+                        Text {
+                            Layout.fillWidth: true
+                            text: "Nearby Wi-Fi"
+                            color: Colors.textMuted
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontSizeSmall
+                        }
                         StyledButton {
-                            text: "Connect"
-                            enabled: password.text.length > 0 && !Network.busy
-                            onClicked: Network.connectWithPassword(password.text)
+                            text: "Disconnect"
+                            visible: Network.wifiAvailable && Network.wifiDevice.connected
+                            enabled: !Network.busy
+                            flat: true
+                            padding: Spacing.xs
+                            onClicked: Network.disconnectWifi()
                         }
                     }
+                    Item {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        Layout.minimumHeight: 0
+                        implicitWidth: networks.count ? Math.max(Sizing.dropdownMinWidth,
+                            ...Array.from({length: Network.nearbyNetworks.count}, (_, index) => networkFont.advanceWidth(Network.nearbyNetworks.get(index).networkData.name)
+                                + networkFont.advanceWidth("100%") + Sizing.barIconSize + Spacing.sm * 4 + Sizing.scrollBarWidth + Spacing.xs))
+                            : emptyState.implicitWidth
+                        implicitHeight: networks.count
+                            ? networks.count * Sizing.networkRowHeight + Math.max(0, networks.count - 1) * Spacing.xs
+                            : emptyState.implicitHeight + Spacing.sm * 2
+                        ListView {
+                            id: networks
+                            anchors.fill: parent
+                            clip: true
+                            spacing: Spacing.xs
+                            model: Network.nearbyNetworks
+                            boundsBehavior: Flickable.StopAtBounds
+                            ScrollBar.vertical: StyledScrollBar {}
+                            delegate: StyledButton {
+                                id: option
+                                required property var networkData
+                                width: networks.width - Sizing.scrollBarWidth - Spacing.xs
+                                height: Sizing.networkRowHeight
+                                enabled: networkData.available && !Network.busy && !networkData.stateChanging
+                                Accessible.name: networkData.name + (networkData.connected ? ", connected" : ", connect")
+                                highlightInteractions: false
+                                padding: Spacing.sm
+                                onClicked: Network.selectWifi(networkData)
+                                background: StyledContainer {
+                                    radius: Theme.radiusSmall
+                                    color: option.networkData.connected ? Colors.primaryContainer
+                                        : option.hovered ? Colors.surfaceContainerHigh : "transparent"
+                                    border.width: option.visualFocus ? Theme.borderSelectedWidth : Theme.borderNone
+                                    border.color: Colors.primary
+                                }
+                                contentItem: RowLayout {
+                                    spacing: Spacing.sm
+                                    ShellIcon { kind: "wifi"; tint: option.networkData.connected ? Colors.onPrimaryContainer : Colors.textMuted }
+                                    ColumnLayout {
+                                        Layout.fillWidth: true
+                                        spacing: Spacing.xs
+                                        Text {
+                                            Layout.fillWidth: true
+                                            text: option.networkData.name
+                                            textFormat: Text.PlainText
+                                            elide: Text.ElideRight
+                                            color: option.networkData.connected ? Colors.onPrimaryContainer : Colors.text
+                                            font.family: Theme.fontFamily
+                                            font.weight: Theme.emphasisFontWeight
+                                            font.pixelSize: Theme.fontSizeSmall
+                                        }
+                                        Text {
+                                            Layout.fillWidth: true
+                                            text: option.networkData.connected ? "Connected" : option.networkData.stateChanging ? "Connecting…"
+                                                : option.networkData.known ? "Saved" : Network.usesPassword(option.networkData) ? "Password required" : ""
+                                            visible: text !== ""
+                                            color: option.networkData.connected ? Colors.onPrimaryContainer : Colors.textMuted
+                                            font.family: Theme.fontFamily
+                                            font.pixelSize: Theme.fontSize
+                                        }
+                                    }
+                                    Text {
+                                        text: Math.round(option.networkData.signalStrength * 100) + "%"
+                                        color: option.networkData.connected ? Colors.onPrimaryContainer : Colors.textMuted
+                                        font.family: Theme.fontFamily
+                                        font.pixelSize: Theme.fontSize
+                                    }
+                                }
+                            }
+                        }
+                        Text {
+                            id: emptyState
+                            anchors.centerIn: parent
+                            width: parent.width
+                            visible: networks.count === 0
+                            text: !Network.wifiAvailable ? "No Wi-Fi adapter available"
+                                : !Network.wifiHardwareEnabled ? "Wi-Fi is blocked by the hardware switch"
+                                : !Network.wifiEnabled ? "Wi-Fi is off" : "Looking for nearby networks…"
+                            horizontalAlignment: Text.AlignHCenter
+                            wrapMode: Text.Wrap
+                            color: Colors.textMuted
+                            font.family: Theme.fontFamily
+                            font.pixelSize: Theme.fontSizeSmall
+                        }
+                    }
+                    StyledContainer {
+                        Layout.fillWidth: true
+                        visible: Network.passwordNetwork !== null
+                        implicitWidth: credentials.implicitWidth + Spacing.sm * 2
+                        implicitHeight: credentials.implicitHeight + Spacing.sm * 2
+                        radius: Theme.radiusSmall
+                        color: Colors.surfaceContainerHigh
+                        ColumnLayout {
+                            id: credentials
+                            x: Spacing.sm
+                            y: Spacing.sm
+                            width: parent.width - Spacing.sm * 2
+                            spacing: Spacing.sm
+                            Text {
+                                Layout.fillWidth: true
+                                text: Network.passwordNetwork ? "Connect to " + Network.passwordNetwork.name : ""
+                                textFormat: Text.PlainText
+                                elide: Text.ElideRight
+                                color: Colors.text
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontSizeSmall
+                            }
+                            TextField {
+                                id: password
+                                Layout.fillWidth: true
+                                echoMode: TextInput.Password
+                                placeholderText: "Wi-Fi password"
+                                Accessible.name: "Wi-Fi password"
+                                color: Colors.text
+                                placeholderTextColor: Colors.textMuted
+                                selectionColor: Colors.primaryContainer
+                                selectedTextColor: Colors.onPrimaryContainer
+                                font.family: Theme.fontFamily
+                                font.pixelSize: Theme.fontSizeSmall
+                                padding: Spacing.sm
+                                background: StyledContainer {
+                                    radius: Theme.radiusSmall
+                                    color: Colors.surfaceContainer
+                                    border.width: password.activeFocus ? Theme.borderSelectedWidth : Theme.borderWidth
+                                    border.color: password.activeFocus ? Colors.primary : Colors.border
+                                }
+                                onAccepted: if (text.length > 0) Network.connectWithPassword(text)
+                            }
+                            RowLayout {
+                                Layout.fillWidth: true
+                                Item { Layout.fillWidth: true }
+                                StyledButton { text: "Cancel"; flat: true; onClicked: Network.cancelPassword() }
+                                StyledButton {
+                                    text: "Connect"
+                                    enabled: password.text.length > 0 && !Network.busy
+                                    onClicked: Network.connectWithPassword(password.text)
+                                }
+                            }
+                        }
+                    }
+                    Text {
+                        Layout.fillWidth: true
+                        visible: Network.busy || Network.error !== ""
+                        text: Network.busy ? "Connecting to " + Network.attemptNetwork.name + "…" : Network.error
+                        textFormat: Text.PlainText
+                        wrapMode: Text.Wrap
+                        maximumLineCount: 3
+                        elide: Text.ElideRight
+                        color: Network.error ? Colors.error : Colors.textMuted
+                        font.family: Theme.fontFamily
+                        font.pixelSize: Theme.fontSize
+                    }
                 }
-            }
-            Text {
-                Layout.fillWidth: true
-                visible: Network.busy || Network.error !== ""
-                text: Network.busy ? "Connecting to " + Network.attemptNetwork.name + "…" : Network.error
-                textFormat: Text.PlainText
-                wrapMode: Text.Wrap
-                maximumLineCount: 3
-                elide: Text.ElideRight
-                color: Network.error ? Colors.error : Colors.textMuted
-                font.family: Theme.fontFamily
-                font.pixelSize: Theme.fontSize
             }
         }
     }

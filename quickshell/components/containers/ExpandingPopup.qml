@@ -36,10 +36,11 @@ PanelWindow {
         function onTransitioningChanged() { if (!panel.transitioning) root.updateSize() }
     }
     readonly property alias surface: panel
+    property alias animateContentResize: panel.animateResize
     property alias expanded: panel.expanded
     property alias radius: panel.radius
     signal dismissed()
-    BackgroundEffect.blurRegion: BackdropBlurRegion { target: panel; animating: panel.transitioning }
+    BackgroundEffect.blurRegion: BackdropBlurRegion { target: panel; animating: panel.transitioning || panel.resizing }
     color: "transparent"
     visible: panel.showing
     anchors { top: true; bottom: true; left: true; right: true }

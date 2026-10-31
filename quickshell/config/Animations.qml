@@ -17,6 +17,7 @@ Singleton {
     readonly property int fadeInDuration: 160
     readonly property int fadeOutDuration: 120
     readonly property int fadeEasing: Easing.Linear
+    readonly property int notificationClearStagger: 70
     readonly property int feedbackDuration: 80
     readonly property int feedbackEasing: Easing.OutCubic
 }

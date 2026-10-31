@@ -29,7 +29,10 @@ Singleton {
     function install() {
         if (launcher.running) return
         // Preserve Waybar's terminal and compositor placement behavior.
-        const command = "alacritty -e " + "'" + installer.replace(/'/g, "'\\''") + "'"
+        // Sudo's -B rings this window's bell whenever it asks for a password.
+        const bellOption = 'bell.command={program="notify-send",args=["Updates need your attention","Check the update terminal for a password prompt."]}'
+        const command = "alacritty -o '" + bellOption + "' -e "
+            + "'" + installer.replace(/'/g, "'\\''") + "'"
         launcher.command = ["hyprctl", "repl", "hl.exec_cmd(" + JSON.stringify(command)
             + ", { focus_on_activate = true, float = true, center = true })"]
         launcher.running = true

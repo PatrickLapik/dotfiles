@@ -12,6 +12,8 @@ Singleton {
     property var order: []
     property var toasts: []
     property int serial: 0
+    property var clearQueue: []
+    readonly property bool clearing: clearQueue.length > 0
     readonly property var history: server.trackedNotifications.values
         .filter(n => !n.transient)
         .sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id))
@@ -41,13 +43,14 @@ Singleton {
                 hideToast(id)
                 return
             }
-            if (Applications.openNotification(notification)) {
-                hideToast(id)
-                return
-            }
+            // Keep app identity before invoking: the sender may close the notification.
+            const application = { desktopEntry: notification.desktopEntry, appName: notification.appName }
+            // Let the sender navigate, then bring its window and workspace into view.
             const action = notification.actions.find(action => action.identifier === "default")
                 || notification.actions.find(action => /^(view|open)$/i.test(action.text.trim()))
-            if (action) { action.invoke(); hideToast(id) }
+            if (action) action.invoke()
+            const opened = Applications.openNotification(application)
+            if (action || opened) hideToast(id)
             else Widgets.open("notifications", screenName)
         })
     }
@@ -68,8 +71,28 @@ Singleton {
         order = order.filter(id => ids.includes(id))
     }
     function clearAll() {
-        toasts = []
-        for (const n of server.trackedNotifications.values.slice()) n.dismiss()
+        if (clearing) return
+        // History is newest first; begin with the bottom (oldest) card.
+        const ids = history.slice().reverse().map(n => n.id)
+        const transientIds = server.trackedNotifications.values.filter(n => n.transient).map(n => n.id)
+        clearQueue = ids.concat(transientIds)
+        if (!Animations.enabled) {
+            const pending = clearQueue
+            clearQueue = []
+            for (const id of pending) dismiss(id)
+        } else clearNext()
+    }
+    function clearNext() {
+        if (!clearQueue.length) return
+        const id = clearQueue[0]
+        clearQueue = clearQueue.slice(1)
+        dismiss(id)
+    }
+    Timer {
+        interval: Animations.notificationClearStagger
+        repeat: true
+        running: root.clearing
+        onTriggered: root.clearNext()
     }
     function timeout(id) {
         hideToast(id)

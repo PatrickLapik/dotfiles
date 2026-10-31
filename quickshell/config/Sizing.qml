@@ -85,8 +85,8 @@ Singleton {
     // available monitor space. "content" fits that axis within its bounds.
     // Omitted width/height follow ShellConfig.popupHugContents and legacy defaults.
     readonly property var popupLimits: ({
-        bluetooth: { width: "content", minWidth: 400, maxWidth: 460, height: "content", maxHeight: "70%" },
-        network: { width: "content", minWidth: 400, maxWidth: 460, height: "content", maxHeight: "70%" },
+        bluetooth: { width: "content", minWidth: 400, maxWidth: 460, height: "content", maxHeight: "30%" },
+        network: { width: "content", minWidth: 400, maxWidth: 460, height: "content", maxHeight: "30%" },
         brightness: { width: "content", minWidth: 360, maxWidth: 460, height: "content", maxHeight: 160 },
         volume: { width: "content", minWidth: 400, maxWidth: 460, height: "content", maxHeight: 160 },
         microphone: { width: "content", minWidth: 400, maxWidth: 460, height: "content", maxHeight: 160 },

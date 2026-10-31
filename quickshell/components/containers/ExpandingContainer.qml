@@ -15,6 +15,18 @@ RevealingContainer {
     property real collapsedHeight: Sizing.barHeight
     property real expandedWidth: Sizing.popupWidth
     property real expandedHeight: Sizing.popupHeight
+    // Content stays at its destination layout while the painted surface catches up.
+    property bool animateResize: false
+    property real surfaceHeight: expandedHeight
+    readonly property bool resizing: resizeAnimation.running
+    Behavior on surfaceHeight {
+        enabled: root.animateResize && root.expanded && !root.preparing && root.progress === 1
+        NumberAnimation {
+            id: resizeAnimation
+            duration: Animations.enabled ? Animations.collapseDuration : 0
+            easing.type: Animations.collapseEasing
+        }
+    }
     property real progress: expanded ? 1 : 0
     property real fadeProgress: expanded ? 1 : 0
     property bool anchoredExpansion: false
@@ -41,10 +53,10 @@ RevealingContainer {
         : startY + (destinationY - startY) * progress : 0
     width: belowSource ? expandedWidth : (anchoredExpansion ? sourceRect.width : collapsedWidth)
         + (expandedWidth - (anchoredExpansion ? sourceRect.width : collapsedWidth)) * progress
-    fullHeight: expandedHeight
+    fullHeight: surfaceHeight
     revealProgress: progress
     height: belowSource ? revealedHeight : (anchoredExpansion ? startHeight : collapsedHeight)
-        + (expandedHeight - (anchoredExpansion ? startHeight : collapsedHeight)) * progress
+        + (surfaceHeight - (anchoredExpansion ? startHeight : collapsedHeight)) * progress
     opacity: preparing ? 0 : 1
     function captureSource(item: Item) {
         if (item) {
