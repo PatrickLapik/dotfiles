@@ -17,13 +17,16 @@ ShellRoot{
     Bar{}
     ClockMenu{}
     BrightnessPanel{}
+    BrightnessIndicator {}
     WallpaperPicker{}
     WidgetHost{}
     ClipboardViewer{}
     AppLauncher{}
     PowerMenu{}
+    VolumeIndicator {}
     VolumePanel { }
     MicrophonePanel {}
+    MicrophoneIndicator {}
     NetworkPanel {}
     BluetoothPanel {}
     MediaPanel {}

@@ -26,6 +26,9 @@ Singleton {
     readonly property int dropdownIndicatorSize: ShellConfig.scaled(16)
     readonly property int brightnessPanelWidth: ShellConfig.scaled(360)
     readonly property int brightnessPanelHeight: ShellConfig.scaled(160)
+    readonly property int indicatorWidth: ShellConfig.scaled(280)
+    readonly property int indicatorHeight: ShellConfig.scaled(86)
+    readonly property int indicatorTrackHeight: ShellConfig.scaled(6)
     readonly property int volumePanelWidth: ShellConfig.scaled(360)
     readonly property int volumePanelHeight: ShellConfig.scaled(160)
     readonly property int bluetoothPanelWidth: networkPanelWidth

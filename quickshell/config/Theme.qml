@@ -13,6 +13,7 @@ Singleton {
     readonly property int launcherSaveDelay: 300
     readonly property int launcherVisitInterval: 30 * 60 * 1000
     readonly property int clipboardPollInterval: 2000
+    readonly property int indicatorTimeout: 1500
     readonly property int notificationTimeout: 5000
     readonly property int notificationProgressInterval: 33
     readonly property int packageUpdatesPollInterval: 30 * 60 * 1000
