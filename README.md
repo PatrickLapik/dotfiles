@@ -40,8 +40,6 @@ For SDDM, `./install.sh --sddm` additionally copies the Monochrome theme and
 files. It does not enable a display manager or replace its service. Preview
 with `--dry-run --sddm` first.
 
-## Daily use
-
 Use `scripts/widget.sh list` for available widgets and
 `scripts/widget.sh <name> [open|toggle|close]` to control them. See
 [Quickshell theming and configuration](quickshell/THEMING.md) for details.

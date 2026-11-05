@@ -75,6 +75,7 @@ alias c="clear"
 alias ls="ls --color"
 alias cts="~/dotfiles/scripts/create-tmux-session.sh" # Create tmux session command
 alias sail='sh $([ -f sail ] && echo sail || echo vendor/bin/sail)'
+alias hyprw="~/dotfiles/scripts/hypr-workspace.sh"
 
 # Git aliases
 alias gs="git status"

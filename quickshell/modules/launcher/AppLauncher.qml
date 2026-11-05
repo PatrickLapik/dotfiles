@@ -55,6 +55,11 @@ LazyWidget {
                 }
                 function buildResults(): var {
                     const query = toolbar.searchText.trim()
+                    if (query.startsWith(">")) {
+                        const command = query.slice(1).trim()
+                        return command ? [{kind: "command", id: "command", name: command,
+                            command: command, detail: "Run shell command · Enter to execute", icon: "utilities-terminal"}] : []
+                    }
                     const windowRows = Applications.windows.map(row => Object.assign({}, row, {detail: "Switch to window · " + row.genericName}))
                     const apps = Applications.entries.map(entry => appRow(entry))
                     const rows = Fuzzy.grouped(query, apps, windowRows, id => Applications.boost(id))
@@ -78,7 +83,10 @@ LazyWidget {
                 }
                 function activate(row: var) {
                     if (!row) return
-                    if (row.kind === "calculator") {
+                    if (row.kind === "command") {
+                        close()
+                        Qt.callLater(() => Quickshell.execDetached(["zsh", "-ic", row.command]))
+                    } else if (row.kind === "calculator") {
                         Quickshell.clipboardText = row.name
                         notice = "Copied " + row.name
                     } else if (row.kind === "window") {
@@ -101,7 +109,7 @@ LazyWidget {
                         id: toolbar
                         Layout.fillWidth: true
                         title: "Launch & switch"
-                        placeholderText: "Search apps, windows, or calculate…"
+                        placeholderText: "Search apps, windows, calculate, or > command…"
                         countText: popup.results.length + " results"
                         Component.onCompleted: searchField.objectName = "launcherSearch"
                         onSearchTextChanged: popup.notice = ""
@@ -201,7 +209,8 @@ LazyWidget {
                             horizontalAlignment: Text.AlignHCenter
                             wrapMode: Text.WordWrap
                             visible: list.count === 0
-                            text: popup.searching ? (toolbar.searchText.trim().startsWith("=") ? "Enter a valid expression, such as = (12 + 8) / 5" : "No matching apps or windows")
+                            text: toolbar.searchText.trim().startsWith(">") ? "Type a shell command after >, then press Enter"
+                                : popup.searching ? (toolbar.searchText.trim().startsWith("=") ? "Enter a valid expression, such as = (12 + 8) / 5" : "No matching apps or windows")
                                 : "No applications or windows available"
                             color: Colors.textMuted
                             font.family: Theme.fontFamily
@@ -209,7 +218,7 @@ LazyWidget {
                         }
                     }
                     Text {
-                        text: "↑↓ / Ctrl+N / Ctrl+P Select · Enter Launch or switch"
+                        text: "↑↓ / Ctrl+N / Ctrl+P Select · Enter Launch, switch, or run"
                         color: Colors.textMuted
                         font.family: Theme.fontFamily
                         font.pixelSize: Theme.fontSize

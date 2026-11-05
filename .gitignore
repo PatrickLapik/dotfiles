@@ -1,5 +1,6 @@
 hypr/conf/keyboard.conf
 quickshell/shaders/.qsb
+scripts/hypr-workspace.sh
 
 .qmlls.ini
 
