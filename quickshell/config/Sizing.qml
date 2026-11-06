@@ -2,6 +2,10 @@ pragma Singleton
 import Quickshell
 
 Singleton {
+    readonly property int greeterPreviewWidth: ShellConfig.scaled(1100)
+    readonly property int greeterPreviewHeight: ShellConfig.scaled(760)
+    readonly property int greeterCardWidth: ShellConfig.scaled(400)
+    readonly property int greeterStatusHeight: ShellConfig.scaled(44)
     readonly property int lockFormWidth: ShellConfig.scaled(320)
     readonly property int lockInputHeight: ShellConfig.scaled(48)
     readonly property int lockIconSize: ShellConfig.scaled(64)

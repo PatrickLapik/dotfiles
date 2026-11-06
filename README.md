@@ -40,6 +40,45 @@ For SDDM, `./install.sh --sddm` additionally copies the Monochrome theme and
 files. It does not enable a display manager or replace its service. Preview
 with `--dry-run --sddm` first.
 
+The greetd migration is being developed on `quickshell-greetd`. Prepare its
+graphical login screen with:
+
+```sh
+./scripts/migrate-greetd.sh --dry-run
+./scripts/migrate-greetd.sh
+```
+
+This Arch Linux script installs greetd, Cage, and Quickshell, backs up
+`/etc/greetd/config.toml`, and installs a root-owned copy of the login UI and
+shared components under `/usr/local/share/dotfiles-greeter/releases/`.
+It snapshots your selected wallpaper, current palette, and username so the
+greeter does not need access to your home. The wallpaper picker automatically
+updates public-readable copies at `/var/lib/dotfiles-greeter/assets/wallpaper`
+and `/var/lib/dotfiles-greeter/assets/theme/quickshell/colors.json` after each
+successful wallpaper or color scheme selection. The installer gives your user ownership of
+that assets directory; the login UI stays root-owned. The greeter uses the copy
+on its next launch, falling back to the installed snapshot if it is unavailable.
+Re-run the installer after UI changes; old releases are retained.
+
+It performs a full pacman upgrade with normal confirmation prompts, disables
+SDDM, and enables greetd. It never restarts services: if greetd is already
+running, the graphical login appears after logout; if SDDM is running, reboot
+when ready. Cage uses the last connected monitor and allows recovery TTY
+switching. The selector launches the chosen installed Wayland session.
+Passwords and additional PAM challenges go through Quickshell's greetd API.
+Escape cancels an in-progress authentication. Power buttons use systemd/logind
+permissions; denied actions display an error. Existing PAM policies are kept.
+
+To switch back for the next boot:
+
+```sh
+sudo systemctl disable greetd.service
+sudo systemctl enable sddm.service
+```
+
+To undo the configuration change, copy the backup printed by the script back
+to `/etc/greetd/config.toml`. No desktop settings or PAM files are modified.
+
 Use `scripts/widget.sh list` for available widgets and
 `scripts/widget.sh <name> [open|toggle|close]` to control them. See
 [Quickshell theming and configuration](quickshell/THEMING.md) for details.
@@ -67,3 +106,22 @@ Rofi if you choose to use it.
 Update this checkout through Git. The obsolete upstream ML4W downloader and
 AppImage uninstaller have been removed. To unlink a configuration later, use
 GNU Stow's delete mode with the same package and target as the installer.
+
+## Greeter UI preview
+
+Run `./scripts/preview-greeter.sh` inside your desktop to open a normal window
+using the shared Quickshell colors, containers, buttons, and theme tokens.
+It follows the saved wallpaper, or accepts a wallpaper path as its argument.
+Changes to the QML reload while the preview is open. Close the window to exit.
+
+The preview simulates authentication: press Enter in the password field or
+click its arrow to submit. Any nonempty demo password succeeds, and `fail`
+shows an error. Restart and Shutdown only display a simulated result. Do not enter
+your real password. It never contacts greetd, launches a session, or changes
+services. The installed greeter uses the same view with real authentication.
+
+The preview's Desktop session selector discovers installed Wayland sessions from
+`/usr/share/wayland-sessions`, including Plasma and both Hyprland launch modes.
+It filters hidden sessions and entries whose `TryExec` is unavailable. Selection
+lasts for the current preview; simulated success names the selected desktop.
+The installed graphical greeter launches the selected session after authentication.

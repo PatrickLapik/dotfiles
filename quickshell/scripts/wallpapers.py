@@ -2,6 +2,7 @@
 import json
 import os
 import re
+import shutil
 from pathlib import Path
 import subprocess
 import sys
@@ -19,6 +20,7 @@ SCHEME_TYPES = (
     'scheme-vibrant', 'scheme-smart',
 )
 DEFAULT_SCHEME = 'scheme-tonal-spot'
+GREETER_WALLPAPER = Path('/var/lib/dotfiles-greeter/assets/wallpaper')
 
 
 def render(path, restore=False):
@@ -67,6 +69,37 @@ def scan():
             'items': [{'path': str(p), 'url': p.as_uri(), 'name': str(p.relative_to(DIRECTORY))} for p in images()]}
 
 
+def publish_copy(source, destination):
+    """Replace a public-readable asset without exposing a partial write."""
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(dir=destination.parent, prefix='.snapshot-', delete=False) as target:
+            temporary = Path(target.name)
+            with Path(source).open('rb') as original:
+                shutil.copyfileobj(original, target)
+            os.fchmod(target.fileno(), 0o644)
+        temporary.replace(destination)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+
+
+def snapshot_greeter(path):
+    """Publish image and generated palette once the installer sets up assets."""
+    if not GREETER_WALLPAPER.parent.is_dir():
+        return
+    palette = CONFIG / 'quickshell/colors.json'
+    if palette.is_file():
+        json.loads(palette.read_text())
+        theme = GREETER_WALLPAPER.parent / 'theme'
+        colors = theme / 'quickshell'
+        for directory in (theme, colors):
+            directory.mkdir(exist_ok=True)
+            directory.chmod(0o755)
+        publish_copy(palette, colors / 'colors.json')
+    publish_copy(path, GREETER_WALLPAPER)
+
+
 def apply(filename, scheme=None):
     if scheme is None:
         scheme = scan()['schemeType']
@@ -97,6 +130,10 @@ def apply(filename, scheme=None):
     temporary = STATE.with_suffix('.tmp')
     temporary.write_text(json.dumps({'current': str(path), 'schemeType': scheme}))
     temporary.replace(STATE)
+    try:
+        snapshot_greeter(path)
+    except (OSError, ValueError) as error:
+        print(f'Wallpaper applied, but the login theme could not be updated: {error}', file=sys.stderr)
     return {'current': str(path), 'url': path.as_uri(), 'schemeType': scheme}
 
 

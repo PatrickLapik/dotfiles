@@ -12,6 +12,56 @@ spec.loader.exec_module(wallpapers)
 
 
 class WallpaperSchemeTests(unittest.TestCase):
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        # Tests must never publish their fixtures to the installed greeter.
+        patcher = patch.object(wallpapers, 'GREETER_WALLPAPER', Path(temporary.name) / 'missing/wallpaper')
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_greeter_snapshot_copies_generated_palette(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            config = root / 'config'
+            (config / 'quickshell').mkdir(parents=True)
+            palette = config / 'quickshell/colors.json'
+            palette.write_text('{"primary": "#123456"}')
+            assets = root / 'assets'
+            assets.mkdir()
+            image = root / 'image'
+            image.write_bytes(b'wallpaper')
+            with patch.object(wallpapers, 'GREETER_WALLPAPER', assets / 'wallpaper'), patch.object(wallpapers, 'CONFIG', config):
+                wallpapers.snapshot_greeter(image)
+                palette.write_text('{"primary": "#abcdef"}')
+                wallpapers.snapshot_greeter(image)
+            copied = assets / 'theme/quickshell/colors.json'
+            self.assertEqual(copied.read_bytes(), palette.read_bytes())
+            self.assertEqual(copied.stat().st_mode & 0o777, 0o644)
+            self.assertEqual(copied.parent.stat().st_mode & 0o777, 0o755)
+
+
+    def test_greeter_snapshot_is_readable_and_replaces_old_copy(self):
+        with tempfile.TemporaryDirectory() as temp:
+            source = Path(temp) / 'source.png'
+            source.write_bytes(b'new wallpaper')
+            source.chmod(0o600)
+            assets = Path(temp) / 'assets'
+            assets.mkdir()
+            destination = assets / 'wallpaper'
+            destination.write_bytes(b'old wallpaper')
+            with patch.object(wallpapers, 'GREETER_WALLPAPER', destination), patch.object(wallpapers, 'CONFIG', Path(temp) / 'no-config'):
+                wallpapers.snapshot_greeter(source)
+            self.assertEqual(destination.read_bytes(), source.read_bytes())
+            self.assertEqual(destination.stat().st_mode & 0o777, 0o644)
+            self.assertEqual(list(assets.iterdir()), [destination])
+
+    def test_greeter_snapshot_skips_uninstalled_greeter(self):
+        with tempfile.TemporaryDirectory() as temp, patch.object(
+                wallpapers, 'GREETER_WALLPAPER', Path(temp) / 'missing/wallpaper'):
+            wallpapers.snapshot_greeter(Path(temp) / 'missing-source')
+
+
     def test_legacy_and_unknown_schemes_use_default(self):
         with tempfile.TemporaryDirectory() as temp, patch.object(wallpapers, "STATE", Path(temp) / "state.json"):
             for state in ({}, {"schemeType": "unknown"}):
