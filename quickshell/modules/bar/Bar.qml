@@ -158,14 +158,15 @@ Scope {
                     id: rightSection
                     anchors.right: parent.right
                     height: parent.height
-                    width: Math.min(rightContent.implicitWidth + Spacing.panelPadding * 2,
+                    width: Math.min(rightContent.visibleWidth + Spacing.panelPadding * 2,
                         Math.max(0, centerSection.x - Spacing.barSectionGap))
                     HoverHandler { id: rightHover }
                     BarVisibilityLock { screen: barWindow.screen; active: rightHover.hovered }
                     RightBar {
                         id: rightContent
                         anchors.verticalCenter: parent.verticalCenter
-                        x: Spacing.panelPadding
+                        // Keep the full layout fixed against the right edge.
+                        x: parent.width - Spacing.panelPadding - width
                     }
                 }
             }

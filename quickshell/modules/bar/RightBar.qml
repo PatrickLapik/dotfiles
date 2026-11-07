@@ -1,18 +1,56 @@
 import QtQuick
-import QtQuick.Layouts
 import Quickshell
 import qs.components
 import qs.services
 import qs.config
 
-RowLayout {
+Item {
     id: root
-    Layout.fillWidth: false
-    Layout.alignment: Qt.AlignRight
-    spacing: Spacing.sm
+    // Stable slots avoid running a RowLayout on each animation frame.
+    readonly property var indicators: [bluetoothButton, brightnessButton, microphone,
+        volumeButton, networkButton, batteryButton, bell]
+    implicitWidth: extent(false)
+    implicitHeight: Sizing.widgetHeight
+    readonly property real visibleWidth: extent(true)
+
+    function extent(animated) {
+        let total = 0
+        let count = 0
+        for (const indicator of indicators) {
+            if (!indicator.visible) continue
+            total += animated ? indicator.compactWidth + indicator.revealedWidth : indicator.implicitWidth
+            count++
+        }
+        return total + Math.max(0, count - 1) * Spacing.sm
+    }
+
+    function slotX(target) {
+        let offset = width
+        for (let i = indicators.length - 1; i >= 0; i--) {
+            const indicator = indicators[i]
+            if (!indicator.visible) continue
+            offset -= indicator.compactWidth
+            if (indicator === target) return offset
+            offset -= Spacing.sm
+        }
+        return offset
+    }
+
+    function slideX(target) {
+        let offset = 0
+        for (let i = indicators.length - 1; i >= 0; i--) {
+            const indicator = indicators[i]
+            if (!indicator.visible) continue
+            offset -= indicator.revealedWidth
+            if (indicator === target) return offset
+        }
+        return offset
+    }
 
     StatusItem {
         id: bluetoothButton
+        x: root.slotX(bluetoothButton)
+        transform: Translate { x: root.slideX(bluetoothButton) }
         WidgetAnchor { name: "bluetooth"; target: bluetoothButton }
         statusIcon: Bluetooth.icon
         Accessible.name: Bluetooth.details
@@ -22,6 +60,9 @@ RowLayout {
     }
     StatusItem {
         id: brightnessButton
+        revealPercentage: true
+        x: root.slotX(brightnessButton)
+        transform: Translate { x: root.slideX(brightnessButton) }
         visible: Brightness.available
         WidgetAnchor { name: "brightness"; target: brightnessButton }
         statusIcon: "sun"
@@ -33,6 +74,9 @@ RowLayout {
     }
     StatusItem {
         id: microphone
+        revealPercentage: true
+        x: root.slotX(microphone)
+        transform: Translate { x: root.slideX(microphone) }
         WidgetAnchor { name: "microphone"; target: microphone }
         statusIcon: Audio.inputMuted ? "microphone-muted" : "microphone"
         label: Audio.inputAvailable ? Audio.inputPercent + "%" : "—"
@@ -46,6 +90,9 @@ RowLayout {
     }
     StatusItem {
         id: volumeButton
+        revealPercentage: true
+        x: root.slotX(volumeButton)
+        transform: Translate { x: root.slideX(volumeButton) }
         middleClickEnabled: true
         onMiddleClicked: Audio.toggleMute()
         WidgetAnchor { name: "volume"; target: volumeButton }
@@ -59,6 +106,8 @@ RowLayout {
     }
     StatusItem {
         id: networkButton
+        x: root.slotX(networkButton)
+        transform: Translate { x: root.slideX(networkButton) }
         WidgetAnchor { name: "network"; target: networkButton }
         statusIcon: Network.icon
         Accessible.name: Network.details
@@ -67,6 +116,10 @@ RowLayout {
         onClicked: Widgets.toggle("network", networkButton.QsWindow.window.screen.name)
     }
     StatusItem {
+        id: batteryButton
+        revealPercentage: true
+        x: root.slotX(batteryButton)
+        transform: Translate { x: root.slideX(batteryButton) }
         visible: Environment.showBattery
         batteryLevel: Environment.batteryPercent
         statusIcon: Environment.charging ? "charging" : "battery"
@@ -76,6 +129,8 @@ RowLayout {
     }
     StatusItem {
         id: bell
+        x: root.slotX(bell)
+        transform: Translate { x: root.slideX(bell) }
         WidgetAnchor { name: "notifications"; target: bell }
         statusIcon: (Notifications.dnd ? "bell-off" : "bell") + (Notifications.count > 0 ? "-dot" : "")
         Accessible.name: "Notifications · " + Notifications.count + (Notifications.dnd ? " · Do not disturb" : "")

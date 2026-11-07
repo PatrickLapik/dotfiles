@@ -9,6 +9,7 @@ Button {
     property bool middleClickEnabled: false
     property bool scrollActionEnabled: false
     property bool highlightInteractions: true
+    property bool pointerCursorEnabled: true
     signal middleClicked()
     signal scrolled(int direction)
     hoverEnabled: true
@@ -26,7 +27,7 @@ Button {
             if (!root.scrollActionEnabled || event.angleDelta.y === 0) { event.accepted = false; return }
             root.scrolled(event.angleDelta.y > 0 ? 1 : -1)
         }
-        cursorShape: root.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+        cursorShape: root.enabled && root.pointerCursorEnabled ? Qt.PointingHandCursor : Qt.ArrowCursor
     }
     background: StyledContainer {
         radius: Theme.radiusSmall
