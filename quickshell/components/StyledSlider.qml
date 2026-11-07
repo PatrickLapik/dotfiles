@@ -6,6 +6,7 @@ import qs.services
 
 Slider {
     id: root
+    property bool showHandle: true
     HoverHandler { cursorShape: root.enabled ? Qt.PointingHandCursor : Qt.ArrowCursor }
     background: StyledContainer {
         x: root.leftPadding
@@ -17,6 +18,7 @@ Slider {
         StyledContainer { width: parent.width * root.visualPosition; height: parent.height; radius: Theme.radiusSmall; color: Colors.primary }
     }
     handle: StyledContainer {
+        visible: root.showHandle
         x: root.leftPadding + root.visualPosition * (root.availableWidth - width)
         y: root.topPadding + (root.availableHeight - height) / 2
         implicitWidth: Sizing.volumeHandleSize

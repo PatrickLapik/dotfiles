@@ -13,16 +13,23 @@ StyledButton {
     property color tint: Colors.text
     property bool interactive: false
     property bool revealPercentage: false
-    readonly property real iconSlotWidth: Sizing.barIconSize + Spacing.sm
+    // The owning section releases revealed values together when it loses hover.
+    property bool retainReveal: false
+    property bool revealLatched: false
+    onHoveredChanged: {
+        if (hovered && retainReveal && revealPercentage) revealLatched = true
+    }
+    onRetainRevealChanged: revealLatched = retainReveal && hovered && revealPercentage
+    readonly property real iconSlotWidth: indicator.implicitWidth + Spacing.barStatusPadding * 2
     readonly property real compactWidth: iconSlotWidth
-        + (!revealPercentage && label !== "" ? Spacing.xs + value.implicitWidth : 0)
-    readonly property real percentageWidth: revealPercentage && label !== "" ? Spacing.xs + content.valueWidth : 0
+        + (!revealPercentage && label !== "" ? Spacing.barContentGap + value.implicitWidth : 0)
+    readonly property real percentageWidth: revealPercentage && label !== "" ? Spacing.barContentGap + content.valueWidth : 0
     readonly property real revealedWidth: percentageWidth * revealProgress
     // Read-only indicators still need hover input to reveal their values.
     enabled: interactive || label !== ""
     pointerCursorEnabled: interactive
     focusPolicy: interactive ? Qt.StrongFocus : Qt.NoFocus
-    readonly property bool revealing: revealPercentage && label !== "" && (hovered || visualFocus)
+    readonly property bool revealing: revealPercentage && label !== "" && (hovered || visualFocus || (retainReveal && revealLatched))
     property real revealProgress: revealing ? 1 : 0
     Behavior on revealProgress {
         NumberAnimation {
@@ -49,9 +56,8 @@ StyledButton {
         // Icon and text keep a stable layout while the input extent reveals the value.
         implicitWidth: root.compactWidth + root.percentageWidth
         implicitHeight: Math.max(indicator.implicitHeight, value.implicitHeight)
-        readonly property real valueWidth: Math.max(metrics.advanceWidth("100%"), value.implicitWidth)
+        readonly property real valueWidth: value.implicitWidth
         clip: true
-        FontMetrics { id: metrics; font: value.font }
         BarIcon {
             id: indicator
             visible: root.statusIcon !== ""
@@ -67,7 +73,7 @@ StyledButton {
             text: root.label
             color: root.tint
             anchors.verticalCenter: parent.verticalCenter
-            x: root.iconSlotWidth - Spacing.sm / 2 + Spacing.xs
+            x: root.iconSlotWidth - Spacing.barStatusPadding + Spacing.barContentGap
             transform: Translate { x: root.revealPercentage ? Spacing.popupSlideOffset * (1 - root.revealProgress) : 0 }
             opacity: root.revealPercentage ? root.revealProgress : 1
             font.weight: Theme.fontWeight; font.family: Theme.fontFamily

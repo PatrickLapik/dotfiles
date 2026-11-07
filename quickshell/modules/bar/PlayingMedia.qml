@@ -8,11 +8,11 @@ import qs.services
 
 RowLayout {
     id: root
-    spacing: Spacing.xs
+    spacing: Spacing.barStatusGap
     StyledContainer {
         id: track
         WidgetAnchor { name: "media"; target: track }
-        Layout.preferredWidth: Math.min(title.implicitWidth + 10 + Sizing.barIconSize + Spacing.xs, Sizing.mediaTextMaxWidth)
+        Layout.preferredWidth: Math.min(title.implicitWidth + musicIcon.implicitWidth + Spacing.barContentGap + Spacing.barStatusPadding * 2, Sizing.mediaTextMaxWidth)
         Layout.maximumWidth: Sizing.mediaTextMaxWidth
         implicitHeight: Sizing.widgetHeight
         radius: Theme.radiusSmall
@@ -20,10 +20,13 @@ RowLayout {
         color: "transparent"
         RowLayout {
             anchors.fill: parent
-            spacing: Spacing.sm
+            anchors.leftMargin: Spacing.barStatusPadding
+            anchors.rightMargin: Spacing.barStatusPadding
+            spacing: Spacing.barContentGap
             BarIcon {
+                id: musicIcon
                 kind: "music"
-                Layout.preferredWidth: Sizing.barIconSize
+                Layout.preferredWidth: implicitWidth
                 Layout.preferredHeight: Sizing.barIconSize
                 tint: Media.available ? Colors.text : Colors.textMuted
             }

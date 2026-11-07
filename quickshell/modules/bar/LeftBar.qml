@@ -8,7 +8,7 @@ import qs.config
 RowLayout {
     Layout.fillWidth: false
     Layout.alignment: Qt.AlignLeft
-    spacing: Spacing.sm
+    spacing: Spacing.barStatusGap
     PlayingMedia {}
 
     StatusItem {

@@ -11,9 +11,10 @@ Singleton {
     readonly property string title: available ? (player.trackTitle || player.identity || "Unknown track") : "No media playing"
     readonly property string artist: available ? player.trackArtist : ""
     readonly property string artUrl: available ? player.trackArtUrl : ""
-    readonly property real length: available && player.lengthSupported ? Math.max(0, player.length) : 0
-    readonly property real position: available && player.positionSupported ? Math.max(0, player.position) : 0
-    readonly property bool canSeek: available && player.canSeek && player.positionSupported && length > 0
+    readonly property real length: available && player.lengthSupported && Number.isFinite(player.length) ? Math.max(0, player.length) : 0
+    readonly property real position: available && player.positionSupported && Number.isFinite(player.position) ? Math.max(0, player.position) : 0
+    readonly property bool timelineAvailable: length > 0 && available && player.positionSupported
+    readonly property bool canSeek: timelineAvailable && player.canSeek
     function seekTo(seconds) { if (canSeek) player.position = Math.max(0, Math.min(length, seconds)) }
     function formatTime(seconds) {
         const value = Math.max(0, Math.floor(seconds))

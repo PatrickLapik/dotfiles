@@ -6,6 +6,7 @@ import qs.config
 
 Item {
     id: root
+    property bool sectionHovered: false
     // Stable slots avoid running a RowLayout on each animation frame.
     readonly property var indicators: [bluetoothButton, brightnessButton, microphone,
         volumeButton, networkButton, batteryButton, bell]
@@ -21,7 +22,7 @@ Item {
             total += animated ? indicator.compactWidth + indicator.revealedWidth : indicator.implicitWidth
             count++
         }
-        return total + Math.max(0, count - 1) * Spacing.sm
+        return total + Math.max(0, count - 1) * Spacing.barStatusGap
     }
 
     function slotX(target) {
@@ -31,7 +32,7 @@ Item {
             if (!indicator.visible) continue
             offset -= indicator.compactWidth
             if (indicator === target) return offset
-            offset -= Spacing.sm
+            offset -= Spacing.barStatusGap
         }
         return offset
     }
@@ -61,6 +62,7 @@ Item {
     StatusItem {
         id: brightnessButton
         revealPercentage: true
+        retainReveal: root.sectionHovered
         x: root.slotX(brightnessButton)
         transform: Translate { x: root.slideX(brightnessButton) }
         visible: Brightness.available
@@ -75,6 +77,7 @@ Item {
     StatusItem {
         id: microphone
         revealPercentage: true
+        retainReveal: root.sectionHovered
         x: root.slotX(microphone)
         transform: Translate { x: root.slideX(microphone) }
         WidgetAnchor { name: "microphone"; target: microphone }
@@ -91,6 +94,7 @@ Item {
     StatusItem {
         id: volumeButton
         revealPercentage: true
+        retainReveal: root.sectionHovered
         x: root.slotX(volumeButton)
         transform: Translate { x: root.slideX(volumeButton) }
         middleClickEnabled: true
@@ -118,6 +122,7 @@ Item {
     StatusItem {
         id: batteryButton
         revealPercentage: true
+        retainReveal: root.sectionHovered
         x: root.slotX(batteryButton)
         transform: Translate { x: root.slideX(batteryButton) }
         visible: Environment.showBattery

@@ -48,15 +48,16 @@ LazyWidget {
                         Layout.fillWidth: true
                         from: 0; to: Math.max(1, Media.length)
                         enabled: Media.canSeek
+                        showHandle: Media.timelineAvailable
                         Accessible.name: "Playback position"
                         onMoved: Media.seekTo(value)
-                        Binding { target: seek; property: "value"; value: Media.position; when: !seek.pressed }
+                        Binding { target: seek; property: "value"; value: Media.timelineAvailable ? Math.min(Media.position, Media.length) : 0; when: !seek.pressed }
                     }
                     RowLayout {
                         Layout.fillWidth: true
-                        Text { text: Media.formatTime(seek.value); color: Colors.textMuted; font.weight: Theme.fontWeight; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall; font.features: { "tnum": 1 } }
+                        Text { text: Media.available && Media.player.positionSupported ? Media.formatTime(seek.pressed ? seek.value : Media.position) : "—"; color: Colors.textMuted; font.weight: Theme.fontWeight; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall; font.features: { "tnum": 1 } }
                         Item { Layout.fillWidth: true }
-                        Text { text: Media.length > 0 ? Media.formatTime(Media.length) : "—"; color: Colors.textMuted; font.weight: Theme.fontWeight; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall; font.features: { "tnum": 1 } }
+                        Text { text: Media.length > 0 ? Media.formatTime(Media.length) : "Duration unavailable"; color: Colors.textMuted; font.weight: Theme.fontWeight; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall; font.features: { "tnum": 1 } }
                     }
                     RowLayout {
                         Layout.alignment: Qt.AlignHCenter

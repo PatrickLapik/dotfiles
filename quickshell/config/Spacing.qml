@@ -13,6 +13,9 @@ Singleton {
 
     readonly property int launcherWindowIndent: xl * 2
 
+    readonly property int barStatusPadding: xs
+    readonly property int barStatusGap: sm
+    readonly property int barContentGap: ShellConfig.scaled(6)
     readonly property int barSectionGap: xl
     readonly property int barMargin: md
     readonly property int barLeftMargin: barMargin

@@ -164,6 +164,7 @@ Scope {
                     BarVisibilityLock { screen: barWindow.screen; active: rightHover.hovered }
                     RightBar {
                         id: rightContent
+                        sectionHovered: rightHover.hovered
                         anchors.verticalCenter: parent.verticalCenter
                         // Keep the full layout fixed against the right edge.
                         x: parent.width - Spacing.panelPadding - width
