@@ -61,6 +61,14 @@ Singleton {
     // Strength is compositor-wide: hypr/conf/blur.lua (size and passes).
     readonly property bool backdropBlurEnabled: true
     readonly property real panelOpacity: 0.5
+    // Glass: controls and cards inside panels are light overlays of the text color,
+    // so the blurred backdrop shows through them instead of opaque surface blocks.
+    readonly property real glassFillOpacity: 0.07
+    readonly property real glassFillHoverOpacity: 0.12
+    readonly property real glassTrackOpacity: 0.14
+    // Hairline rim on top-level surfaces, with a brighter sheen along the top edge.
+    readonly property real glassEdgeOpacity: 0.10
+    readonly property real glassSheenOpacity: 0.22
     readonly property color containerHighlightColor: Colors.primary
     readonly property color containerHighlightSecondary: Colors.secondary
     readonly property color containerHighlightTertiary: Colors.tertiary

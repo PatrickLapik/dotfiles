@@ -32,7 +32,7 @@ Button {
     background: StyledContainer {
         radius: Theme.radiusSmall
         color: root.highlightInteractions && (root.down || root.checked) ? Colors.primaryContainer
-            : root.highlightInteractions && root.hovered ? Colors.surfaceContainerHighest : root.flat ? "transparent" : Colors.surfaceContainerHigh
+            : root.highlightInteractions && root.hovered ? Colors.glassFillHover : root.flat ? Colors.glassClear : Colors.glassFill
         border.width: root.visualFocus ? Theme.borderSelectedWidth : Theme.metalStyle ? Theme.borderWidth : Theme.borderNone
         border.color: root.visualFocus || root.highlightInteractions && (root.hovered || root.checked) ? Colors.primary : Colors.border
     }

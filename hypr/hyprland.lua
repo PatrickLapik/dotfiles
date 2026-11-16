@@ -14,11 +14,20 @@ require('conf.cursors')
 
 require("conf.monitors")
 
+-- Glass rim matching Quickshell's glassEdge: a hairline in the wallpaper's text
+-- color, brighter along the top. matugen regenerates the color on wallpaper change.
+local ok, palette = pcall(require, "matugen-colors")
+local edge = ok and palette.on_surface or "d8e6df"
+
 hl.config({
     general = {
         gaps_in = 5,
         gaps_out = 10,
-        border_size = 0,
+        border_size = 1,
+        col = {
+            active_border = { colors = { "rgba(" .. edge .. "40)", "rgba(" .. edge .. "1a)" }, angle = 90 },
+            inactive_border = { colors = { "rgba(" .. edge .. "24)", "rgba(" .. edge .. "10)" }, angle = 90 },
+        },
         layout = "dwindle",
     },
     input = {

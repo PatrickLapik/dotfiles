@@ -164,6 +164,15 @@ Singleton {
     readonly property color textMuted: onSurfaceVariant
     readonly property color border: outlineVariant
     readonly property color temp: withAlpha(surface, 0.8)
+    // Translucent fills for controls/cards on glass panels (see Theme glass tokens).
+    // Metal style keeps its opaque surfaces. glassClear matches glassFill's color at
+    // zero alpha, so fades never pass through transparent black.
+    readonly property color glassFill: Theme.metalStyle ? surfaceContainerHigh : withAlpha(text, Theme.glassFillOpacity)
+    readonly property color glassFillHover: Theme.metalStyle ? surfaceContainerHighest : withAlpha(text, Theme.glassFillHoverOpacity)
+    readonly property color glassTrack: Theme.metalStyle ? surfaceContainerHighest : withAlpha(text, Theme.glassTrackOpacity)
+    readonly property color glassClear: withAlpha(text, 0)
+    readonly property color glassEdge: withAlpha(text, Theme.glassEdgeOpacity)
+    readonly property color glassSheen: withAlpha(text, Theme.glassSheenOpacity)
 
     function withAlpha(value: color, opacity: real): color {
         return Qt.rgba(value.r, value.g, value.b, Math.max(0, Math.min(1, opacity)))

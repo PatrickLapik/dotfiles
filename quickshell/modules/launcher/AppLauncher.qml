@@ -189,7 +189,7 @@ LazyWidget {
                                 onClicked: { list.currentIndex = row.index; popup.activate(row.modelData) }
                                 background: StyledContainer {
                                     radius: Theme.radiusSmall
-                                    color: row.ListView.isCurrentItem || rowButton.visualFocus ? Colors.primaryContainer : rowButton.hovered ? Colors.surfaceContainerHigh : "transparent"
+                                    color: row.ListView.isCurrentItem || rowButton.visualFocus ? Colors.primaryContainer : rowButton.hovered ? Colors.glassFillHover : Colors.glassClear
                                 }
                                 contentItem: RowLayout {
                                     spacing: Spacing.md

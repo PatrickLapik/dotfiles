@@ -49,7 +49,7 @@ LazyWidget {
                         StyledButton {
                             text: "Clear all"
                             flat: true
-                            enabled: Notifications.count > 0 && !Notifications.clearing
+                            enabled: Notifications.count > 0
                             font.pixelSize: Theme.fontSizeSmall
                             onClicked: Notifications.clearAll()
                         }
@@ -104,17 +104,31 @@ LazyWidget {
                             ListModel { id: presentation; dynamicRoles: true }
                             model: presentation
                             function syncEntries() {
+                                // Closing rows on screen slide out bottom-first; rows outside the
+                                // viewport are removed at once so large clears finish quickly.
+                                const exiting = []
+                                const hidden = []
                                 for (let i = 0; i < presentation.count; ++i) {
                                     const row = presentation.get(i)
-                                    if (!entries.some(n => n.id === row.entry.id))
-                                        presentation.setProperty(i, "closing", true)
+                                    if (row.closing || entries.some(n => n.id === row.entry.id)) continue
+                                    const item = itemAtIndex(i)
+                                    if (item && item.y + item.height > contentY && item.y < contentY + height)
+                                        exiting.push({ index: i, item: item })
+                                    else hidden.push(i)
                                 }
+                                exiting.sort((a, b) => b.item.y - a.item.y)
+                                exiting.forEach((exit, rank) => {
+                                    exit.item.exitDelay = Animations.enabled ? rank * Animations.notificationClearStagger : 0
+                                    presentation.setProperty(exit.index, "closing", true)
+                                })
+                                for (let i = hidden.length - 1; i >= 0; --i) presentation.remove(hidden[i])
                                 for (let i = 0; i < entries.length; ++i) {
                                     const n = entries[i]
                                     let existing = -1
                                     for (let j = 0; j < presentation.count; ++j)
                                         if (presentation.get(j).entry.id === n.id) { existing = j; break }
-                                    const entry = { id: n.id, notification: n, snapshot: {
+                                    // Store plain data only; delegates resolve the live object by id.
+                                    const entry = { id: n.id, snapshot: {
                                         id: n.id, summary: n.summary, body: n.body, appName: n.appName,
                                         appIcon: n.appIcon, image: n.image, urgency: n.urgency, actions: []
                                     } }
@@ -129,7 +143,8 @@ LazyWidget {
                                         return
                                     }
                             }
-                            onEntriesChanged: syncEntries()
+                            // Bulk dismissals change history once per notification; sync once.
+                            onEntriesChanged: Qt.callLater(syncEntries)
                             Component.onCompleted: syncEntries()
                             ScrollBar.vertical: StyledScrollBar {}
                             delegate: NotificationCard {
@@ -137,14 +152,19 @@ LazyWidget {
                                 required property var entry
                                 required property bool closing
                                 property real exitProgress: 0
+                                property int exitDelay: 0
                                 width: list.width - Sizing.scrollBarWidth - Spacing.xs
-                                notification: entry.notification
+                                notification: closing ? null : Notifications.find(entry.id)
                                 fallbackDetails: entry.snapshot
+                                // Cards sit on the center's glass; don't stack another panel tint.
+                                color: Colors.glassFill
                                 enabled: !closing
                                 transform: Translate { x: card.exitProgress * list.width }
                                 onClosingChanged: if (closing) exitAnimation.start()
+                                Component.onCompleted: if (closing) exitAnimation.start()
                                 SequentialAnimation {
                                     id: exitAnimation
+                                    PauseAnimation { duration: card.exitDelay }
                                     NumberAnimation {
                                         target: card
                                         property: "exitProgress"
@@ -154,7 +174,7 @@ LazyWidget {
                                     }
                                     ScriptAction { script: list.finishExit(card.entry.id) }
                                 }
-                                onClicked: Notifications.activate(entry.notification, popup.screen.name)
+                                onClicked: Notifications.activate(card.notification, popup.screen.name)
                             }
                         }
                     }

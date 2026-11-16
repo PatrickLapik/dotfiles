@@ -141,7 +141,7 @@ LazyWidget {
                         Layout.fillWidth: true
                         implicitHeight: confirmation.implicitHeight + Spacing.sm * 2
                         visible: popup.confirmClear
-                        color: Colors.surfaceContainerHigh
+                        color: Colors.glassFill
                         RowLayout {
                             id: confirmation
                             anchors.fill: parent
@@ -190,7 +190,7 @@ LazyWidget {
                             width: list.width - Sizing.scrollBarWidth - Spacing.xs
                             height: Sizing.clipboardRowHeight
                             radius: Theme.radiusSmall
-                            color: selected || rowHover.hovered ? Colors.surfaceContainerHigh : "transparent"
+                            color: selected || rowHover.hovered ? Colors.glassFillHover : Colors.glassClear
                             border.width: selected || copyButton.visualFocus || removeButton.visualFocus ? Theme.borderSelectedWidth : Theme.borderNone
                             border.color: Colors.primary
                             HoverHandler { id: rowHover }

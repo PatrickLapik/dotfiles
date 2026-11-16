@@ -58,6 +58,11 @@ StyledContainer {
             Layout.alignment: Qt.AlignTop
             visible: source.toString() !== "" && status !== Image.Error
             source: root.iconSource()
+            // Screenshot notifications use the full capture as their icon; decode it
+            // at thumbnail size (2x for sharpness) and off the UI thread.
+            sourceSize.width: Sizing.notificationCompactIconSize * 2
+            sourceSize.height: Sizing.notificationCompactIconSize * 2
+            asynchronous: true
             fillMode: Image.PreserveAspectFit
         }
         ColumnLayout {
@@ -120,7 +125,7 @@ StyledContainer {
                         required property var modelData
                         text: modelData.text || "Open"
                         onClicked: modelData.invoke()
-                        background: StyledContainer { radius: Theme.radiusSmall; color: actionButton.hovered ? Colors.primaryContainer : Colors.surfaceContainerHighest }
+                        background: StyledContainer { radius: Theme.radiusSmall; color: actionButton.hovered ? Colors.primaryContainer : Colors.glassFill }
                         contentItem: Text { text: actionButton.text; textFormat: Text.PlainText; color: actionButton.hovered ? Colors.onPrimaryContainer : Colors.text; font.weight: Theme.controlFontWeight; font.family: Theme.fontFamily; font.pixelSize: Theme.fontSizeSmall }
                     }
                 }
@@ -146,7 +151,7 @@ StyledContainer {
         height: Sizing.notificationProgressHeight
         visible: root.showTimeout
         radius: Theme.radiusSmall
-        color: Colors.surfaceContainerHighest
+        color: Colors.glassTrack
         border.width: Theme.borderNone
         highlightOpacity: 0
         Rectangle {

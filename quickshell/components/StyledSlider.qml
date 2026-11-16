@@ -14,7 +14,7 @@ Slider {
         width: root.availableWidth
         height: Spacing.xs
         radius: Theme.radiusSmall
-        color: Colors.surfaceContainerHighest
+        color: Colors.glassTrack
         StyledContainer { width: parent.width * root.visualPosition; height: parent.height; radius: Theme.radiusSmall; color: Colors.primary }
     }
     handle: StyledContainer {

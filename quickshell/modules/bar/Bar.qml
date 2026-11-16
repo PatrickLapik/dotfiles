@@ -124,6 +124,7 @@ Scope {
                 }
                 StyledContainer {
                     id: leftSection
+                    glassEdge: true
                     anchors.left: parent.left
                     height: parent.height
                     width: Math.min(leftContent.implicitWidth + Spacing.panelPadding * 2,
@@ -149,6 +150,7 @@ Scope {
                     Accessible.name: "Open calendar"
                     WidgetAnchor { name: "clock"; target: centerSection }
                     background: StyledContainer {
+                        glassEdge: true
                         border.width: centerSection.visualFocus ? Theme.borderSelectedWidth : Theme.borderNone
                         border.color: Colors.primary
                     }
@@ -156,6 +158,7 @@ Scope {
                 }
                 StyledContainer {
                     id: rightSection
+                    glassEdge: true
                     anchors.right: parent.right
                     height: parent.height
                     width: Math.min(rightContent.visibleWidth + Spacing.panelPadding * 2,

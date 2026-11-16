@@ -59,7 +59,9 @@ StyledWindow {
         collapsedWidth: root.width
         collapsedHeight: 0
         revealOrigin: 0.5
-        y: (root.height - height) / 2
+        // An OSD at the screen bottom rises as a drawer.
+        drawerOrigin: 1
+        y: (root.height - fullHeight) / 2 + originShift
         visible: showing
 
         ExpandingContent {
@@ -99,7 +101,7 @@ StyledWindow {
                     Layout.fillWidth: true
                     Layout.preferredHeight: Sizing.indicatorTrackHeight
                     radius: Theme.radiusSmall
-                    color: Colors.surfaceContainerHighest
+                    color: Colors.glassTrack
                     StyledContainer {
                         width: parent.width * root.progress
                         height: parent.height

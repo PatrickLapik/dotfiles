@@ -11,6 +11,8 @@ RevealingContainer {
     property bool expanded: false
     property bool preparing: false
     property bool dismissOnOutsideClick: true
+    glassEdge: true
+    revealStyle: belowSource ? Animations.revealStyle : "unfold"
     property real collapsedWidth: Sizing.widgetHeight
     property real collapsedHeight: Sizing.barHeight
     property real expandedWidth: Sizing.popupWidth
@@ -48,10 +50,13 @@ RevealingContainer {
     readonly property bool transitioning: progressAnimation.running || fadeAnimation.running
     readonly property bool showing: preparing || expanded || progress > 0 || fadeProgress > 0 || transitioning
 
-    x: anchoredExpansion ? belowSource ? destinationX : sourceRect.x + (destinationX - sourceRect.x) * progress : 0
+    // Below-source surfaces grow from their top-center (zoom narrows the width).
+    readonly property real centeringOffset: belowSource ? (expandedWidth - width) / 2 : 0
+    x: (anchoredExpansion ? belowSource ? destinationX : sourceRect.x + (destinationX - sourceRect.x) * progress : 0)
+        + centeringOffset
     y: anchoredExpansion ? belowSource ? destinationY
         : startY + (destinationY - startY) * progress : 0
-    width: belowSource ? expandedWidth : (anchoredExpansion ? sourceRect.width : collapsedWidth)
+    width: belowSource ? expandedWidth * revealWidthFactor : (anchoredExpansion ? sourceRect.width : collapsedWidth)
         + (expandedWidth - (anchoredExpansion ? sourceRect.width : collapsedWidth)) * progress
     fullHeight: surfaceHeight
     revealProgress: progress
@@ -90,8 +95,11 @@ RevealingContainer {
     Behavior on progress {
         NumberAnimation {
             id: progressAnimation
-            duration: !Animations.enabled ? 0 : root.expanded ? Animations.expandDuration : Animations.collapseDuration
-            easing.type: root.expanded ? Animations.expandEasing : Animations.collapseEasing
+            duration: !Animations.enabled ? 0 : !root.expanded ? Animations.collapseDuration
+                : root.belowSource ? Animations.popupOpenDuration : Animations.expandDuration
+            easing.type: !root.expanded ? Animations.collapseEasing
+                : root.belowSource ? Animations.popupOpenEasing : Animations.expandEasing
+            easing.overshoot: Animations.popupOpenOvershoot
         }
     }
     Behavior on fadeProgress {

@@ -61,7 +61,7 @@ LazyWidget {
                         implicitWidth: connectionInfo.implicitWidth + Spacing.sm * 2
                         implicitHeight: connectionInfo.implicitHeight + Spacing.sm * 2
                         radius: Theme.radiusSmall
-                        color: Colors.surfaceContainerHigh
+                        color: Colors.glassFill
                         RowLayout {
                             id: connectionInfo
                             x: Spacing.sm
@@ -180,7 +180,7 @@ LazyWidget {
                                 onClicked: Bluetooth.selectDevice(modelData)
                                 background: StyledContainer {
                                     radius: Theme.radiusSmall
-                                    color: option.connected ? Colors.primaryContainer : option.hovered ? Colors.surfaceContainerHigh : "transparent"
+                                    color: option.connected ? Colors.primaryContainer : option.hovered ? Colors.glassFillHover : Colors.glassClear
                                     border.width: option.visualFocus ? Theme.borderSelectedWidth : Theme.borderNone
                                     border.color: Colors.primary
                                 }
@@ -239,7 +239,7 @@ LazyWidget {
                         implicitWidth: pairing.implicitWidth + Spacing.sm * 2
                         implicitHeight: pairing.implicitHeight + Spacing.sm * 2
                         radius: Theme.radiusSmall
-                        color: Colors.surfaceContainerHigh
+                        color: Colors.glassFill
                         ColumnLayout {
                             id: pairing
                             x: Spacing.sm
@@ -274,7 +274,7 @@ LazyWidget {
                                 padding: Spacing.sm
                                 background: StyledContainer {
                                     radius: Theme.radiusSmall
-                                    color: Colors.surfaceContainer
+                                    color: Colors.glassFill
                                     border.width: pairingCode.activeFocus ? Theme.borderSelectedWidth : Theme.borderWidth
                                     border.color: pairingCode.activeFocus ? Colors.primary : Colors.border
                                 }

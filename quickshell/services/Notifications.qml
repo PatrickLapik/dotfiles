@@ -12,8 +12,6 @@ Singleton {
     property var order: []
     property var toasts: []
     property int serial: 0
-    property var clearQueue: []
-    readonly property bool clearing: clearQueue.length > 0
     readonly property var history: server.trackedNotifications.values
         .filter(n => !n.transient)
         .sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id))
@@ -70,29 +68,13 @@ Singleton {
         toasts = toasts.filter(t => ids.includes(t.id))
         order = order.filter(id => ids.includes(id))
     }
+    // Live notification lookup; views must not store native objects in models,
+    // because those references are not cleared when the notification is destroyed.
+    function find(id) { return server.trackedNotifications.values.find(n => n.id === id) || null }
     function clearAll() {
-        if (clearing) return
-        // History is newest first; begin with the bottom (oldest) card.
-        const ids = history.slice().reverse().map(n => n.id)
-        const transientIds = server.trackedNotifications.values.filter(n => n.transient).map(n => n.id)
-        clearQueue = ids.concat(transientIds)
-        if (!Animations.enabled) {
-            const pending = clearQueue
-            clearQueue = []
-            for (const id of pending) dismiss(id)
-        } else clearNext()
-    }
-    function clearNext() {
-        if (!clearQueue.length) return
-        const id = clearQueue[0]
-        clearQueue = clearQueue.slice(1)
-        dismiss(id)
-    }
-    Timer {
-        interval: Animations.notificationClearStagger
-        repeat: true
-        running: root.clearing
-        onTriggered: root.clearNext()
+        // The center animates its visible cards from retained snapshots.
+        toasts = []
+        for (const n of server.trackedNotifications.values.slice()) n.dismiss()
     }
     function timeout(id) {
         hideToast(id)

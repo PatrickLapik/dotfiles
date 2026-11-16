@@ -16,6 +16,8 @@ Item {
     property real slantWidth: Sizing.barSlantWidth
     readonly property real slant: Math.min(slantWidth, width / 2)
     property real highlightOpacity: Theme.containerHighlightOpacity
+    // Top-level glass surfaces (panels, popups, bar sections, toasts) draw a rim.
+    property bool glassEdge: false
     property color highlightColor: Theme.containerHighlightColor
     property color highlightSecondary: Theme.containerHighlightSecondary
     property color highlightTertiary: Theme.containerHighlightTertiary
@@ -80,6 +82,29 @@ Item {
         fillMode: Image.Tile
         opacity: Theme.surfaceTextureOpacity * root.color.a
         visible: opacity > 0 && width > 0 && height > 0
+    }
+    // Drawn above content so the rim stays crisp where content meets the edge.
+    Rectangle {
+        anchors.fill: parent
+        z: 1
+        visible: root.glassEdge && !Theme.metalStyle && root.slantedEdge === "none" && root.height > root.radius
+        radius: root.radius
+        color: "transparent"
+        border.width: Theme.borderWidth
+        border.color: Colors.glassEdge
+    }
+    Rectangle {
+        x: root.radius
+        width: Math.max(0, root.width - root.radius * 2)
+        height: Theme.borderWidth
+        z: 1
+        visible: root.glassEdge && !Theme.metalStyle && root.slantedEdge === "none" && root.height > root.radius
+        gradient: Gradient {
+            orientation: Gradient.Horizontal
+            GradientStop { position: 0; color: Colors.glassClear }
+            GradientStop { position: 0.5; color: Colors.glassSheen }
+            GradientStop { position: 1; color: Colors.glassClear }
+        }
     }
 
 }

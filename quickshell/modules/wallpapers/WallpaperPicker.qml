@@ -90,7 +90,7 @@ LazyWidget {
                                 onClicked: Wallpapers.select(modelData.path)
                                 background: StyledContainer {
                                     radius: Theme.radiusSmall
-                                    color: tile.hovered ? Colors.surfaceContainerHigh : "transparent"
+                                    color: tile.hovered ? Colors.glassFillHover : Colors.glassClear
                                     border.width: tile.current || tile.visualFocus ? Theme.borderSelectedWidth : Theme.borderNone
                                     border.color: Colors.primary
                                 }
@@ -158,7 +158,7 @@ LazyWidget {
                         }
                         StyledDropdown {
                             id: schemeDropdown
-                            Layout.preferredWidth: Math.min(Sizing.wallpaperSchemeWidth, picker.surface.width * 0.4)
+                            Layout.preferredWidth: Math.min(Sizing.wallpaperSchemeWidth, picker.surface.fullWidth * 0.4)
                             model: Wallpapers.schemeTypes.map(scheme => ({ label: scheme.replace(/^scheme-/, "")
                                 .split("-").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ") }))
                             textRole: "label"

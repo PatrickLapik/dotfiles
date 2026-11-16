@@ -59,7 +59,7 @@ LazyWidget {
                         implicitWidth: connectionInfo.implicitWidth + Spacing.sm * 2
                         implicitHeight: connectionInfo.implicitHeight + Spacing.sm * 2
                         radius: Theme.radiusSmall
-                        color: Colors.surfaceContainerHigh
+                        color: Colors.glassFill
                         RowLayout {
                             id: connectionInfo
                             x: Spacing.sm
@@ -141,7 +141,7 @@ LazyWidget {
                                 background: StyledContainer {
                                     radius: Theme.radiusSmall
                                     color: option.networkData.connected ? Colors.primaryContainer
-                                        : option.hovered ? Colors.surfaceContainerHigh : "transparent"
+                                        : option.hovered ? Colors.glassFillHover : Colors.glassClear
                                     border.width: option.visualFocus ? Theme.borderSelectedWidth : Theme.borderNone
                                     border.color: Colors.primary
                                 }
@@ -201,7 +201,7 @@ LazyWidget {
                         implicitWidth: credentials.implicitWidth + Spacing.sm * 2
                         implicitHeight: credentials.implicitHeight + Spacing.sm * 2
                         radius: Theme.radiusSmall
-                        color: Colors.surfaceContainerHigh
+                        color: Colors.glassFill
                         ColumnLayout {
                             id: credentials
                             x: Spacing.sm
@@ -232,7 +232,7 @@ LazyWidget {
                                 padding: Spacing.sm
                                 background: StyledContainer {
                                     radius: Theme.radiusSmall
-                                    color: Colors.surfaceContainer
+                                    color: Colors.glassFill
                                     border.width: password.activeFocus ? Theme.borderSelectedWidth : Theme.borderWidth
                                     border.color: password.activeFocus ? Colors.primary : Colors.border
                                 }

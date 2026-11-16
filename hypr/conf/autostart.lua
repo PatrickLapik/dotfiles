@@ -4,7 +4,9 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP")
     hl.exec_cmd("/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1")
     hl.exec_cmd('python3 "${XDG_CONFIG_HOME:-$HOME/.config}/quickshell/scripts/wallpapers.py" restore')
-    hl.exec_cmd('quickshell -p "${XDG_CONFIG_HOME:-$HOME/.config}/quickshell"')
+    -- With several windows, Qt's default driver ticks animations on a ~6ms timer
+    -- that drifts against vsync and skips frames; the simple driver stays frame-locked.
+    hl.exec_cmd('QSG_USE_SIMPLE_ANIMATION_DRIVER=1 quickshell -p "${XDG_CONFIG_HOME:-$HOME/.config}/quickshell"')
     hl.exec_cmd("hypridle")
     hl.exec_cmd("wl-paste --watch cliphist store")
     hl.exec_cmd("keepassxc", { workspace = "9 silent" })

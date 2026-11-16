@@ -12,6 +12,7 @@ PanelWindow {
     id: menu
     required property var dropdown
     required property Component optionDelegate
+    required property Component highlightDelegate
     function focusMenu() {
         choices.currentIndex = dropdown.currentIndex >= 0 ? dropdown.currentIndex : 0
         menuContent.forceActiveFocus()
@@ -65,6 +66,7 @@ PanelWindow {
     }
     RevealingContainer {
         id: menuContent
+        glassEdge: true
         x: menu.origin.x
         y: menu.origin.y
         width: dropdown.width
@@ -98,6 +100,8 @@ PanelWindow {
             model: dropdown.model
             ScrollBar.vertical: StyledScrollBar {}
             delegate: menu.optionDelegate
+            highlight: menu.highlightDelegate
+            highlightFollowsCurrentItem: false
         }
     }
 }

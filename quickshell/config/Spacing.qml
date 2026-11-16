@@ -29,4 +29,5 @@ Singleton {
     readonly property int widgetSpacing: sm
     readonly property int indicatorBottomMargin: xl * 3
     readonly property int popupSlideOffset: xs
+    readonly property int popupRiseOffset: sm
 }

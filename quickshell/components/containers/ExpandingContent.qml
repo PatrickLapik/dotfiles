@@ -12,13 +12,15 @@ Item {
     implicitWidth: PopupSizing.implicitExtent(children, "implicitWidth")
     implicitHeight: PopupSizing.implicitExtent(children, "implicitHeight")
     x: (surface.width - surface.expandedWidth) / 2 + padding
-    y: topInset + (surface.belowSource ? 0 : slideOffset * (1 - surface.progress))
+    y: topInset + (surface.belowSource ? surface.contentOffsetY : slideOffset * (1 - surface.progress))
     width: surface.expandedWidth - padding * 2
     height: Math.max(0, surface.expandedHeight - topInset - padding)
-    opacity: surface.belowSource ? 1 : surface.fadeProgress
+    opacity: surface.belowSource ? surface.contentOpacity : surface.fadeProgress
+    scale: surface.belowSource ? surface.contentScale : 1
+    transformOrigin: surface.contentTransformOrigin
     visible: surface.showing
     enabled: surface.expanded
     // Composite the fade during motion, then render settled text directly.
     // Keeping an offscreen layer alive can leave stale glyphs until an interaction repaints it.
-    layer.enabled: surface.transitioning && !surface.belowSource
+    layer.enabled: surface.transitioning && (!surface.belowSource || surface.contentOpacity < 1)
 }

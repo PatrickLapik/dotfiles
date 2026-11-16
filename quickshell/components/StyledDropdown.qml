@@ -30,13 +30,19 @@ Item {
     component DropdownState: QtObject {
         property bool visible: false
         function open() {
+            // Place the highlight on the selection instantly, then let it slide.
+            root.highlightArmed = false
             visible = true
             windowChoices.currentIndex = root.currentIndex >= 0 ? root.currentIndex : 0
-            Qt.callLater(() => { if (root.windowedHost) windowChoices.forceActiveFocus(); else desktopHost.item.focusMenu() })
+            Qt.callLater(() => {
+                if (root.windowedHost) windowChoices.forceActiveFocus(); else desktopHost.item.focusMenu()
+                root.highlightArmed = true
+            })
         }
         function close() { visible = false }
     }
     property DropdownState popup: DropdownState {}
+    property bool highlightArmed: false
     StyledButton {
         id: trigger
         anchors.fill: parent
@@ -87,11 +93,13 @@ Item {
             topPadding: Spacing.xs
             bottomPadding: Spacing.xs
             onClicked: root.choose(index)
-            onHoveredChanged: { if (hovered) option.list.currentIndex = index }
+            onHoveredChanged: { if (hovered && option.list) option.list.currentIndex = index }
+            readonly property bool current: !!option.list && option.list.currentIndex === option.index
+            // The shared highlight paints the hovered row; rows keep only focus rings.
             background: StyledContainer {
-                radius: Theme.radiusNone
+                radius: Theme.radiusSmall
                 highlightOpacity: 0
-                color: option.list.currentIndex === option.index ? Colors.surfaceContainerHigh : "transparent"
+                color: "transparent"
                 border.width: option.visualFocus ? Theme.borderSelectedWidth : Theme.borderNone
                 border.color: Colors.primary
             }
@@ -102,7 +110,10 @@ Item {
                     text: option.text
                     textFormat: Text.PlainText
                     font: root.font
-                    color: Colors.text
+                    color: option.current ? Colors.onPrimaryContainer : Colors.text
+                    Behavior on color {
+                        ColorAnimation { duration: Animations.enabled ? Animations.feedbackDuration : 0; easing.type: Animations.feedbackEasing }
+                    }
                     wrapMode: Text.Wrap
                     maximumLineCount: 2
                     elide: Text.ElideRight
@@ -110,11 +121,36 @@ Item {
                 }
                 ShellIcon {
                     kind: "check"
-                    tint: Colors.textMuted
+                    tint: option.current ? Colors.onPrimaryContainer : Colors.textMuted
                     opacity: root.currentIndex === option.index ? 1 : 0
                     Layout.preferredWidth: Sizing.dropdownIndicatorSize
                     Layout.preferredHeight: Sizing.dropdownIndicatorSize
                 }
+            }
+        }
+    }
+    // One highlight slides between rows. Fading per-row backgrounds to "transparent"
+    // interpolated through transparent black and flashed dark on the previous row.
+    Component {
+        id: dropdownHighlight
+        Item {
+            id: highlight
+            readonly property ListView list: ListView.view
+            width: list ? list.width : 0
+            height: Sizing.dropdownRowHeight
+            y: list && list.currentItem ? list.currentItem.y : 0
+            visible: !!list && !!list.currentItem
+            Behavior on y {
+                enabled: root.highlightArmed
+                NumberAnimation { duration: Animations.enabled ? Animations.revealDuration : 0; easing.type: Animations.revealEasing }
+            }
+            StyledContainer {
+                // Full-width band; the menu's rounded mask shapes the end rows.
+                anchors.fill: parent
+                radius: Theme.radiusNone
+                highlightOpacity: 0
+                color: Colors.primaryContainer
+                border.width: Theme.borderNone
             }
         }
     }
@@ -156,6 +192,7 @@ Item {
             }
             RevealingContainer {
                 id: windowSurface
+                glassEdge: true
                 width: parent.width
                 fullHeight: windowMenu.availableHeight
                 revealOrigin: windowMenu.y < 0 ? 1 : 0
@@ -176,6 +213,8 @@ Item {
                     y: windowSurface.contentOffsetY
                     clip: true
                     model: root.model
+                    highlight: dropdownHighlight
+                    highlightFollowsCurrentItem: false
                     ScrollBar.vertical: StyledScrollBar {}
                     Keys.onPressed: event => {
                         if (event.key === Qt.Key_Down) currentIndex = Math.min(root.count - 1, currentIndex + 1)
@@ -199,7 +238,7 @@ Item {
         active: !root.windowedHost
         function loadHost() {
             if (active && !source.toString())
-                setSource(Qt.resolvedUrl("StyledDropdownPanel.qml"), { dropdown: root, optionDelegate: dropdownDelegate })
+                setSource(Qt.resolvedUrl("StyledDropdownPanel.qml"), { dropdown: root, optionDelegate: dropdownDelegate, highlightDelegate: dropdownHighlight })
         }
         onActiveChanged: {
             if (active) loadHost()

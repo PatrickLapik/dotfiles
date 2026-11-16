@@ -77,7 +77,9 @@ Scope {
             function syncEntries() {
                 for (let i = 0; i < presentation.count; ++i) {
                     const current = presentation.get(i)
-                    const entry = entries.find(t => t.id === current.entry.id)
+                    const toast = entries.find(t => t.id === current.entry.id)
+                    // Store plain data only; native objects in a ListModel dangle once closed.
+                    const entry = toast && window.modelEntry(toast)
                     if (entry) {
                         presentation.setProperty(i, "entry", entry)
                         presentation.setProperty(i, "closing", false)
@@ -87,8 +89,11 @@ Scope {
                     let exists = false
                     for (let i = 0; i < presentation.count; ++i)
                         if (presentation.get(i).entry.id === entry.id) exists = true
-                    if (!exists) presentation.append({entry: entry, closing: false})
+                    if (!exists) presentation.append({entry: window.modelEntry(entry), closing: false})
                 }
+            }
+            function modelEntry(toast) {
+                return { id: toast.id, snapshot: toast.snapshot, screenName: toast.screenName, serial: toast.serial }
             }
             function finishExit(id) {
                 for (let i = 0; i < presentation.count; ++i) {
@@ -164,14 +169,15 @@ Scope {
                             height: implicitHeight
                             // Keep the live data through ordinary timeout; fallbackDetails
                             // still retains the visual if a transient native object closes.
-                            notification: toast.entry.notification
+                            notification: toast.closing ? null : Notifications.find(toast.entry.id)
                             fallbackDetails: toast.entry.snapshot
+                            glassEdge: true
                             enabled: !toast.closing
                             compact: true
                             showTimeout: countdown.duration > 0
                             timeoutProgress: countdown.progress
                             transform: Translate { x: (toast.width + Spacing.barMargin) * (1 - toast.reveal) }
-                            onClicked: Notifications.activate(toast.entry.notification, window.screen.name)
+                            onClicked: Notifications.activate(card.notification, window.screen.name)
                         }
                         HoverHandler { id: hover }
                         BarVisibilityLock { screen: window.screen; active: hover.hovered && !toast.closing }

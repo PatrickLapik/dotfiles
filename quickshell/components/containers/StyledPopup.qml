@@ -46,8 +46,9 @@ PanelWindow {
     Behavior on progress {
         NumberAnimation {
             id: motion
-            duration: !Animations.enabled ? 0 : root.isOpen ? Animations.expandDuration : Animations.collapseDuration
-            easing.type: root.isOpen ? Animations.expandEasing : Animations.collapseEasing
+            duration: !Animations.enabled ? 0 : root.isOpen ? Animations.popupOpenDuration : Animations.collapseDuration
+            easing.type: root.isOpen ? Animations.popupOpenEasing : Animations.collapseEasing
+            easing.overshoot: Animations.popupOpenOvershoot
             onRunningChanged: if (!running) root.updateSize()
         }
     }
@@ -125,13 +126,18 @@ PanelWindow {
         RevealingContainer {
             id: popupSurface
             color: Colors.withAlpha(Colors.panel, Theme.panelOpacity)
+            glassEdge: true
+            revealStyle: Animations.revealStyle
+            drawerOrigin: revealOrigin >= 1 ? 1 : 0
             x: root.alignment & Qt.AlignRight
                 ? Math.max(0, parent.width - width - root.rightMargin)
                 : root.alignment & Qt.AlignLeft ? root.edgeMargin : (parent.width - width) / 2
             y: root.alignment & Qt.AlignTop
                 ? Math.min(root.topMargin, Math.max(0, parent.height - fullHeight - root.edgeMargin))
-                : root.alignment & Qt.AlignBottom ? parent.height - height - root.edgeMargin : (parent.height - height) / 2
-            width: Math.min(root.layoutWidth, Math.max(0, parent.width - root.edgeMargin * 2))
+                : root.alignment & Qt.AlignBottom ? parent.height - height - root.edgeMargin
+                : (parent.height - fullHeight) / 2 + originShift
+            fullWidth: Math.min(root.layoutWidth, Math.max(0, parent.width - root.edgeMargin * 2))
+            width: fullWidth * revealWidthFactor
             fullHeight: Math.min(root.layoutHeight, Math.max(0, parent.height - (root.alignment & Qt.AlignTop ? root.topMargin : root.edgeMargin) - root.edgeMargin))
             revealProgress: root.progress
             revealOrigin: root.alignment & Qt.AlignTop ? 0 : root.alignment & Qt.AlignBottom ? 1 : 0.5
@@ -139,9 +145,13 @@ PanelWindow {
                 id: body
                 implicitWidth: PopupSizing.implicitExtent(children, "implicitWidth")
                 implicitHeight: PopupSizing.implicitExtent(children, "implicitHeight")
-                x: root.padding
+                x: (popupSurface.width - popupSurface.fullWidth) / 2 + root.padding
                 y: popupSurface.contentOffsetY + root.padding
-                width: Math.max(0, popupSurface.width - root.padding * 2)
+                width: Math.max(0, popupSurface.fullWidth - root.padding * 2)
+                opacity: popupSurface.contentOpacity
+                scale: popupSurface.contentScale
+                transformOrigin: popupSurface.contentTransformOrigin
+                layer.enabled: motion.running && popupSurface.contentOpacity < 1
                 height: Math.max(0, popupSurface.fullHeight - root.padding * 2)
             }
         }

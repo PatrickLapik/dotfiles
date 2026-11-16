@@ -15,3 +15,8 @@ opacity = 0.7
 [window.padding]
 x = 7
 y = 7
+
+[[keyboard.bindings]]
+key = "Return"
+mods = "Shift"
+chars = "\u001B\r"

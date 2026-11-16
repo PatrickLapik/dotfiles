@@ -18,6 +18,17 @@ Singleton {
     readonly property int fadeOutDuration: 120
     readonly property int fadeEasing: Easing.Linear
     readonly property int notificationClearStagger: 70
+    // How popups appear (bar dropdowns, centered popups, OSD indicators):
+    //   "unfold"  surface uncovers content in place
+    //   "drawer"  surface slides out from under its edge, content riding along
+    //   "zoom"    grows from its anchor with a slight spring; content scales/fades in
+    //   "cascade" surface unfolds, then content fades in and rises into place
+    readonly property string revealStyle: "cascade"
+    readonly property int popupOpenDuration: revealStyle === "zoom" || revealStyle === "cascade" ? 240
+        : revealStyle === "drawer" ? 200 : expandDuration
+    readonly property int popupOpenEasing: revealStyle === "zoom" ? Easing.OutBack : expandEasing
+    readonly property real popupOpenOvershoot: 1.1
+    readonly property real cascadeContentStart: 0.3
     readonly property int feedbackDuration: 80
     readonly property int feedbackEasing: Easing.OutCubic
 }

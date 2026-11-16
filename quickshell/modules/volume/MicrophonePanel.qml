@@ -67,7 +67,7 @@ LazyWidget {
                         Layout.fillWidth: true
                         implicitHeight: Sizing.audioInputMeterHeight
                         radius: Theme.radiusSmall
-                        color: Colors.surfaceContainerHighest
+                        color: Colors.glassTrack
                         border.width: Theme.borderNone
                         highlightOpacity: 0
                         readonly property real level: inputMonitor.enabled

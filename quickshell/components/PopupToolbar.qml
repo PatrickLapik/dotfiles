@@ -46,7 +46,7 @@ Item {
             font.family: Theme.fontFamily
             font.pixelSize: Theme.fontSize
             background: StyledContainer {
-                color: Colors.surfaceContainerHigh
+                color: Colors.glassFill
                 radius: Theme.radiusSmall
                 border.width: search.activeFocus ? Theme.borderWidth : Theme.borderNone
                 border.color: Colors.primary

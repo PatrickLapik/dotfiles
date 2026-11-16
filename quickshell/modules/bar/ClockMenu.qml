@@ -170,7 +170,7 @@ LazyWidget {
                                             background: StyledContainer {
                                                 radius: Theme.radiusSmall
                                                 color: dayButton.checked ? Colors.primaryContainer
-                                                    : dayButton.hovered ? Colors.surfaceContainerHigh : "transparent"
+                                                    : dayButton.hovered ? Colors.glassFillHover : Colors.glassClear
                                                 border.width: dayButton.visualFocus ? Theme.borderSelectedWidth
                                                     : dayCell.model.today ? Theme.borderWidth : Theme.borderNone
                                                 border.color: Colors.primary
