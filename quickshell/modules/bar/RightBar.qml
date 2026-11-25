@@ -56,7 +56,7 @@ Item {
         statusIcon: Bluetooth.icon
         Accessible.name: Bluetooth.details
         interactive: true
-        tint: Bluetooth.enabled ? Colors.text : Colors.textMuted
+        tint: Colors.text
         onClicked: Widgets.toggle("bluetooth", bluetoothButton.QsWindow.window.screen.name)
     }
     StatusItem {
@@ -86,7 +86,7 @@ Item {
         Accessible.name: Audio.inputDescription + (Audio.inputMuted ? " · Muted" : "")
         interactive: Audio.inputAvailable
         middleClickEnabled: true
-        tint: Audio.inputMuted || !Audio.inputAvailable ? Colors.textMuted : Colors.text
+        tint: Colors.text
         onClicked: Widgets.toggle("microphone", microphone.QsWindow.window.screen.name)
         onMiddleClicked: Audio.toggleInputMute()
         onScrolled: direction => Audio.adjustInput(direction)
@@ -104,7 +104,7 @@ Item {
         label: Audio.available ? Audio.percent + "%" : "—"
         Accessible.name: Audio.description + (Audio.muted ? " · Muted" : "")
         interactive: Audio.available
-        tint: Audio.muted ? Colors.textMuted : Colors.text
+        tint: Colors.text
         onClicked: Widgets.toggle("volume", volumeButton.QsWindow.window.screen.name)
         onScrolled: direction => Audio.adjust(direction)
     }
@@ -114,6 +114,7 @@ Item {
         transform: Translate { x: root.slideX(networkButton) }
         WidgetAnchor { name: "network"; target: networkButton }
         statusIcon: Network.icon
+        wifiStrength: Network.signalStrength
         Accessible.name: Network.details
         interactive: true
         tint: Network.connected ? Colors.text : Colors.textMuted
@@ -129,8 +130,9 @@ Item {
         batteryLevel: Environment.batteryPercent
         statusIcon: Environment.charging ? "charging" : "battery"
         label: Environment.batteryPercent + "%"
-        Accessible.name: Environment.charging ? "Charging" : Environment.onBattery ? "On battery" : "Plugged in"
-        tint: Environment.onBattery && Environment.batteryPercent <= 20 ? Colors.error : Colors.text
+        Accessible.name: (Environment.charging ? "Charging" : Environment.onBattery ? "On battery" : "Plugged in")
+            + " · " + label
+        tint: Colors.text
     }
     StatusItem {
         id: bell

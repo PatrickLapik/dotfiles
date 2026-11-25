@@ -601,7 +601,23 @@ stroke width in memory. To add an icon, include its upstream SVG in
 upstream source/version record and license with the bundled assets. Regenerate
 `assets/lucide/bounds.js` using its `update-bounds.py` helper after asset changes.
 
+Muted microphone uses Lucide's strike-through icon. Disabled Bluetooth uses a
+steeper slash to distinguish it from the symbol's diagonal arms. Muted volume
+centers the speaker body under its slash. Both custom slashes have a transparent
+gap behind them for clarity. These are drawn in `ShellIcon`; the upstream SVG
+assets remain unchanged.
+
+Wi-Fi icons accept `wifiStrength` as a fraction (0–1). The dot stays lit;
+the inner, middle, and outer arcs light above 25%, 50%, and 75%, respectively.
+Inactive arcs use `Theme.wifiInactiveArcOpacity` and keep the icon bounds stable.
+The bar follows the connected network's live strength, includes its percentage
+in the connection details, and the network list uses each network's strength.
+
 Lucide supplies the unread bell icon; the disabled bell's unread dot uses
 `Sizing.iconBadgeSize` and `Spacing.iconBadgeInset`. Battery icons use
-`batteryLevel` to select empty (0–10%), low (11–30%), medium (31–70%), or full
-(above 70%). Charging uses Lucide's battery-charging icon.
+`batteryLevel` (0–100) for a continuous proportional fill inside Lucide's battery
+outline. The fill is red at 20% or below, amber through 50%, and green above 50%.
+Customize the thresholds and colors with `Theme.batteryLowThreshold`,
+`batteryWarningThreshold`, `batteryLowColor`, `batteryWarningColor`, and
+`batteryHealthyColor`. Charging keeps the percentage fill and overlays a
+contrasting lightning bolt. The outline and percentage text retain the normal tint.

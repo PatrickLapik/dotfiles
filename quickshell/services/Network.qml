@@ -12,9 +12,12 @@ Singleton {
     readonly property bool connected: !!device
     readonly property bool wireless: !!device && device.type === Net.DeviceType.Wifi
     readonly property var connection: device ? device.networks.values.find(n => n.connected) : null
+    readonly property real signalStrength: wireless && connection && Number.isFinite(connection.signalStrength)
+        ? Math.max(0, Math.min(1, connection.signalStrength)) : 0
     readonly property string name: connection ? connection.name : device ? device.name : "Disconnected"
     readonly property string icon: !connected ? "offline" : wireless ? "wifi" : "ethernet"
-    readonly property string details: !connected ? "Network disconnected" : (wireless ? "Wi-Fi · " : "Ethernet · ") + name + "\n" + device.name
+    readonly property string details: !connected ? "Network disconnected" : (wireless ? "Wi-Fi · " : "Ethernet · ") + name
+        + (wireless ? " · " + Math.round(signalStrength * 100) + "% signal" : "") + "\n" + device.name
     readonly property Net.WifiDevice wifiDevice: Net.Networking.devices.values.find(d => d.connected && d.type === Net.DeviceType.Wifi)
         || Net.Networking.devices.values.find(d => d.type === Net.DeviceType.Wifi) || null
     readonly property bool wifiAvailable: !!wifiDevice

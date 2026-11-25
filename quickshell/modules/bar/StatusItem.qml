@@ -8,6 +8,7 @@ import qs.config
 StyledButton {
     id: root
     property real batteryLevel: 100
+    property real wifiStrength: 1
     property string statusIcon: ""
     property string label: ""
     property color tint: Colors.text
@@ -64,6 +65,7 @@ StyledButton {
             kind: root.statusIcon
             tint: root.tint
             batteryLevel: root.batteryLevel
+            wifiStrength: root.wifiStrength
             anchors.verticalCenter: parent.verticalCenter
             x: (root.iconSlotWidth - width) / 2
         }

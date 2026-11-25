@@ -147,7 +147,11 @@ LazyWidget {
                                 }
                                 contentItem: RowLayout {
                                     spacing: Spacing.sm
-                                    ShellIcon { kind: "wifi"; tint: option.networkData.connected ? Colors.onPrimaryContainer : Colors.textMuted }
+                                    ShellIcon {
+                                        kind: "wifi"
+                                        wifiStrength: option.networkData.signalStrength
+                                        tint: option.networkData.connected ? Colors.onPrimaryContainer : Colors.textMuted
+                                    }
                                     ColumnLayout {
                                         Layout.fillWidth: true
                                         spacing: Spacing.xs

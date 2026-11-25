@@ -31,6 +31,13 @@ Singleton {
     readonly property real surfaceTextureOpacity: metalStyle ? 0.18 : 0
     // Lucide stroke width in its 24-unit viewBox. Match this to your font weight.
     readonly property real iconStrokeWidth: 1.7
+    readonly property real wifiInactiveArcOpacity: 0.18
+    // Battery fill uses stable semantic colors independent of wallpaper palettes.
+    readonly property int batteryLowThreshold: 20
+    readonly property int batteryWarningThreshold: 50
+    readonly property color batteryLowColor: "#f28b82"
+    readonly property color batteryWarningColor: "#f2c66d"
+    readonly property color batteryHealthyColor: "#8bd49c"
     readonly property int fontWeight: Font.Normal
     readonly property int controlFontWeight: Font.Medium
     readonly property int headingFontWeight: Font.DemiBold
